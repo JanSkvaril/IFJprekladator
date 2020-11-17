@@ -93,8 +93,11 @@ void print_token(tTokenPtr token)
 		case ID_GREATER_EQ:
 			printf("\">=\"\n");
 			break;
-		case ID_ASSIGN:
+		case ID_DEFINE:
 			printf("\":=\"\n");
+			break;
+		case ID_ASSIGN:
+			printf("\"=\"\n");
 			break;
 		case ID_COMMA:
 			printf("\",\"\n");
@@ -141,7 +144,12 @@ typedef enum
 	FLOAT_EXP_S,
 	FLOAT_EXP2_S,
 	FLOAT_EXP_SIGN_S,
-	STRING_S
+	STRING_S,
+	EQ_SIGN_S,
+	NEQ_SIGN_S,
+	LESS_SIGN_S,
+	GREATER_SIGN_S,
+	COLON_SIGN_S
 } tState;
 
 
@@ -212,6 +220,11 @@ tTokenRet get_token(tTokenPtr *token)
 		{
 			//start***************************************************
 			case START_S:
+				
+				*token = malloc(sizeof (tToken));//do funkce
+				if (*token == NULL)
+					return RET_INTERNAL_ERR;
+				
 				//is identifier
 				if (isalpha(c) || c == '_')
 				{
@@ -237,18 +250,99 @@ tTokenRet get_token(tTokenPtr *token)
 						return RET_INTERNAL_ERR;
 					str_add(str, c);
 				}
+				//brackets ****************************************
+				else if (c == '(')
+				{
+					(*token)->id = ID_ROUND_1;
+					return RET_OK;
+				}
+				else if (c == ')')
+				{
+					(*token)->id = ID_ROUND_2;
+					return RET_OK;
+				}
+				else if (c == '{')
+				{
+					(*token)->id = ID_CURLY_1;
+					return RET_OK;
+				}
+				else if (c == '}')
+				{
+					(*token)->id = ID_CURLY_2;
+					return RET_OK;
+				}
+				//arithmetic operators ******************
+				else if (c == '+')
+				{
+					(*token)->id = ID_ADD;
+					return RET_OK;
+				}
+				else if (c == '-')
+				{
+					(*token)->id = ID_SUB;
+					return RET_OK;
+				}
+				else if (c == '*')
+				{
+					(*token)->id = ID_MULT;
+					return RET_OK;
+				}
+				else if (c == '/')
+				{
+					(*token)->id = ID_DIV;
+					return RET_OK;
+				}
+				//relation operators
+				else if(c == '=')
+				{
+					state = EQ_SIGN_S;
+				}
+				else if(c == '!')
+				{
+					state = NEQ_SIGN_S;
+				}
+				else if(c == '<')
+				{
+					state = LESS_SIGN_S;
+				}
+				else if(c == '>')
+				{
+					state = GREATER_SIGN_S;
+				}
+				//others
+				else if(c == ':')
+				{
+					state = COLON_SIGN_S;
+				}
+				else if(c == ',')
+				{
+					(*token)->id = ID_COMMA;
+					return RET_OK;
+				}
+				else if(c == ';')
+				{
+					(*token)->id = ID_SEMICOLLON;
+					return RET_OK;
+				}
+				else if(c == '_')
+				{
+					(*token)->id = ID_UNDER;
+					return RET_OK;
+				}
+
 				//ignore whitespace characters
 				else if (isspace(c));
 				else if (c == EOF)
+				{
+					free(*token);
 					return RET_EOF;
+				}
 				//no match means invalid lexeme
 				else
+				{
+					free(*token);
 					return RET_LEX_ERR;
-
-				*token = malloc(sizeof (tToken));//do funkce
-				if (*token == NULL)
-					return RET_INTERNAL_ERR;
-
+				}
 				break;
 
 			//identifier**********************************************************
@@ -380,6 +474,73 @@ tTokenRet get_token(tTokenPtr *token)
 					return RET_OK;
 				}
 				break;
+			//string***************************************************************
+			//todo
+			//others
+			case EQ_SIGN_S:
+				if (c == '=')
+				{
+					(*token)->id = ID_EQ;
+					return RET_OK;
+				}
+				else
+				{
+					ungetc(c, stdin);
+					(*token)->id = ID_ASSIGN;
+					return RET_OK;
+				}
+				break;
+			case NEQ_SIGN_S:
+				if (c == '=')
+				{
+					(*token)->id = ID_NEQ;
+					return RET_OK;
+				}
+				else
+				{
+					free(*token);
+					return RET_LEX_ERR;
+				}
+				break;
+			case LESS_SIGN_S:
+				if (c == '=')
+				{
+					(*token)->id = ID_LESS_EQ;
+					return RET_OK;
+				}
+				else
+				{
+					ungetc(c, stdin);
+					(*token)->id = ID_LESS;
+					return RET_OK;
+				}
+				break;
+			case GREATER_SIGN_S:
+				if (c == '=')
+				{
+					(*token)->id = ID_GREATER_EQ;
+					return RET_OK;
+				}
+				else
+				{
+					ungetc(c, stdin);
+					(*token)->id = ID_GREATER;
+					return RET_OK;
+				}
+				break;
+			case COLON_SIGN_S:
+				if (c == '=')
+				{
+					(*token)->id = ID_DEFINE;
+					return RET_OK;
+				}
+				else
+				{
+					free(*token);
+					return RET_LEX_ERR;
+				}
+				break;
+
 			
 			//is an invalid lexeme
 			default:
