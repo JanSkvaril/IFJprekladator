@@ -8,6 +8,110 @@
 static int strIter;
 static int strSize;
 
+void print_token(tTokenPtr token)
+{
+	switch (token->id)
+	{
+		case ID_IDENTIFIER:
+			printf("type: identifier, name: %s\n", token->att.s);
+			break;
+		case ID_INT_LIT:
+			printf("type: int literal, value: %ld\n", token->att.i);
+			break;
+		case ID_FLOAT_LIT:
+			printf("type: float literal, value: %lf\n", token->att.d);
+			break;
+		case ID_STRING_LIT:
+			printf("type: string literal, value: %s\n", token->att.s);
+			break;
+		case ID_KEY_INT:
+			printf("int (keyword)\n");
+			break;
+		case ID_KEY_FLOAT64:
+			printf("float64 (keyword)\n");
+			break;
+		case ID_KEY_STRING:
+			printf("string (keyword)\n");
+			break;
+		case ID_KEY_FUNC:
+			printf("func (keyword)\n");
+			break;
+		case ID_KEY_RETURN:
+			printf("return (keyword)\n");
+			break;
+		case ID_KEY_PACKAGE:
+			printf("package (keyword)\n");
+			break;
+		case ID_KEY_IF:
+			printf("if (keyword)\n");
+			break;
+		case ID_KEY_ELSE:
+			printf("else (keyword)\n");
+			break;
+		case ID_KEY_FOR:
+			printf("for (keyword)\n");
+			break;
+		case ID_ROUND_1:
+			printf("\"(\"\n");
+			break;
+		case ID_ROUND_2:
+			printf("\")\"\n");
+			break;
+		case ID_CURLY_1:
+			printf("\"{\"\n");
+			break;
+		case ID_CURLY_2:
+			printf("\"}\"\n");
+			break;
+		case ID_ADD:
+			printf("\"+\"\n");
+			break;
+		case ID_SUB:
+			printf("\"-\"\n");
+			break;
+		case ID_MULT:
+			printf("\"*\"\n");
+			break;
+		case ID_DIV:
+			printf("\"/\"\n");
+			break;
+		case ID_EQ:
+			printf("\"==\"\n");
+			break;
+		case ID_NEQ:
+			printf("\"!=\"\n");
+			break;
+		case ID_LESS:
+			printf("\"<\"\n");
+			break;
+		case ID_GREATER:
+			printf("\">\"\n");
+			break;
+		case ID_LESS_EQ:
+			printf("\"<=\"\n");
+			break;
+		case ID_GREATER_EQ:
+			printf("\">=\"\n");
+			break;
+		case ID_ASSIGN:
+			printf("\":=\"\n");
+			break;
+		case ID_COMMA:
+			printf("\",\"\n");
+			break;
+		case ID_SEMICOLLON:
+			printf("\";\"\n");
+			break;
+		case ID_UNDER:
+			printf("\"_\"\n");
+			break;
+		
+		default:
+			printf("lol je to v riti\n");
+			break;
+	}
+}
+
 int str_alloc(char ** str)
 {
 	*str = malloc(256 * sizeof(char));
