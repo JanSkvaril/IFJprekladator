@@ -31,7 +31,7 @@ typedef enum
 	ID_KEY_FOR,
 	//brackets
 	ID_ROUND_1, 	// (
-	ID_ROUNT_2,		// )
+	ID_ROUND_2,		// )
 	ID_CURLY_1,		// {
 	ID_CURLY_2,		// }
 	//arithmetic operators
@@ -47,7 +47,8 @@ typedef enum
 	ID_LESS_EQ,		// <=
 	ID_GREATER_EQ,	// >=
 	//other
-	ID_ASSIGN, 		// :=
+	ID_DEFINE,		// :=
+	ID_ASSIGN, 		// =
 	ID_COMMA,		// ,
 	ID_SEMICOLLON,	// ;
 	ID_UNDER,		// _
