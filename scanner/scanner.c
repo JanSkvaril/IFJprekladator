@@ -149,7 +149,8 @@ typedef enum
 	NEQ_SIGN_S,
 	LESS_SIGN_S,
 	GREATER_SIGN_S,
-	COLON_SIGN_S
+	COLON_SIGN_S,
+	UNDER_SIGN_S
 } tState;
 
 
@@ -226,9 +227,17 @@ tTokenRet get_token(tTokenPtr *token)
 					return RET_INTERNAL_ERR;
 				
 				//is identifier
-				if (isalpha(c) || c == '_')
+				if (isalpha(c))
 				{
 					state = IDEN_S;
+					if (str_alloc(&str))
+						return RET_INTERNAL_ERR;
+					str_add(str, c);
+				}
+				//is identifier or underscore sign
+				else if (c == '_')
+				{
+					state = UNDER_SIGN_S;
 					if (str_alloc(&str))
 						return RET_INTERNAL_ERR;
 					str_add(str, c);
@@ -538,6 +547,22 @@ tTokenRet get_token(tTokenPtr *token)
 				{
 					free(*token);
 					return RET_LEX_ERR;
+				}
+				break;
+			//underscore on ipnut, either identifier or alone underscore
+			case UNDER_SIGN_S:
+				if (isalnum(c) || c == '_')
+				{
+					state = IDEN_S;
+					str_add(str, c);
+				}
+				else
+				{
+					free(str);
+					ungetc(c, stdin);
+					(*token)->id = ID_UNDER;
+					return RET_OK;
+					
 				}
 				break;
 
