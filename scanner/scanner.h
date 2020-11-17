@@ -31,7 +31,7 @@ typedef enum
 	ID_KEY_FOR,
 	//brackets
 	ID_ROUND_1, 	// (
-	ID_ROUNT_2,		// )
+	ID_ROUND_2,		// )
 	ID_CURLY_1,		// {
 	ID_CURLY_2,		// }
 	//arithmetic operators
@@ -47,7 +47,8 @@ typedef enum
 	ID_LESS_EQ,		// <=
 	ID_GREATER_EQ,	// >=
 	//other
-	ID_ASSIGN, 		// :=
+	ID_DEFINE,		// :=
+	ID_ASSIGN, 		// =
 	ID_COMMA,		// ,
 	ID_SEMICOLLON,	// ;
 	ID_UNDER,		// _
@@ -72,7 +73,11 @@ typedef tToken *tTokenPtr;
 
 /*returns RET_OK = 0 on success and token in tTokenPtr
 token will always have an id and if necessarry an attribute
-on error or eof returns non zero value*/
+on error or eof returns non zero value and token data is undefined*/
 tTokenRet get_token(tTokenPtr *);
+
+//printf conviniently token id and its attribute
+//note that if ret value of get_token is not zero, the token data is undefined
+void print_token(tTokenPtr);
 
 #endif
