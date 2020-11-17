@@ -19,7 +19,7 @@ void print_token(tTokenPtr token)
 			printf("type: int literal, value: %ld\n", token->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("type: float literal, value: %lf\n", token->att.d);
+			printf("type: float literal, value: %.16lf\n", token->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("type: string literal, value: %s\n", token->att.s);
@@ -133,8 +133,15 @@ void str_add(char *str, char c)
 
 typedef enum
 {
-	START,
-	IDEN
+	START_S,
+	IDEN_S,
+	INT_FLOAT_LIT_S,
+	FLOAT_DEC1_S,
+	FLOAT_DEC2_S,
+	FLOAT_EXP_S,
+	FLOAT_EXP2_S,
+	FLOAT_EXP_SIGN_S,
+	STRING_S
 } tState;
 
 
@@ -197,50 +204,183 @@ tTokenRet get_token(tTokenPtr *token)
 {
 	char *str = NULL;
 	int c;
-	tState state = START;
+	tState state = START_S;
 	while (1)
 	{
 		c = getchar();
 		switch (state)
 		{
-			case START:
+			//start***************************************************
+			case START_S:
+				//is identifier
 				if (isalpha(c) || c == '_')
 				{
-					state = IDEN;
+					state = IDEN_S;
 					if (str_alloc(&str))
 						return RET_INTERNAL_ERR;
 					str_add(str, c);
 				}
+				//is integer or float literal
+				else if (isdigit(c))
+				{
+					state = INT_FLOAT_LIT_S;
+					if (str_alloc(&str))
+						return RET_INTERNAL_ERR;
+					str_add(str, c);
+				}
+				//else if; //float64
+				//is string
+				else if (c == '"')
+				{
+					state = STRING_S;
+					if (str_alloc(&str))
+						return RET_INTERNAL_ERR;
+					str_add(str, c);
+				}
+				//ignore whitespace characters
 				else if (isspace(c));
 				else if (c == EOF)
 					return RET_EOF;
+				//no match means invalid lexeme
 				else
 					return RET_LEX_ERR;
+
+				*token = malloc(sizeof (tToken));//do funkce
+				if (*token == NULL)
+					return RET_INTERNAL_ERR;
+
 				break;
-			case IDEN:
+
+			//identifier**********************************************************
+			case IDEN_S:
+				//continue to read characters of identifier
 				if (isalnum(c) || c == '_')
-				{
 					str_add(str, c);
-					break;
-				}
-				//correct identifier
+				//end of identifier, return token
 				else
 				{
 					str_add(str, 0);
 					str = realloc(str, strIter);
-					*token = malloc(sizeof (tToken));//do funkce
 					ungetc(c, stdin);
 					if (is_keyword(str, *token))
 						return RET_OK;
 					else
 					{
 						(*token)->id = ID_IDENTIFIER;
-						(*token)->att.s = str; //realoc na velikost;
+						(*token)->att.s = str;
 						return RET_OK;
 					}
-
 				}
-		 
+				break;
+
+			//integer of float literal********************************************
+		 	case INT_FLOAT_LIT_S:
+			 	//continue reading
+				if (isdigit(c))
+					str_add(str, c);
+				//is a float literal, read decimal part
+				else if (c == '.')
+				{
+					state = FLOAT_DEC1_S;
+					str_add(str,c);
+				}
+				//is a float literal, read value of exponent
+				else if (c == 'e' || c == 'E')
+				{
+					state = FLOAT_EXP_S;
+					str_add(str,c);
+				}
+				//end of integer literal, return token
+				else
+				{
+					ungetc(c, stdin);
+					str_add(str, 0);
+					(*token)->id = ID_INT_LIT;
+					sscanf(str, "%lld", (long long *)&(*token)->att.i);
+					free(str);
+					return RET_OK;
+				}
+				break;
+
+			//float literal******************************************************************
+			case FLOAT_DEC1_S:
+				//after decimal point there has to be at least one digit, otherwise invalid lexeme
+				if (isdigit(c))
+				{
+					state = FLOAT_DEC2_S; 
+					str_add(str, c);
+				}
+				else
+					return RET_LEX_ERR;
+				break;
+			//continue reading decimal digits
+			case FLOAT_DEC2_S:
+				if (isdigit(c))
+					str_add(str, c);
+				//start of exponent
+				else if (c == 'e' || c == 'E')
+				{
+					state = FLOAT_EXP_S;
+					str_add(str,c);
+				}
+				//read string is a valid decimal number with whole and decimal part
+				else
+				{
+					ungetc(c, stdin);
+					str_add(str, 0);
+					(*token)->id = ID_FLOAT_LIT;
+					sscanf(str, "%lf",&(*token)->att.d);
+					free(str);
+					return RET_OK;
+				} 
+				break;
+			//read first exponent digit, non mandatory + or - can be read
+			case FLOAT_EXP_S:
+				if (c == '+' || c == '-')
+				{
+					state = FLOAT_EXP_SIGN_S;
+					str_add(str, c);
+				}
+				else if (isdigit(c))
+				{
+					state = FLOAT_EXP2_S;
+					str_add(str, c);
+				}
+				else
+				{
+					free(str);
+					return RET_LEX_ERR;
+				}
+				break;
+			//sign was read, read the first exponent digit
+			case FLOAT_EXP_SIGN_S:
+				if (isdigit(c))
+				{
+					state = FLOAT_EXP2_S;
+					str_add(str, c);
+				}
+				else
+				{
+					free(str);
+					return RET_LEX_ERR;
+				}
+				break;
+			//continue reading exponent digits, non digit character on input results in returning
+			//a valid floating literal token
+			case FLOAT_EXP2_S:
+				if (isdigit(c))
+					str_add(str, c);
+				else 
+				{
+					ungetc(c, stdin);
+					str_add(str, 0);
+					(*token)->id = ID_FLOAT_LIT;
+					sscanf(str, "%lf",&(*token)->att.d);
+					free(str);
+					return RET_OK;
+				}
+				break;
+			
 			//is an invalid lexeme
 			default:
 				return RET_LEX_ERR;
