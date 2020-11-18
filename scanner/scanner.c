@@ -209,7 +209,7 @@ bool is_keyword (char *str, tTokenPtr token)
 
 
 
-tTokenRet get_token(tTokenPtr *token)
+tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 {
 	char *str = NULL;
 	int c;
