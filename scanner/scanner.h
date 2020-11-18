@@ -12,6 +12,14 @@ typedef enum
 	RET_INTERNAL_ERR = 99	//failed malloc
 } tTokenRet;
 
+//eol flag type
+typedef enum
+{
+	EOL_REQ,
+	EOL_OPT,
+	EOL_FORBID
+} tEolFlag;
+
 //token ID type
 typedef enum
 {
@@ -74,7 +82,7 @@ typedef tToken *tTokenPtr;
 /*returns RET_OK = 0 on success and token in tTokenPtr
 token will always have an id and if necessarry an attribute
 on error or eof returns non zero value and token data is undefined*/
-tTokenRet get_token(tTokenPtr *);
+tTokenRet get_token(tTokenPtr *, tEolFlag);
 
 //printf conviniently token id and its attribute
 //note that if ret value of get_token is not zero, the token data is undefined
