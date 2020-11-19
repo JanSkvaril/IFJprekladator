@@ -8,6 +8,7 @@
 static int strIter;
 static int strSize;
 
+
 void print_token(tTokenPtr token)
 {
 	switch (token->id)
@@ -145,12 +146,16 @@ typedef enum
 	FLOAT_EXP2_S,
 	FLOAT_EXP_SIGN_S,
 	STRING_S,
+	STRING_ESCAPE_S,
+	STRING_HEX1,
+	STRING_HEX2,
 	EQ_SIGN_S,
 	NEQ_SIGN_S,
 	LESS_SIGN_S,
 	GREATER_SIGN_S,
 	COLON_SIGN_S,
 	UNDER_SIGN_S
+	
 } tState;
 
 
@@ -214,6 +219,9 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 	char *str = NULL;
 	int c;
 	tState state = START_S;
+	char hexStr[2];
+	unsigned hexNum;
+
 	while (1)
 	{
 		c = getchar();
@@ -257,7 +265,6 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 					state = STRING_S;
 					if (str_alloc(&str))
 						return RET_INTERNAL_ERR;
-					str_add(str, c);
 				}
 				//brackets ****************************************
 				else if (c == '(')
@@ -484,7 +491,84 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 				}
 				break;
 			//string***************************************************************
-			//todo
+			case STRING_S:
+				//string literal has to be on one line
+				if (c == '\n')
+				{
+					free(str);
+					free(*token);
+					return RET_LEX_ERR;
+				}
+				//end of string, return token
+				else if (c == '"')
+				{
+					str_add(str, 0);
+					str = realloc(str, strIter);
+					(*token)->id = ID_STRING_LIT;
+					(*token)->att.s = str;
+					return RET_OK;
+				}
+				//escape sequence
+				else if (c == '\\')
+					state = STRING_ESCAPE_S;
+				else 
+					str_add(str, c);
+			break;
+
+			case STRING_ESCAPE_S:
+				state = STRING_S;
+				//only these characters are accepted after escape sequence
+				if (c == '\"')
+					str_add(str, '\"');
+				else if (c == '\\')
+					str_add(str, '\\');
+				else if (c == 'n')
+					str_add(str, '\n');
+				else if (c == 't')
+					str_add(str, '\t');
+				else if (c == 'x')
+					state = STRING_HEX1;
+					
+				else 
+				{
+					free(str);
+					free(*token);
+					return RET_LEX_ERR;
+				}
+			break;
+			case STRING_HEX1:
+				//read first hex digit
+				if (isxdigit(c))
+				{
+					hexStr[0] = c;
+					state = STRING_HEX2;
+				}
+				else
+				{
+					free(str);
+					free(*token);
+					return RET_LEX_ERR;
+				}
+
+			break;
+			case STRING_HEX2:
+				//read second hex digit
+				if (isxdigit(c))
+				{
+					hexStr[1] = c;
+					hexStr[2] = 0;
+					sscanf(hexStr, "%x", &hexNum);
+					str_add(str, hexNum);
+					state = STRING_S;
+				}
+				else
+				{
+					free(str);
+					free(*token);
+					return RET_LEX_ERR;
+				}
+
+			break;
 			//others
 			case EQ_SIGN_S:
 				if (c == '=')
