@@ -6,20 +6,24 @@
 
 #define TRUE 1
 #define FALSE 0
-typedef enum {INT, FLOAT} TYPE;
+typedef enum {INT, DOUBLE, STRING} TYPE;
 
 union Value {
    int i;
-   float f;
+   double f;
+   char *s;
 };
 
 typedef struct Data_struct {
 	TYPE type;
+	int defined;
 	union Value value;
+	int paramsNumber;
+	char params[]; 
 } Data;
 
 typedef struct Node {
-	char Key;			                                                      /* klíč */
+	unsigned long Key;	                                   /* klíč */
 	Data data;                                            /* užitečný obsah uzlu */
 	struct Node * LPtr;                                    /* levý podstrom */
 	struct Node * RPtr;                                   /* pravý podstrom */
@@ -27,8 +31,8 @@ typedef struct Node {
 
 /* prototypy funkcí */
 
-void BSTInit   (NodePtr *);
-int BSTSearch  (NodePtr, char, Data *);
-void BSTInsert (NodePtr *, char, Data);
-void BSTDelete (NodePtr *, char);
-void BSTDispose(NodePtr *);
+void Init   (NodePtr *);
+int Search  (NodePtr, char*, Data *);
+void Insert (NodePtr *, char*, Data*);
+void Delete (NodePtr *, char*);
+void Dispose(NodePtr *);
