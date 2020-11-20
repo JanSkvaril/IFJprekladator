@@ -220,6 +220,10 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 	char hexStr[2];
 	unsigned hexNum;
 
+	*token = malloc(sizeof(tToken)); //do funkce
+		if (*token == NULL)
+			return RET_INTERNAL_ERR;
+
 	while (1)
 	{
 		c = getchar();
@@ -227,13 +231,26 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 		{
 		//start***************************************************
 		case START_S:
-
-			*token = malloc(sizeof(tToken)); //do funkce
-			if (*token == NULL)
-				return RET_INTERNAL_ERR;
+			//if eol is required, only white space characters are allowed until the firt new line
+			if (eol == EOL_REQ)
+			{
+				if (c == '\n')
+					eol = EOL_OPT;
+				else if (isspace(c) || c == '/')
+					;
+				else
+					return RET_EOL_ERR; 
+			}
+			//white space chars dont change state and are ignored
+			//new line character while eol is forbidden causes error
+			if (isspace(c))
+			{
+				if (eol == EOL_FORBID && c == '\n')
+					return RET_EOL_ERR;
+			}
 
 			//is identifier
-			if (isalpha(c))
+			else if (isalpha(c))
 			{
 				state = IDEN_S;
 				if (str_alloc(&str))
@@ -256,7 +273,6 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 					return RET_INTERNAL_ERR;
 				str_add(str, c);
 			}
-			//else if; //float64
 			//is string
 			else if (c == '"')
 			{
@@ -345,9 +361,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 				return RET_OK;
 			}
 
-			//ignore whitespace characters
-			else if (isspace(c))
-				;
+			
 			else if (c == EOF)
 			{
 				free(*token);
