@@ -1,5 +1,5 @@
 #ifndef SCANNER_H_
-#define SCANNET_H_
+#define SCANNER_H_
 
 #include <stdint.h> //int64
 
