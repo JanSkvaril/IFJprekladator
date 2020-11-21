@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
-#include "../scanner/scanner.h"
+
 #include "token_stack.h"
 void tsInit(TokenStack *stack)
 {

@@ -1,35 +1,37 @@
 #include "parser.h"
 #include <stdlib.h>
-#include "../scanner/scanner.h"
-#include "token_stack.h";
 #include <stdbool.h>
-Exp *Parse()
+
+#define solve_and_replace_exp()                           \
+    do                                                    \
+    {                                                     \
+        new_exp = makeTree(st, st->prev->prev, st->prev); \
+        ReplaceWithExp(st, new_exp, 2);                   \
+        changed = true;                                   \
+    } while (false)
+
+/* Returns true if anything changed */
+bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
 {
-    /* == Create stack == */
-    TokenStack *stack = malloc(sizeof(TokenStack));
-    if (stack == NULL)
-        return NULL; //TODO: rework
-    tsInit(stack);
-    tToken *init_token = malloc(sizeof(tToken));
-    init_token->id = ID_SEMICOLLON;
-    tsPushToken(stack, init_token);
+    bool changed = false;
+    sToken *st;
+    Exp *new_exp;
 
-    /* == Parse == */
-    tTokenRet status;
-    do
+    /* == MULT == */
+    st = searchForRule(stack, ID_MULT, endToken);
+    if (st != NULL)
     {
-        tToken *token = malloc(sizeof(tToken));
-        if (token == NULL)
-            return NULL;                    //TODO: rework
-        status = get_token(token, EOL_REQ); //TODO: error handling
-        tsPush(stack, token);
-        ResolveRules(stack);
-    } while (status == RET_OK);
+        solve_and_replace_exp();
+    }
 
-    /* == Cleanup and return tre == */
-    Exp *final_tree = stack->top;
-    tsDispose(stack);
-    return final_tree;
+    /* == WRITE == */
+    st = searchForRule(stack, ID_EQ, endToken);
+    if (st != NULL)
+    {
+        solve_and_replace_exp();
+    }
+    //TODO: add other rules
+    return changed;
 }
 
 bool ResolveRules(TokenStack *stack)
@@ -42,7 +44,7 @@ bool ResolveRules(TokenStack *stack)
             /* == Identifier to Exp == */
             if (stack->top->token->id == ID_IDENTIFIER)
             {
-                //push(CreateLeaf(pop(stack->top->token)));
+                tsPushExp(stack, makeLeaf(tsPopToken(stack)));
                 changed = true;
             }
             /* == Right bracket: ) == */
@@ -72,30 +74,31 @@ bool ResolveRules(TokenStack *stack)
     } while (changed == false);
 }
 
-/* Returns true if anything changed */
-bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
+Exp *Parse()
 {
-    bool changed = false;
-    sToken *st;
-    Exp *new_exp;
+    /* == Create stack == */
+    TokenStack *stack = malloc(sizeof(TokenStack));
+    if (stack == NULL)
+        return NULL; //TODO: rework
+    tsInit(stack);
+    tToken *init_token = malloc(sizeof(tToken));
+    init_token->id = ID_SEMICOLLON;
+    tsPushToken(stack, init_token);
 
-    /* == MULT == */
-    st = searchForRule(stack, ID_MULT, endToken);
-    if (st != NULL)
+    /* == Parse == */
+    tTokenRet status;
+    do
     {
-        //new_exp = CreateTree(st->prev->prev, st->prev, st);
-        ReplaceWithExp(st, new_exp, 2);
-        changed = true;
-    }
+        tToken *token = malloc(sizeof(tToken));
+        if (token == NULL)
+            return NULL;                    //TODO: rework
+        status = get_token(token, EOL_REQ); //TODO: error handling
+        tsPush(stack, token);
+        ResolveRules(stack);
+    } while (status == RET_OK);
 
-    /* == WRITE == */
-    st = searchForRule(stack, ID_EQ, endToken);
-    if (st != NULL)
-    {
-        //new_exp = CreateTree(st->prev->prev, st->prev, st);
-        ReplaceWithExp(st, new_exp, 2);
-        changed = true;
-    }
-    //TODO: add other rules
-    return changed;
+    /* == Cleanup and return tre == */
+    Exp *final_tree = stack->top;
+    tsDispose(stack);
+    return final_tree;
 }

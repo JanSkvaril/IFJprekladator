@@ -7,9 +7,9 @@
 typedef enum
 {
 	RET_OK = 0,
-	RET_LEX_ERR = 1,		//invalid lexeme
+	RET_LEX_ERR = 1, //invalid lexeme
 	RET_EOF,
-	RET_INTERNAL_ERR = 99	//failed malloc
+	RET_INTERNAL_ERR = 99 //failed malloc
 } tTokenRet;
 
 //eol flag type
@@ -23,10 +23,10 @@ typedef enum
 //token ID type
 typedef enum
 {
-	ID_IDENTIFIER,	//identifier of a variable, function ...	
-	ID_INT_LIT,		//integer literal e.g. 10
-	ID_FLOAT_LIT,	//float literal e.g. 10.2
-	ID_STRING_LIT,	//string literal
+	ID_IDENTIFIER, //identifier of a variable, function ...
+	ID_INT_LIT,	   //integer literal e.g. 10
+	ID_FLOAT_LIT,  //float literal e.g. 10.2
+	ID_STRING_LIT, //string literal
 	//keywords
 	ID_KEY_INT,
 	ID_KEY_FLOAT64,
@@ -38,28 +38,28 @@ typedef enum
 	ID_KEY_ELSE,
 	ID_KEY_FOR,
 	//brackets
-	ID_ROUND_1, 	// (
-	ID_ROUND_2,		// )
-	ID_CURLY_1,		// {
-	ID_CURLY_2,		// }
+	ID_ROUND_1, // (
+	ID_ROUND_2, // )
+	ID_CURLY_1, // {
+	ID_CURLY_2, // }
 	//arithmetic operators
-	ID_ADD,			// +
-	ID_SUB,			// -
-	ID_MULT, 		// *
-	ID_DIV,			// /
+	ID_ADD,	 // +
+	ID_SUB,	 // -
+	ID_MULT, // *
+	ID_DIV,	 // /
 	//relation operators
-	ID_EQ,			// ==
-	ID_NEQ,			// !=
-	ID_LESS,		// <
-	ID_GREATER,		// >
-	ID_LESS_EQ,		// <=
-	ID_GREATER_EQ,	// >=
+	ID_EQ,		   // ==
+	ID_NEQ,		   // !=
+	ID_LESS,	   // <
+	ID_GREATER,	   // >
+	ID_LESS_EQ,	   // <=
+	ID_GREATER_EQ, // >=
 	//other
-	ID_DEFINE,		// :=
-	ID_ASSIGN, 		// =
-	ID_COMMA,		// ,
-	ID_SEMICOLLON,	// ;
-	ID_UNDER,		// _
+	ID_DEFINE,	   // :=
+	ID_ASSIGN,	   // =
+	ID_COMMA,	   // ,
+	ID_SEMICOLLON, // ;
+	ID_UNDER,	   // _
 } tID;
 
 //token attribute type

@@ -1,6 +1,6 @@
 #include "semantics.h"
 
-TreePtr *makeLeaf(tToken term)
+TreePtr *makeLeaf(tToken *term)
 {
     TreePtr *newTree = malloc(sizeof(struct Tree));
     newTree->value = term;
@@ -9,7 +9,7 @@ TreePtr *makeLeaf(tToken term)
     return newTree;
 }
 
-TreePtr *makeTree(TreePtr *x, TreePtr *y, tToken term)
+TreePtr *makeTree(TreePtr *x, TreePtr *y, tToken *term)
 {
     TreePtr *newTree = malloc(sizeof(struct Tree));
     newTree->value = term;
@@ -20,11 +20,11 @@ TreePtr *makeTree(TreePtr *x, TreePtr *y, tToken term)
 
 void disposeTree(TreePtr *tree)
 {
-    if(tree != NULL)
-	{
-		disposeTree(tree->LPtr);
-		disposeTree(tree->RPtr);
-		free(tree);
-		tree = NULL;
-	}
+    if (tree != NULL)
+    {
+        disposeTree(tree->LPtr);
+        disposeTree(tree->RPtr);
+        free(tree);
+        tree = NULL;
+    }
 }
