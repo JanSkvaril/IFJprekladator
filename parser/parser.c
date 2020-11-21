@@ -10,20 +10,29 @@ Exp *Parse()
     if (stack == NULL)
         return NULL; //TODO: rework
     tsInit(stack);
+    tToken *init_token = malloc(sizeof(tToken));
+    init_token->id = ID_SEMICOLLON;
+    tsPushToken(stack, init_token);
 
     /* == Parse == */
+    tTokenRet status;
     do
     {
         tToken *token = malloc(sizeof(tToken));
         if (token == NULL)
-            return NULL;           //TODO: rework
-        get_token(token, EOL_REQ); //TODO: error handling
+            return NULL;                    //TODO: rework
+        status = get_token(token, EOL_REQ); //TODO: error handling
         tsPush(stack, token);
         ResolveRules(stack);
-    } while (1); //TODO: zjistit jak poznám že je konec
+    } while (status == RET_OK);
+
+    /* == Cleanup and return tre == */
+    Exp *final_tree = stack->top;
+    tsDispose(stack);
+    return final_tree;
 }
 
-void ResolveRules(TokenStack *stack)
+bool ResolveRules(TokenStack *stack)
 {
     bool changed = false;
     do
@@ -33,11 +42,8 @@ void ResolveRules(TokenStack *stack)
             /* == Identifier to Exp == */
             if (stack->top->token->id == ID_IDENTIFIER)
             {
-                if (stack->top->prev != NULL)
-                {
-                    //push(CreateLeaf(pop(stack->top->token)));
-                    changed = true;
-                }
+                //push(CreateLeaf(pop(stack->top->token)));
+                changed = true;
             }
             /* == Right bracket: ) == */
             if (stack->top->token->id == ID_ROUND_2)
@@ -53,15 +59,23 @@ void ResolveRules(TokenStack *stack)
                 }
                 else
                 {
-                    ResolveExpresionRules(stack, ID_ROUND_1);
+
+                    changed = ResolveExpresionRules(stack, ID_ROUND_1);
                 }
+            }
+            /* == Semicollon: ; == */
+            if (stack->top->token->id == ID_SEMICOLLON)
+            {
+                changed = ResolveExpresionRules(stack, ID_SEMICOLLON);
             }
         }
     } while (changed == false);
 }
 
-void ResolveExpresionRules(TokenStack *stack, id_t endToken)
+/* Returns true if anything changed */
+bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
 {
+    bool changed = false;
     sToken *st;
     Exp *new_exp;
 
@@ -71,5 +85,17 @@ void ResolveExpresionRules(TokenStack *stack, id_t endToken)
     {
         //new_exp = CreateTree(st->prev->prev, st->prev, st);
         ReplaceWithExp(st, new_exp, 2);
+        changed = true;
     }
+
+    /* == WRITE == */
+    st = searchForRule(stack, ID_EQ, endToken);
+    if (st != NULL)
+    {
+        //new_exp = CreateTree(st->prev->prev, st->prev, st);
+        ReplaceWithExp(st, new_exp, 2);
+        changed = true;
+    }
+    //TODO: add other rules
+    return changed;
 }

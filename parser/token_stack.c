@@ -69,7 +69,7 @@ void tsDispose(TokenStack *stack)
 }
 Exp *searchForRule(TokenStack *stack, tID tokenID, tID endToken)
 {
-    sToken *current = stack->top;
+    sToken *current = stack->top->prev;
     if (IsToken(current))
     {
         if (current->token->id == endToken)
