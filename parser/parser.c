@@ -90,7 +90,6 @@ bool ResolveRules(TokenStack *stack)
             /* == Semicollon: ; == */
             else if (stack->top->token->id == ID_SEMICOLLON)
             {
-                printf("Semicolon detected, parsing expressions\n");
                 changed = ResolveExpresionRules(stack, ID_SEMICOLLON);
             }
         }
@@ -125,12 +124,16 @@ Exp *Parse()
     } while (status == RET_OK);
     printf("    == Parsing finished ==\n");
     /* == Cleanup and return tree == */
-    /* Stack should end in state: ; EXP ;*/
+    /* Stack should end in state: ; EXP ;   */
     tsPopToken(stack);                 //first ;
     Exp *final_tree = tsPopExp(stack); //EXP
-    tsPopToken(stack);                 //second ;
+    printf("Root token is: ");
+    print_token(final_tree->value);
+    tsPopToken(stack); //second ;
     if (stack->top == NULL)
+    {
         printf("Succesfuly reduced to one Exp\n");
+    }
     tsDispose(stack);
     return final_tree;
 }

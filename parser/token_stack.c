@@ -118,13 +118,11 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete)
     {
         token->exp = exp;
         printf("Replacing with exp: ");
-        print_token(exp->value);
+        print_token(token->exp->value);
         sToken *prev = token->prev;
         for (int i = 1; i <= delete; i++)
         {
             token->prev = prev->prev;
-            if (IsToken(prev))
-                free(prev->token); //TODO: zeptat se na tohle erika!
             free(prev);
             prev = token->prev;
         }
