@@ -21,13 +21,15 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
     st = searchForRule(stack, ID_MULT, endToken);
     if (st != NULL)
     {
+        printf("Rule: MULT\n");
         solve_and_replace_exp();
     }
 
     /* == WRITE == */
-    st = searchForRule(stack, ID_EQ, endToken);
+    st = searchForRule(stack, ID_ASSIGN, endToken);
     if (st != NULL)
     {
+        printf("Rule: WRITE\n");
         solve_and_replace_exp();
     }
     //TODO: add other rules
@@ -39,6 +41,7 @@ bool ResolveRules(TokenStack *stack)
     bool changed = false;
     do
     {
+        changed = false;
         if (IsToken(stack->top))
         {
             /* == Identifier to Exp == */
@@ -48,7 +51,7 @@ bool ResolveRules(TokenStack *stack)
                 changed = true;
             }
             /* == Right bracket: ) == */
-            if (stack->top->token->id == ID_ROUND_2)
+            else if (stack->top->token->id == ID_ROUND_2)
             {
                 /* == Single Exp in bracket: (Exp) */
                 if (stack->top->prev->prev->token->id == ID_ROUND_1)
@@ -66,12 +69,14 @@ bool ResolveRules(TokenStack *stack)
                 }
             }
             /* == Semicollon: ; == */
-            if (stack->top->token->id == ID_SEMICOLLON)
+            else if (stack->top->token->id == ID_SEMICOLLON)
             {
+                printf("Semicolon detected, parsing expressions\n");
                 changed = ResolveExpresionRules(stack, ID_SEMICOLLON);
             }
         }
-    } while (changed == false);
+
+    } while (changed == true);
     return false;
 }
 
@@ -96,7 +101,7 @@ Exp *Parse()
         ResolveRules(stack);
     } while (status == RET_OK);
 
-    /* == Cleanup and return tre == */
+    /* == Cleanup and return tree == */
     Exp *final_tree = stack->top->exp;
     tsDispose(stack);
     return final_tree;

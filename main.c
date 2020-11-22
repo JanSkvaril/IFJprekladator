@@ -1,7 +1,8 @@
+#include "./parser/parser.h"
 #include <stdio.h>
-
-int main ()
+int main()
 {
-	printf("Hello World!\n");
+	Parse();
+	printf("Program compiled! yay\n");
 	return 0;
 }

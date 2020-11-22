@@ -16,6 +16,8 @@ void tsPushToken(TokenStack *stack, tToken *token)
     new_token->token = token;
     new_token->exp = NULL;
     stack->top = new_token;
+    printf("Adding token to stack: ");
+    print_token(token);
 }
 
 void tsPushExp(TokenStack *stack, Exp *exp)
@@ -26,6 +28,7 @@ void tsPushExp(TokenStack *stack, Exp *exp)
     new_token->prev = stack->top;
     new_token->exp = exp;
     new_token->token = NULL;
+    printf("Adding exp to stack\n");
     stack->top = new_token;
 }
 
