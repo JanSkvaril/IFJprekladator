@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "scanner.h"
+#include "../error/error.h"
 
 static int strIter;
 static int strSize;
@@ -222,7 +223,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 
 	*token = malloc(sizeof(tToken)); //do funkce
 		if (*token == NULL)
-			return RET_INTERNAL_ERR;
+			scanner_free_exit(*token, INTER_ERR);
 
 	while (1)
 	{
@@ -239,14 +240,14 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 				else if (isspace(c) || c == '/')
 					;
 				else
-					return RET_EOL_ERR; 
+					scanner_free_exit(*token, SYN_ERR); 
 			}
 			//white space chars dont change state and are ignored
 			//new line character while eol is forbidden causes error
 			if (isspace(c))
 			{
 				if (eol == EOL_FORBID && c == '\n')
-					return RET_EOL_ERR;
+					scanner_free_exit(*token, SYN_ERR); 
 			}
 
 			//is identifier
@@ -254,7 +255,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			{
 				state = IDEN_S;
 				if (str_alloc(&str))
-					return RET_INTERNAL_ERR;
+					scanner_free_exit(*token, INTER_ERR); 
 				str_add(str, c);
 			}
 			//is identifier or underscore sign
@@ -262,7 +263,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			{
 				state = UNDER_SIGN_S;
 				if (str_alloc(&str))
-					return RET_INTERNAL_ERR;
+					scanner_free_exit(*token, INTER_ERR);
 				str_add(str, c);
 			}
 			//is integer or float literal
@@ -270,7 +271,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			{
 				state = INT_FLOAT_LIT_S;
 				if (str_alloc(&str))
-					return RET_INTERNAL_ERR;
+					scanner_free_exit(*token, INTER_ERR);
 				str_add(str, c);
 			}
 			//is string
@@ -278,7 +279,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			{
 				state = STRING_S;
 				if (str_alloc(&str))
-					return RET_INTERNAL_ERR;
+					scanner_free_exit(*token, INTER_ERR);
 			}
 			//a division sign or start of a comment
 			else if (c == '/')
@@ -370,8 +371,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			//no match means invalid lexeme
 			else
 			{
-				free(*token);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 			break;
 
@@ -435,7 +435,10 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 				str_add(str, c);
 			}
 			else
-				return RET_LEX_ERR;
+			{
+				free(str);
+				scanner_free_exit(*token, LEX_ERR);
+			}
 			break;
 		//continue reading decimal digits
 		case FLOAT_DEC2_S:
@@ -473,7 +476,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			else
 			{
 				free(str);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 			break;
 		//sign was read, read the first exponent digit
@@ -486,7 +489,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			else
 			{
 				free(str);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 			break;
 		//continue reading exponent digits, non digit character on input results in returning
@@ -510,8 +513,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			if (c == '\n')
 			{
 				free(str);
-				free(*token);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 			//end of string, return token
 			else if (c == '"')
@@ -546,8 +548,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			else
 			{
 				free(str);
-				free(*token);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 			break;
 		case STRING_HEX1:
@@ -560,8 +561,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			else
 			{
 				free(str);
-				free(*token);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 
 			break;
@@ -578,8 +578,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			else
 			{
 				free(str);
-				free(*token);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 
 			break;
@@ -634,8 +633,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			}
 			else
 			{
-				free(*token);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 			break;
 		case LESS_SIGN_S:
@@ -672,8 +670,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			}
 			else
 			{
-				free(*token);
-				return RET_LEX_ERR;
+				scanner_free_exit(*token, LEX_ERR);
 			}
 			break;
 		//underscore on ipnut, either identifier or alone underscore
@@ -694,7 +691,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 
 		//is an invalid lexeme
 		default:
-			return RET_LEX_ERR;
+			scanner_free_exit(*token, LEX_ERR);
 		}
 	}
 
