@@ -97,8 +97,11 @@ Exp *Parse()
     {
         tToken *token = NULL;
         status = get_token(&token, EOL_REQ); //TODO: error handling
-        tsPushToken(stack, token);
-        ResolveRules(stack);
+        if (status == RET_OK)
+        {
+            tsPushToken(stack, token);
+            ResolveRules(stack);
+        }
     } while (status == RET_OK);
 
     /* == Cleanup and return tree == */

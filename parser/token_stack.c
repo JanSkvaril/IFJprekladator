@@ -28,7 +28,8 @@ void tsPushExp(TokenStack *stack, Exp *exp)
     new_token->prev = stack->top;
     new_token->exp = exp;
     new_token->token = NULL;
-    printf("Adding exp to stack\n");
+    printf("Adding exp to stack:");
+    print_token(exp->value);
     stack->top = new_token;
 }
 
@@ -104,6 +105,8 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete)
     if (IsToken(token) == false)
     {
         token->exp = exp;
+        printf("Replacing with exp: ");
+        print_token(exp->value);
         sToken *prev = token->prev;
         for (int i = 1; i <= delete; i++)
         {
