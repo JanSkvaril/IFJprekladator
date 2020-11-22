@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define solve_and_replace_exp()                           \
-    do                                                    \
-    {                                                     \
-        new_exp = makeTree(st, st->prev->prev, st->prev); \
-        ReplaceWithExp(st, new_exp, 2);                   \
-        changed = true;                                   \
+#define solve_and_replace_exp()                                            \
+    do                                                                     \
+    {                                                                      \
+        new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token); \
+        ReplaceWithExp(st, new_exp, 2);                                    \
+        changed = true;                                                    \
     } while (false)
 
 /* Returns true if anything changed */
@@ -72,6 +72,7 @@ bool ResolveRules(TokenStack *stack)
             }
         }
     } while (changed == false);
+    return false;
 }
 
 Exp *Parse()
@@ -89,16 +90,14 @@ Exp *Parse()
     tTokenRet status;
     do
     {
-        tToken *token = malloc(sizeof(tToken));
-        if (token == NULL)
-            return NULL;                    //TODO: rework
-        status = get_token(token, EOL_REQ); //TODO: error handling
-        tsPush(stack, token);
+        tToken *token = NULL;
+        status = get_token(&token, EOL_REQ); //TODO: error handling
+        tsPushToken(stack, token);
         ResolveRules(stack);
     } while (status == RET_OK);
 
     /* == Cleanup and return tre == */
-    Exp *final_tree = stack->top;
+    Exp *final_tree = stack->top->exp;
     tsDispose(stack);
     return final_tree;
 }

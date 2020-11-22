@@ -67,7 +67,7 @@ void tsDispose(TokenStack *stack)
         free(deleted);
     }
 }
-Exp *searchForRule(TokenStack *stack, tID tokenID, tID endToken)
+sToken *searchForRule(TokenStack *stack, tID tokenID, tID endToken)
 {
     sToken *current = stack->top->prev;
     if (IsToken(current))
@@ -93,6 +93,7 @@ Exp *searchForRule(TokenStack *stack, tID tokenID, tID endToken)
         else
             return NULL; //TODO: error?
     }
+    return NULL;
 }
 
 void ReplaceWithExp(sToken *token, Exp *exp, int delete)

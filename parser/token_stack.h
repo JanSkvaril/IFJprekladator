@@ -34,7 +34,7 @@ void tsDispose(TokenStack *);
 bool IsToken(sToken *);
 
 /* Search for aritmetic rule until endToken */
-Exp *searchForRule(TokenStack *stack, tID token, tID endToken);
+sToken *searchForRule(TokenStack *stack, tID token, tID endToken);
 
 /* Replaces sToken with exp and delete some number of sTokens before it */
 void ReplaceWithExp(sToken *token, Exp *exp, int delete);
