@@ -4,7 +4,8 @@
 CC = gcc
 CFLAGS = -g -Wall -pedantic -Wextra
 LFLAGS = -lm
-OBJ = scanner.o parser.o generator.o sym_table.o main.o error.o
+
+OBJ = scanner.o parser.o semantics.o token_stack.o generator.o sym_table.o main.o
 
 compiler: $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LFLAGS)
@@ -13,6 +14,12 @@ scanner.o: scanner/scanner.c scanner/scanner.h
 	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
 
 parser.o: parser/parser.c parser/parser.h
+	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
+
+semantics.o: parser/semantics.c parser/semantics.h
+	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
+
+token_stack.o: parser/token_stack.c parser/token_stack.h
 	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
 
 generator.o: generator/generator.c generator/generator.h
