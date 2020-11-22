@@ -74,28 +74,40 @@ void tsDispose(TokenStack *stack)
 sToken *searchForRule(TokenStack *stack, tID tokenID, tID endToken)
 {
     sToken *current = stack->top->prev;
-    if (IsToken(current))
+    while (1)
     {
-        if (current->token->id == endToken)
+        if (current == NULL || current->prev == NULL || current->prev->prev == NULL)
         {
             return NULL;
         }
-        current = current->prev;
-    }
-    else
-    {
-        if (IsToken(current->prev))
+        //current is token
+        if (IsToken(current))
         {
-            if (current->prev->token->id == tokenID)
+            if (current->token->id == endToken)
             {
-                if (IsToken(current->prev->prev) == false)
-                {
-                    return current;
-                }
+                return NULL;
             }
+            current = current->prev;
         }
+        //current is Exp
         else
-            return NULL; //TODO: error?
+        {
+            if (IsToken(current->prev))
+            {
+                if (current->prev->token->id == tokenID)
+                {
+                    if (IsToken(current->prev->prev) == false)
+                    {
+                        return current;
+                    }
+                    return NULL; //TODO: error
+                }
+                else
+                    current = current->prev;
+            }
+            else
+                return NULL; //TODO: error?
+        }
     }
     return NULL;
 }

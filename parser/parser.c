@@ -2,12 +2,17 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define solve_and_replace_exp()                                            \
-    do                                                                     \
-    {                                                                      \
-        new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token); \
-        ReplaceWithExp(st, new_exp, 2);                                    \
-        changed = true;                                                    \
+#define solve_and_replace_exp(ID_OF_TOKEN)                                     \
+    do                                                                         \
+    {                                                                          \
+        st = searchForRule(stack, ID_OF_TOKEN, endToken);                      \
+        if (st != NULL)                                                        \
+        {                                                                      \
+            /*printf("Expression rule found: %d\n", ID_OF_TOKEN);     */       \
+            new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token); \
+            ReplaceWithExp(st, new_exp, 2);                                    \
+            changed = true;                                                    \
+        }                                                                      \
     } while (false)
 
 /* Returns true if anything changed */
@@ -16,22 +21,36 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
     bool changed = false;
     sToken *st;
     Exp *new_exp;
-
+    /* =    Aritmetics  = */
     /* == MULT == */
-    st = searchForRule(stack, ID_MULT, endToken);
-    if (st != NULL)
-    {
-        printf("Rule: MULT\n");
-        solve_and_replace_exp();
-    }
-
+    solve_and_replace_exp(ID_MULT);
+    /* == DIV == */
+    solve_and_replace_exp(ID_DIV);
+    /* == ADD == */
+    solve_and_replace_exp(ID_ADD);
+    /* == SUB == */
+    solve_and_replace_exp(ID_SUB);
+    /* =    Boolean   = */
+    /* == EQ ==*/
+    solve_and_replace_exp(ID_EQ);
+    /* == NEQ ==*/
+    solve_and_replace_exp(ID_NEQ);
+    /* == LESS ==*/
+    solve_and_replace_exp(ID_LESS);
+    /* == LESS_EQ ==*/
+    solve_and_replace_exp(ID_LESS_EQ);
+    /* == GREATER==*/
+    solve_and_replace_exp(ID_GREATER);
+    /* == GREATER==*/
+    solve_and_replace_exp(ID_GREATER_EQ);
+    /* =    Others   = */
     /* == WRITE == */
-    st = searchForRule(stack, ID_ASSIGN, endToken);
-    if (st != NULL)
-    {
-        printf("Rule: WRITE\n");
-        solve_and_replace_exp();
-    }
+    solve_and_replace_exp(ID_ASSIGN);
+    /* == DEFINE == */
+    solve_and_replace_exp(ID_DEFINE);
+    /* == CONNECT == */
+    solve_and_replace_exp(ID_SEMICOLLON);
+
     //TODO: add other rules
     return changed;
 }
@@ -92,6 +111,7 @@ Exp *Parse()
     tsPushToken(stack, init_token);
 
     /* == Parse == */
+    printf("    == Parsing starts ==\n");
     tTokenRet status;
     do
     {
@@ -103,9 +123,14 @@ Exp *Parse()
             ResolveRules(stack);
         }
     } while (status == RET_OK);
-
+    printf("    == Parsing finished ==\n");
     /* == Cleanup and return tree == */
-    Exp *final_tree = stack->top->exp;
+    /* Stack should end in state: ; EXP ;*/
+    tsPopToken(stack);                 //first ;
+    Exp *final_tree = tsPopExp(stack); //EXP
+    tsPopToken(stack);                 //second ;
+    if (stack->top == NULL)
+        printf("Succesfuly reduced to one Exp\n");
     tsDispose(stack);
     return final_tree;
 }
