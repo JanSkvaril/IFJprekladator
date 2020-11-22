@@ -6,10 +6,8 @@
 //token return value type
 typedef enum
 {
-	RET_OK = 0,
-	RET_LEX_ERR = 1, //invalid lexeme
-	RET_EOF,
-	RET_INTERNAL_ERR = 99 //failed malloc
+	RET_OK,
+	RET_EOF
 } tTokenRet;
 
 //eol flag type
