@@ -3,39 +3,25 @@
 
 CC = gcc
 CFLAGS = -g -Wall -pedantic -Wextra
-LFLAGS = -lm
+LDFLAGS=-lm
 
-OBJ = scanner.o parser.o semantics.o token_stack.o generator.o sym_table.o main.o
+SRC_DIRS = scanner parser generator error sym_table
+SRCS = $(shell find $(SRC_DIRS) -name "*.c")
+SRCS += main.c
+OBJS = $(addsuffix .o,$(basename $(SRCS)))
 
-compiler: $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ $(LFLAGS)
+compiler: $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
-scanner.o: scanner/scanner.c scanner/scanner.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
 
-parser.o: parser/parser.c parser/parser.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-semantics.o: parser/semantics.c parser/semantics.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-token_stack.o: parser/token_stack.c parser/token_stack.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-generator.o: generator/generator.c generator/generator.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-sym_table.o: sym_table/sym_table.c sym_table/sym_table.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-error.o: error/error.c error/error.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-main.o: main.c
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-./PHONY: clean test
+.PHONY: clean test deploy zip
 test:
 #todo
+#creates folder deploy, copies all source files and updates includes so that everything works wow
+deploy:
+	./deploy.sh
+zip:
+	zip -r -j xzavad18.zip deploy
 clean:
-	rm -f *.o compiler
+	find -name "*.o" -delete
+	rm -r -f compiler
