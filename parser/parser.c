@@ -74,15 +74,35 @@ bool ResolveRules(TokenStack *stack)
             {
                 AddSemicolom(stack);
             }
+            /* == Left bracket: ( ==*/
+            else if (stack->top->token->id == ID_ROUND_1)
+            {
+                if (IsToken(stack->top->prev) && stack->top->prev->token->id == ID_KEY_FOR)
+                {
+                    AddSemicolom(stack);
+                }
+            }
             /* == Right bracket: ) == */
             else if (stack->top->token->id == ID_ROUND_2)
             {
+                sToken *curr = stack->top->prev;
+
                 /* == Single Exp in bracket: (Exp) */
-                if (stack->top->prev->prev->token->id == ID_ROUND_1)
+                if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_ROUND_1)
                 {
-                    tsPopToken(stack);          //(
-                    Exp *exp = tsPopExp(stack); //exp
                     tsPopToken(stack);          //)
+                    Exp *exp = tsPopExp(stack); //exp
+                    tsPopToken(stack);          //(
+                    tsPushExp(stack, exp);
+                    changed = true;
+                }
+                /* == End of for FOR == */
+                else if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_SEMICOLLON)
+                {
+                    tsPopToken(stack);          //)
+                    Exp *exp = tsPopExp(stack); //exp
+                    tsPopToken(stack);          //;
+                    tsPopToken(stack);          //(
                     tsPushExp(stack, exp);
                     changed = true;
                 }
@@ -139,6 +159,19 @@ bool ResolveRules(TokenStack *stack)
                     tToken *t = tsPopToken(stack);
                     Exp *ifExp = makeIfTree(trueExp, condExp, NULL, t);
                     tsPushExp(stack, ifExp);
+
+                    changed = true;
+                    AddSemicolom(stack);
+                }
+                /* == FOR == */
+                else if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_KEY_FOR)
+                {
+                    printf("Parsing for\n");
+                    Exp *body = tsPopExp(stack);
+                    Exp *head = tsPopExp(stack);
+                    tToken *t = tsPopToken(stack);
+                    Exp *forExp = makeTree(head, body, t);
+                    tsPushExp(stack, forExp);
 
                     changed = true;
                     AddSemicolom(stack);
