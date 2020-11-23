@@ -5,15 +5,15 @@
 #include <stdlib.h>
 #include "../scanner/scanner.h"
 
-typedef struct Tree
+typedef struct T
 {
     tToken *value;
     struct Tree *LPtr;
     struct Tree *RPtr;
-} TreePtr;
+} Tree;
 
-TreePtr *makeLeaf(tToken *);
-TreePtr *makeTree(TreePtr *, TreePtr *, tToken *);
-void disposeTree(TreePtr *);
+Tree *makeLeaf(tToken *);
+Tree *makeTree(Tree *, Tree *, tToken *);
+void disposeTree(Tree *);
 
 #endif

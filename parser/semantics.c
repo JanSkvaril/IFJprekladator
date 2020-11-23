@@ -1,24 +1,40 @@
 #include "semantics.h"
 
-TreePtr *makeLeaf(tToken *term)
+tToken *getValue(Tree *tree)
 {
-    TreePtr *newTree = malloc(sizeof(struct Tree));
+    return tree->value;
+}
+
+Tree *makeLeaf(tToken *term)
+{
+    Tree *newTree = malloc(sizeof(struct T));
     newTree->value = term;
     newTree->LPtr = NULL;
+    newTree->Condition = NULL;
     newTree->RPtr = NULL;
     return newTree;
 }
 
-TreePtr *makeTree(TreePtr *x, TreePtr *y, tToken *term)
+Tree *makeTree(Tree *x, Tree *y, tToken *term)
 {
-    TreePtr *newTree = malloc(sizeof(struct Tree));
+    Tree *newTree = malloc(sizeof(struct T));
     newTree->value = term;
     newTree->LPtr = x;
     newTree->RPtr = y;
     return newTree;
 }
 
-void disposeTree(TreePtr *tree)
+Tree *makeIfTree(Tree *true, Tree *cond, Tree *false, tToken *term)
+{
+    Tree *newTree = malloc(sizeof(struct T));
+    newTree->value = term;
+    newTree->LPtr =true;
+    newTree->Condition = cond;
+    newTree->RPtr = false;
+    return newTree;
+}
+
+void disposeTree(Tree *tree)
 {
     if (tree != NULL)
     {
