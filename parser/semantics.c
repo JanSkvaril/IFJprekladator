@@ -36,7 +36,7 @@ Tree *makeIfTree(Tree *trueTree, Tree *cond, Tree *falseTree, tToken *term)
 
 Tree *AddToIfTree(Tree *mainTree, Tree *minorTree)
 {
-    if(mainTree == NULL)
+    if(mainTree->RPtr == NULL)
     {
         mainTree->RPtr = minorTree;
     }
