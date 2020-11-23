@@ -110,13 +110,27 @@ bool ResolveRules(TokenStack *stack)
                 tsPushExp(stack, exp);
                 changed = true;
                 //AddSemicolom(stack);
+
+                /* == ELSE == */
+                if (IsToken(stack->top->prev))
+                {
+                    if (stack->top->prev->token->id == ID_KEY_ELSE)
+                    {
+                        Exp *elseExp = tsPopExp(stack);
+                        tsPopToken(stack); //else
+                        tsPopToken(stack); //;
+                        AddToIfTree(stack->top->exp, elseExp);
+                        AddSemicolom(stack);
+                    }
+                }
             }
         }
         else //expreession
         {
-            /* == IF ==*/
+
             if (!IsToken(stack->top->prev))
             {
+                /* == IF ==*/
                 if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_KEY_IF)
                 {
                     printf("Parsing if\n");
