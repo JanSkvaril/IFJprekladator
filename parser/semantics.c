@@ -24,13 +24,13 @@ Tree *makeTree(Tree *x, Tree *y, tToken *term)
     return newTree;
 }
 
-Tree *makeIfTree(Tree *true, Tree *cond, Tree *false, tToken *term)
+Tree *makeIfTree(Tree *trueTree, Tree *cond, Tree *falseTree, tToken *term)
 {
     Tree *newTree = malloc(sizeof(struct T));
     newTree->value = term;
-    newTree->LPtr = true;
+    newTree->LPtr = trueTree;
     newTree->Condition = cond;
-    newTree->RPtr = false;
+    newTree->RPtr = falseTree;
     return newTree;
 }
 

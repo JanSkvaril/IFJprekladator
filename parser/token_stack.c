@@ -40,6 +40,8 @@ tToken *tsPopToken(TokenStack *stack)
     tToken *token = stack->top->token;
     sToken *deleted = stack->top;
     stack->top = deleted->prev;
+    printf("Poping token: ");
+    print_token(token);
     free(deleted);
     return token;
 }
@@ -51,7 +53,9 @@ Exp *tsPopExp(TokenStack *stack)
     Exp *token = stack->top->exp;
     sToken *deleted = stack->top;
     stack->top = deleted->prev;
+    printf("Poping Exp: ");
     free(deleted);
+    print_token(token->value);
     return token;
 }
 
@@ -129,4 +133,11 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete)
     }
     else
         return; //TODO: error?
+}
+
+void AddSemicolom(TokenStack *stack)
+{
+    tToken *init_token = malloc(sizeof(tToken));
+    init_token->id = ID_SEMICOLLON;
+    tsPushToken(stack, init_token);
 }

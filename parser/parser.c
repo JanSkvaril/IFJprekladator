@@ -69,6 +69,11 @@ bool ResolveRules(TokenStack *stack)
                 tsPushExp(stack, makeLeaf(tsPopToken(stack)));
                 changed = true;
             }
+            /* == Left Curly bracket: { ==*/
+            else if (stack->top->token->id == ID_CURLY_1)
+            {
+                AddSemicolom(stack);
+            }
             /* == Right bracket: ) == */
             else if (stack->top->token->id == ID_ROUND_2)
             {
@@ -92,6 +97,39 @@ bool ResolveRules(TokenStack *stack)
             {
                 changed = ResolveExpresionRules(stack, ID_SEMICOLLON);
             }
+            /* == Right Curly bracket: } ==*/
+            else if (stack->top->token->id == ID_CURLY_2)
+            {
+                printf("} - replacing\n");
+                //should like this {;EXP;}
+                tsPopToken(stack);          //}
+                tsPopToken(stack);          //;
+                Exp *exp = tsPopExp(stack); //exp
+                tsPopToken(stack);          //;
+                tsPopToken(stack);          //{
+                tsPushExp(stack, exp);
+                changed = true;
+                //AddSemicolom(stack);
+            }
+        }
+        else //expreession
+        {
+            /* == IF ==*/
+            if (!IsToken(stack->top->prev))
+            {
+                if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_KEY_IF)
+                {
+                    printf("Parsing if\n");
+                    Exp *trueExp = tsPopExp(stack);
+                    Exp *condExp = tsPopExp(stack);
+                    tToken *t = tsPopToken(stack);
+                    Exp *ifExp = makeIfTree(trueExp, condExp, NULL, t);
+                    tsPushExp(stack, ifExp);
+
+                    changed = true;
+                    AddSemicolom(stack);
+                }
+            }
         }
 
     } while (changed == true);
@@ -105,9 +143,7 @@ Exp *Parse()
     if (stack == NULL)
         return NULL; //TODO: rework
     tsInit(stack);
-    tToken *init_token = malloc(sizeof(tToken));
-    init_token->id = ID_SEMICOLLON;
-    tsPushToken(stack, init_token);
+    AddSemicolom(stack);
 
     /* == Parse == */
     printf("    == Parsing starts ==\n");

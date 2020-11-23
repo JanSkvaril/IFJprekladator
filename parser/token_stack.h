@@ -5,7 +5,7 @@
 #include "../scanner/scanner.h"
 #include <stdbool.h>
 //placeholder - tohle bude v .h semantických akcí
-typedef TreePtr Exp;
+typedef Tree Exp;
 typedef struct sTokenStruct
 {
     struct sTokenStruct *prev;
@@ -39,4 +39,6 @@ sToken *searchForRule(TokenStack *stack, tID token, tID endToken);
 /* Replaces sToken with exp and delete some number of sTokens before it */
 void ReplaceWithExp(sToken *token, Exp *exp, int delete);
 
+/* Adds semicolon onto stack */
+void AddSemicolom(TokenStack *stack);
 #endif

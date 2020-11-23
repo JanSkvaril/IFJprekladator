@@ -16,7 +16,7 @@ typedef struct T
 tToken *getValue(Tree *);
 Tree *makeLeaf(tToken *);
 Tree *makeTree(Tree *, Tree *, tToken *);
-Tree *makeIfTree(Tree *, Tree *, Tree *, tToken *);
+Tree *makeIfTree(Tree *tru, Tree *cond, Tree *fals, tToken *token);
 void disposeTree(Tree *);
 
 #endif

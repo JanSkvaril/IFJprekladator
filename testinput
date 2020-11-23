@@ -1,2 +1,6 @@
-a = b * (c + d);
-f=q;
+k = c;
+if(a==b){
+    f=q;
+    t = o * o;
+}
+k = c;
