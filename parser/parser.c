@@ -115,7 +115,7 @@ Exp *Parse()
     do
     {
         tToken *token = NULL;
-        status = get_token(&token, EOL_REQ); //TODO: error handling
+        status = get_token(&token, EOL_OPT); //TODO: error handling
         if (status == RET_OK)
         {
             tsPushToken(stack, token);
