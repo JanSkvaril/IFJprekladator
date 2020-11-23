@@ -28,7 +28,7 @@ Tree *makeIfTree(Tree *true, Tree *cond, Tree *false, tToken *term)
 {
     Tree *newTree = malloc(sizeof(struct T));
     newTree->value = term;
-    newTree->LPtr =true;
+    newTree->LPtr = true;
     newTree->Condition = cond;
     newTree->RPtr = false;
     return newTree;

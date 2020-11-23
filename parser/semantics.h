@@ -8,12 +8,15 @@
 typedef struct T
 {
     tToken *value;
-    struct Tree *LPtr;
-    struct Tree *RPtr;
+    struct T *LPtr;
+    struct T *Condition;
+    struct T *RPtr;
 } Tree;
 
+tToken *getValue(Tree *);
 Tree *makeLeaf(tToken *);
 Tree *makeTree(Tree *, Tree *, tToken *);
+Tree *makeIfTree(Tree *, Tree *, Tree *, tToken *);
 void disposeTree(Tree *);
 
 #endif
