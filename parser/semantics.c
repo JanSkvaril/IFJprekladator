@@ -34,6 +34,19 @@ Tree *makeIfTree(Tree *trueTree, Tree *cond, Tree *falseTree, tToken *term)
     return newTree;
 }
 
+Tree *AddToIfTree(Tree *mainTree, Tree *minorTree)
+{
+    if(mainTree == NULL)
+    {
+        mainTree->RPtr = minorTree;
+    }
+    else
+    {
+        *AddToIfTree(mainTree->RPtr, minorTree);
+    }
+    return mainTree;
+}
+
 void disposeTree(Tree *tree)
 {
     if (tree != NULL)
