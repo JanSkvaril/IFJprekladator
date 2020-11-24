@@ -11,7 +11,7 @@
             /*printf("Expression rule found: %d\n", ID_OF_TOKEN);     */       \
             new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token); \
             ReplaceWithExp(st, new_exp, 2);                                    \
-            changed = true;                                                    \
+            return true;                                                       \
         }                                                                      \
     } while (false)
 
@@ -49,6 +49,16 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
     /* == DEFINE == */
     solve_and_replace_exp(ID_DEFINE);
     /* == CONNECT == */
+    st = searchForDoubleExp(stack);
+    if (st != NULL)
+    {
+        tToken *init_token = malloc(sizeof(tToken));
+        init_token->id = ID_SEMICOLLON;
+        new_exp = makeTree(st->exp, st->prev->exp, init_token);
+        ReplaceWithExp(st, new_exp, 1);
+        return true;
+    }
+    /* == CONNECT FOR == */
     solve_and_replace_exp(ID_SEMICOLLON);
 
     //TODO: add other rules
@@ -72,36 +82,41 @@ bool ResolveRules(TokenStack *stack)
             /* == Left Curly bracket: { ==*/
             else if (stack->top->token->id == ID_CURLY_1)
             {
-                AddSemicolom(stack);
-            }
-            /* == Left bracket: ( ==*/
-            else if (stack->top->token->id == ID_ROUND_1)
-            {
-                if (IsToken(stack->top->prev) && stack->top->prev->token->id == ID_KEY_FOR)
+                if (stack->top->prev != NULL)
                 {
-                    AddSemicolom(stack);
+                    sToken *curr = stack->top->prev;
+                    while ((IsToken(curr) && curr->token->id == ID_CURLY_1) != true)
+                    {
+                        if (IsToken(curr) && curr->token->id == ID_KEY_IF)
+                        {
+                            bool changed = true;
+                            while (changed)
+                            {
+                                changed = ResolveExpresionRules(stack, ID_KEY_IF);
+                            }
+                        }
+                        else if (IsToken(curr) && curr->token->id == ID_KEY_FOR)
+                        {
+                            bool changed = true;
+                            while (changed)
+                            {
+                                changed = ResolveExpresionRules(stack, ID_KEY_IF);
+                            }
+                        }
+                        curr = curr->prev;
+                    }
                 }
             }
             /* == Right bracket: ) == */
             else if (stack->top->token->id == ID_ROUND_2)
             {
-                sToken *curr = stack->top->prev;
+                //sToken *curr = stack->top->prev;
 
                 /* == Single Exp in bracket: (Exp) */
                 if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_ROUND_1)
                 {
                     tsPopToken(stack);          //)
                     Exp *exp = tsPopExp(stack); //exp
-                    tsPopToken(stack);          //(
-                    tsPushExp(stack, exp);
-                    changed = true;
-                }
-                /* == End of for FOR == */
-                else if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_SEMICOLLON)
-                {
-                    tsPopToken(stack);          //)
-                    Exp *exp = tsPopExp(stack); //exp
-                    tsPopToken(stack);          //;
                     tsPopToken(stack);          //(
                     tsPushExp(stack, exp);
                     changed = true;
@@ -113,34 +128,38 @@ bool ResolveRules(TokenStack *stack)
                 }
             }
             /* == Semicollon: ; == */
-            else if (stack->top->token->id == ID_SEMICOLLON)
+            else if (false && stack->top->token->id == ID_SEMICOLLON)
             {
-                changed = ResolveExpresionRules(stack, ID_SEMICOLLON);
+                changed = true;
+                while (changed)
+                {
+                    changed = ResolveExpresionRules(stack, ID_KEY_FOR);
+                }
+                //tsPopToken(stack);
             }
             /* == Right Curly bracket: } ==*/
             else if (stack->top->token->id == ID_CURLY_2)
             {
-                printf("} - replacing\n");
-                //should like this {;EXP;}
-                tsPopToken(stack);          //}
-                tsPopToken(stack);          //;
-                Exp *exp = tsPopExp(stack); //exp
-                tsPopToken(stack);          //;
-                tsPopToken(stack);          //{
-                tsPushExp(stack, exp);
-                changed = true;
-                //AddSemicolom(stack);
-
-                /* == ELSE == */
-                if (IsToken(stack->top->prev))
+                changed = ResolveExpresionRules(stack, ID_CURLY_1);
+                if (changed == false)
                 {
-                    if (stack->top->prev->token->id == ID_KEY_ELSE)
+                    printf("} - replacing\n");
+                    //should like this {EXP}
+                    tsPopToken(stack);          //}
+                    Exp *exp = tsPopExp(stack); //exp
+                    tsPopToken(stack);          //{
+                    tsPushExp(stack, exp);
+                    changed = true;
+
+                    /* == ELSE == */
+                    if (stack->top->prev != NULL && IsToken(stack->top->prev))
                     {
-                        Exp *elseExp = tsPopExp(stack);
-                        tsPopToken(stack); //else
-                        tsPopToken(stack); //;
-                        AddToIfTree(stack->top->exp, elseExp);
-                        AddSemicolom(stack);
+                        if (stack->top->prev->token->id == ID_KEY_ELSE)
+                        {
+                            Exp *elseExp = tsPopExp(stack);
+                            tsPopToken(stack); //else
+                            AddToIfTree(stack->top->exp, elseExp);
+                        }
                     }
                 }
             }
@@ -148,7 +167,7 @@ bool ResolveRules(TokenStack *stack)
         else //expreession
         {
 
-            if (!IsToken(stack->top->prev))
+            if (stack->top->prev != NULL && !IsToken(stack->top->prev))
             {
                 /* == IF ==*/
                 if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_KEY_IF)
@@ -161,7 +180,6 @@ bool ResolveRules(TokenStack *stack)
                     tsPushExp(stack, ifExp);
 
                     changed = true;
-                    AddSemicolom(stack);
                 }
                 /* == FOR == */
                 else if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_KEY_FOR)
@@ -174,7 +192,6 @@ bool ResolveRules(TokenStack *stack)
                     tsPushExp(stack, forExp);
 
                     changed = true;
-                    AddSemicolom(stack);
                 }
             }
         }
@@ -190,7 +207,6 @@ Exp *Parse()
     if (stack == NULL)
         return NULL; //TODO: rework
     tsInit(stack);
-    AddSemicolom(stack);
 
     /* == Parse == */
     printf("    == Parsing starts ==\n");
@@ -206,13 +222,12 @@ Exp *Parse()
         }
     } while (status == RET_OK);
     printf("    == Parsing finished ==\n");
+
     /* == Cleanup and return tree == */
     /* Stack should end in state: ; EXP ;   */
-    tsPopToken(stack);                 //first ;
     Exp *final_tree = tsPopExp(stack); //EXP
     printf("Root token is: ");
     print_token(final_tree->value);
-    tsPopToken(stack); //second ;
     if (stack->top == NULL)
     {
         printf("Succesfuly reduced to one Exp\n");

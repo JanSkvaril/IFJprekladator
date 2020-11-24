@@ -1,6 +1,17 @@
-k = c;
-if(a==b){
-    f=q;
-    t = o * o;
+{
+    if a == c {
+        k:=s
+    } else{
+        s:=h
+    }
+    h:=d
+    for i=b; a=r; k=t{
+        t:=d+a*d+(a*d*h+g/f)
+        t+a
+        if a == c {
+            k:=s
+        } else{
+            s:=h
+        }
+    }
 }
-k = c;

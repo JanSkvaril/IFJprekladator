@@ -41,4 +41,6 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete);
 
 /* Adds semicolon onto stack */
 void AddSemicolom(TokenStack *stack);
+
+sToken *searchForDoubleExp(TokenStack *stack);
 #endif

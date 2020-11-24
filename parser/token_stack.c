@@ -110,8 +110,23 @@ sToken *searchForRule(TokenStack *stack, tID tokenID, tID endToken)
                     current = current->prev;
             }
             else
-                return NULL; //TODO: error?
+                current = current->prev;
         }
+    }
+    return NULL;
+}
+
+sToken *searchForDoubleExp(TokenStack *stack)
+{
+    sToken *current = stack->top->prev;
+
+    if (current == NULL || current->prev == NULL)
+    {
+        return NULL;
+    }
+    if (IsToken(current) == false && IsToken(current->prev) == false)
+    {
+        return current;
     }
     return NULL;
 }
