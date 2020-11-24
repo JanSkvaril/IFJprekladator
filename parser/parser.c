@@ -65,9 +65,10 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
     return changed;
 }
 
-bool ResolveRules(TokenStack *stack)
+bool ResolveRules(TokenStack *stack, scopeStack *scope)
 {
     bool changed = false;
+    bool scopeChanged = false;
     do
     {
         changed = false;
@@ -82,11 +83,18 @@ bool ResolveRules(TokenStack *stack)
             /* == Left Curly bracket: { ==*/
             else if (stack->top->token->id == ID_CURLY_1)
             {
+                if (scopeChanged == false)
+                {
+                    ssAdd(scope);
+                    scopeChanged = true;
+                }
                 if (stack->top->prev != NULL)
                 {
                     sToken *curr = stack->top->prev;
+                    /* Try to find if or for */
                     while ((IsToken(curr) && curr->token->id == ID_CURLY_1) != true)
                     {
+                        /* IF */
                         if (IsToken(curr) && curr->token->id == ID_KEY_IF)
                         {
                             bool changed = true;
@@ -95,6 +103,7 @@ bool ResolveRules(TokenStack *stack)
                                 changed = ResolveExpresionRules(stack, ID_KEY_IF);
                             }
                         }
+                        /* FOR */
                         else if (IsToken(curr) && curr->token->id == ID_KEY_FOR)
                         {
                             bool changed = true;
@@ -161,6 +170,9 @@ bool ResolveRules(TokenStack *stack)
                             AddToIfTree(stack->top->exp, elseExp);
                         }
                     }
+
+                    /* Remove scope */
+                    ssPop(scope);
                 }
             }
         }
@@ -202,6 +214,13 @@ bool ResolveRules(TokenStack *stack)
 
 Exp *Parse()
 {
+    /* == Create scope == */
+    scopeStack *scopeS = malloc(sizeof(scopeStack));
+    if (scopeS == NULL)
+        return NULL; //TODO: rework
+    ssInit(scopeS);
+    ssAdd(scopeS);
+
     /* == Create stack == */
     TokenStack *stack = malloc(sizeof(TokenStack));
     if (stack == NULL)
@@ -218,7 +237,7 @@ Exp *Parse()
         if (status == RET_OK)
         {
             tsPushToken(stack, token);
-            ResolveRules(stack);
+            ResolveRules(stack, scopeS);
         }
     } while (status == RET_OK);
     printf("    == Parsing finished ==\n");
@@ -233,5 +252,6 @@ Exp *Parse()
         printf("Succesfuly reduced to one Exp\n");
     }
     tsDispose(stack);
+    ssDispose(scopeS);
     return final_tree;
 }
