@@ -59,7 +59,8 @@ typedef enum
 	ID_SEMICOLLON, // ;
 	ID_UNDER,	   // _
 	//parser
-	ID_FUNC_CALL
+	ID_FUNC_CALL,
+	ID_TYPE_DEF,
 } tID;
 
 //token attribute type

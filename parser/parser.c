@@ -81,6 +81,24 @@ bool ResolveRules(TokenStack *stack)
                 tsPushExp(stack, makeLeaf(tsPopToken(stack)));
                 changed = true;
             }
+            /* == TYPE DEF == */
+            else if (stack->top->token->id == ID_KEY_INT || stack->top->token->id == ID_KEY_FLOAT64 || stack->top->token->id == ID_KEY_STRING)
+            {
+                tToken *type = tsPopToken(stack);
+                Exp *leaf = makeLeaf(type);
+                if (stack->top != NULL && IsToken(stack->top) == false)
+                {
+                    tToken *typed = malloc(sizeof(tToken));
+                    if (typed == NULL)
+                        return false; //TODO: error
+                    typed->id = ID_TYPE_DEF;
+                    tsPushExp(stack, makeTree(tsPopExp(stack), leaf, typed));
+                }
+                else
+                {
+                    tsPushExp(stack, leaf);
+                }
+            }
             /* == Left Curly bracket: { ==*/
             else if (stack->top->token->id == ID_CURLY_1)
             {

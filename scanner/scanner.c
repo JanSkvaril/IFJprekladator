@@ -112,7 +112,9 @@ void print_token(tTokenPtr token)
 	case ID_FUNC_CALL:
 		printf("FUNC_CALL\n");
 		break;
-
+	case ID_TYPE_DEF:
+		printf("TYPE DEF\n");
+		break;
 	default:
 		printf("lol je to v riti\n");
 		break;
