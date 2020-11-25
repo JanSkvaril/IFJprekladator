@@ -46,6 +46,8 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
     /* =    Others   = */
     /* == WRITE == */
     solve_and_replace_exp(ID_ASSIGN);
+    /* == COMMA == */
+    solve_and_replace_exp(ID_COMMA);
     /* == DEFINE == */
     solve_and_replace_exp(ID_DEFINE);
     /* == CONNECT == */
@@ -120,6 +122,21 @@ bool ResolveRules(TokenStack *stack)
                     tsPopToken(stack);          //(
                     tsPushExp(stack, exp);
                     changed = true;
+                    /* == FUNC CALL == */
+                    if (stack->top->prev != NULL && IsToken(stack->top->prev) == false)
+                    {
+                        if (getValue(stack->top->prev->exp)->id == ID_IDENTIFIER)
+                        {
+                            printf("Detected cunction call\n");
+                            Exp *funcArgs = tsPopExp(stack);
+                            Exp *funcName = tsPopExp(stack);
+                            tToken *funcToken = malloc(sizeof(tToken));
+                            funcToken->id = ID_FUNC_CALL;
+                            if (funcToken == NULL)
+                                return false; //TODO: error?
+                            tsPushExp(stack, makeTree(funcName, funcArgs, funcToken));
+                        }
+                    }
                 }
                 else
                 {

@@ -109,6 +109,9 @@ void print_token(tTokenPtr token)
 	case ID_UNDER:
 		printf("\"_\"\n");
 		break;
+	case ID_FUNC_CALL:
+		printf("FUNC_CALL\n");
+		break;
 
 	default:
 		printf("lol je to v riti\n");
@@ -222,8 +225,8 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 	unsigned hexNum;
 
 	*token = malloc(sizeof(tToken)); //do funkce
-		if (*token == NULL)
-			scanner_free_exit(*token, INTER_ERR);
+	if (*token == NULL)
+		scanner_free_exit(*token, INTER_ERR);
 
 	while (1)
 	{
@@ -240,14 +243,14 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 				else if (isspace(c) || c == '/')
 					;
 				else
-					scanner_free_exit(*token, SYN_ERR); 
+					scanner_free_exit(*token, SYN_ERR);
 			}
 			//white space chars dont change state and are ignored
 			//new line character while eol is forbidden causes error
 			if (isspace(c))
 			{
 				if (eol == EOL_FORBID && c == '\n')
-					scanner_free_exit(*token, SYN_ERR); 
+					scanner_free_exit(*token, SYN_ERR);
 			}
 
 			//is identifier
@@ -255,7 +258,7 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 			{
 				state = IDEN_S;
 				if (str_alloc(&str))
-					scanner_free_exit(*token, INTER_ERR); 
+					scanner_free_exit(*token, INTER_ERR);
 				str_add(str, c);
 			}
 			//is identifier or underscore sign
@@ -362,7 +365,6 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 				return RET_OK;
 			}
 
-			
 			else if (c == EOF)
 			{
 				free(*token);
