@@ -1,17 +1,13 @@
 {
-    if a == c {
-        k:=s
-    } else{
-        s:=h
+    func funkce(b int) (){
+        b = 3
     }
-    h:=d
-    for i=b; a=r; k=t{
-        t:=d+a*d+(a*d*h+g/f)
-        t+a
-        if a == c {
-            k:=s
-        } else{
-            s:=h
+    func main(){
+        a := 5 + 3
+        if (a > 10){
+            a = 6
+        }else{
+            funkce(a)
         }
     }
 }

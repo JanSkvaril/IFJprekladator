@@ -82,6 +82,12 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 tsPushExp(stack, makeLeaf(tsPopToken(stack)));
                 changed = true;
             }
+            /* == LITERAL ==*/
+            else if (stack->top->token->id == ID_INT_LIT || stack->top->token->id == ID_FLOAT_LIT || stack->top->token->id == ID_STRING_LIT)
+            {
+                tsPushExp(stack, makeLeaf(tsPopToken(stack)));
+                changed = true;
+            }
             /* == TYPE DEF == */
             else if (stack->top->token->id == ID_KEY_INT || stack->top->token->id == ID_KEY_FLOAT64 || stack->top->token->id == ID_KEY_STRING)
             {
@@ -99,6 +105,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 {
                     tsPushExp(stack, leaf);
                 }
+                changed = true;
             }
             /* == Left Curly bracket: { ==*/
             else if (stack->top->token->id == ID_CURLY_1)
