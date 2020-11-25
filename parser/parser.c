@@ -96,6 +96,7 @@ bool ResolveRules(TokenStack *stack)
                             {
                                 changed = ResolveExpresionRules(stack, ID_KEY_IF);
                             }
+                            break;
                         }
                         else if (IsToken(curr) && curr->token->id == ID_KEY_FOR)
                         {
@@ -104,6 +105,7 @@ bool ResolveRules(TokenStack *stack)
                             {
                                 changed = ResolveExpresionRules(stack, ID_KEY_IF);
                             }
+                            break;
                         }
                         curr = curr->prev;
                     }
@@ -125,15 +127,30 @@ bool ResolveRules(TokenStack *stack)
                     /* == FUNC CALL == */
                     if (stack->top->prev != NULL && IsToken(stack->top->prev) == false)
                     {
-                        if (getValue(stack->top->prev->exp)->id == ID_IDENTIFIER)
+                        // if its not a function definition
+                        bool isDefinition = false;
+                        sToken *curr = stack->top->prev;
+                        while (curr != NULL && (IsToken(curr) && curr->token->id == ID_CURLY_1) != true)
                         {
-                            Exp *funcArgs = tsPopExp(stack);
-                            Exp *funcName = tsPopExp(stack);
-                            tToken *funcToken = malloc(sizeof(tToken));
-                            funcToken->id = ID_FUNC_CALL;
-                            if (funcToken == NULL)
-                                return false; //TODO: error?
-                            tsPushExp(stack, makeTree(funcName, funcArgs, funcToken));
+                            if (IsToken(curr) && curr->token->id == ID_KEY_FUNC)
+                            {
+                                isDefinition = true;
+                                break;
+                            }
+                            curr = curr->prev;
+                        }
+                        if (isDefinition == false)
+                        {
+                            if (getValue(stack->top->prev->exp)->id == ID_IDENTIFIER)
+                            {
+                                Exp *funcArgs = tsPopExp(stack);
+                                Exp *funcName = tsPopExp(stack);
+                                tToken *funcToken = malloc(sizeof(tToken));
+                                funcToken->id = ID_FUNC_CALL;
+                                if (funcToken == NULL)
+                                    return false; //TODO: error?
+                                tsPushExp(stack, makeTree(funcName, funcArgs, funcToken));
+                            }
                         }
                     }
                 }
@@ -142,14 +159,30 @@ bool ResolveRules(TokenStack *stack)
                 {
                     tsPopToken(stack);
                     tsPopToken(stack);
+                    //function call with empty brackets
                     if (IsToken(stack->top) == false && getValue(stack->top->exp)->id == ID_IDENTIFIER)
                     {
-                        Exp *funcName = tsPopExp(stack);
-                        tToken *funcToken = malloc(sizeof(tToken));
-                        funcToken->id = ID_FUNC_CALL;
-                        if (funcToken == NULL)
-                            return false; //TODO: error?
-                        tsPushExp(stack, makeTree(funcName, NULL, funcToken));
+                        // if its not a function definition
+                        bool isDefinition = false;
+                        sToken *curr = stack->top->prev;
+                        while (curr != NULL && (IsToken(curr) && curr->token->id == ID_CURLY_1) != true)
+                        {
+                            if (IsToken(curr) && curr->token->id == ID_KEY_FUNC)
+                            {
+                                isDefinition = true;
+                                break;
+                            }
+                            curr = curr->prev;
+                        }
+                        if (isDefinition == false)
+                        {
+                            Exp *funcName = tsPopExp(stack);
+                            tToken *funcToken = malloc(sizeof(tToken));
+                            funcToken->id = ID_FUNC_CALL;
+                            if (funcToken == NULL)
+                                return false; //TODO: error?
+                            tsPushExp(stack, makeTree(funcName, NULL, funcToken));
+                        }
                     }
                     changed = true;
                 }
@@ -193,6 +226,52 @@ bool ResolveRules(TokenStack *stack)
                             AddToIfTree(stack->top->exp, elseExp);
                         }
                     }
+                    /* == FUNC DEFINITION == */
+                    sToken *curr = stack->top->prev;
+                    int expCounter = 0;
+                    while (curr != NULL && (IsToken(curr) && curr->token->id == ID_CURLY_1) != true)
+                    {
+                        if (IsToken(curr) && curr->token->id == ID_KEY_FUNC)
+                        {
+                            printf("    Function definition: \n");
+                            printf("Body: ");
+                            Exp *body = tsPopExp(stack);
+
+                            Exp *ret;
+                            if (expCounter == 3)
+                            {
+                                printf("Return value: ");
+                                ret = tsPopExp(stack);
+                            }
+                            else
+                            {
+                                printf("No return value\n");
+                                ret = NULL;
+                            }
+                            Exp *args;
+                            if (expCounter == 1)
+                            {
+                                printf("No arguments\n");
+                                args = NULL;
+                            }
+                            else
+                            {
+                                printf("Arguments: ");
+                                args = tsPopExp(stack);
+                            }
+                            printf("Name: ");
+                            Exp *name = tsPopExp(stack);
+                            tToken *funcT = tsPopToken(stack);
+                            tToken *argsRetToken = malloc(sizeof(tToken));
+                            argsRetToken->id = ID_SEMICOLLON;
+                            Exp *argsRet = makeTree(args, ret, argsRetToken);
+
+                            tsPushExp(stack, makeIfTree(name, argsRet, body, funcT));
+                            break;
+                        }
+                        expCounter++;
+                        curr = curr->prev;
+                    }
                 }
             }
         }
@@ -227,7 +306,6 @@ bool ResolveRules(TokenStack *stack)
                 }
             }
         }
-
     } while (changed == true);
     return false;
 }
