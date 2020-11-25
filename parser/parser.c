@@ -2,21 +2,21 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define solve_and_replace_exp(ID_OF_TOKEN)                                     \
-    do                                                                         \
-    {                                                                          \
-        st = searchForRule(stack, ID_OF_TOKEN, endToken);                      \
-        if (st != NULL)                                                        \
-        {                                                                      \
-            /*printf("Expression rule found: %d\n", ID_OF_TOKEN);     */       \
-            new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token); \
-            ReplaceWithExp(st, new_exp, 2);                                    \
-            return true;                                                       \
-        }                                                                      \
+#define solve_and_replace_exp(ID_OF_TOKEN)                                                 \
+    do                                                                                     \
+    {                                                                                      \
+        st = searchForRule(stack, ID_OF_TOKEN, endToken);                                  \
+        if (st != NULL)                                                                    \
+        {                                                                                  \
+            /*printf("Expression rule found: %d\n", ID_OF_TOKEN);     */                   \
+            new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token, scope->top); \
+            ReplaceWithExp(st, new_exp, 2);                                                \
+            return true;                                                                   \
+        }                                                                                  \
     } while (false)
 
 /* Returns true if anything changed */
-bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
+bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
 {
     bool changed = false;
     sToken *st;
@@ -56,7 +56,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
     {
         tToken *init_token = malloc(sizeof(tToken));
         init_token->id = ID_SEMICOLLON;
-        new_exp = makeTree(st->exp, st->prev->exp, init_token);
+        new_exp = makeTree(st->exp, st->prev->exp, init_token, scope->top);
         ReplaceWithExp(st, new_exp, 1);
         return true;
     }
@@ -93,7 +93,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     if (typed == NULL)
                         return false; //TODO: error
                     typed->id = ID_TYPE_DEF;
-                    tsPushExp(stack, makeTree(tsPopExp(stack), leaf, typed));
+                    tsPushExp(stack, makeTree(tsPopExp(stack), leaf, typed, scope->top));
                 }
                 else
                 {
@@ -120,7 +120,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             bool changed = true;
                             while (changed)
                             {
-                                changed = ResolveExpresionRules(stack, ID_KEY_IF);
+                                changed = ResolveExpresionRules(stack, ID_KEY_IF, scope);
                             }
                             break;
                         }
@@ -130,7 +130,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             bool changed = true;
                             while (changed)
                             {
-                                changed = ResolveExpresionRules(stack, ID_KEY_IF);
+                                changed = ResolveExpresionRules(stack, ID_KEY_IF, scope);
                             }
                             break;
                         }
@@ -176,7 +176,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                                 funcToken->id = ID_FUNC_CALL;
                                 if (funcToken == NULL)
                                     return false; //TODO: error?
-                                tsPushExp(stack, makeTree(funcName, funcArgs, funcToken));
+                                tsPushExp(stack, makeTree(funcName, funcArgs, funcToken, scope->top));
                             }
                         }
                     }
@@ -208,7 +208,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             funcToken->id = ID_FUNC_CALL;
                             if (funcToken == NULL)
                                 return false; //TODO: error?
-                            tsPushExp(stack, makeTree(funcName, NULL, funcToken));
+                            tsPushExp(stack, makeTree(funcName, NULL, funcToken, scope->top));
                         }
                     }
                     changed = true;
@@ -216,7 +216,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 else
                 {
 
-                    changed = ResolveExpresionRules(stack, ID_ROUND_1);
+                    changed = ResolveExpresionRules(stack, ID_ROUND_1, scope);
                 }
             }
             /* == Semicollon: ; == */
@@ -225,14 +225,14 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 changed = true;
                 while (changed)
                 {
-                    changed = ResolveExpresionRules(stack, ID_KEY_FOR);
+                    changed = ResolveExpresionRules(stack, ID_KEY_FOR, scope);
                 }
                 //tsPopToken(stack);
             }
             /* == Right Curly bracket: } ==*/
             else if (stack->top->token->id == ID_CURLY_2)
             {
-                changed = ResolveExpresionRules(stack, ID_CURLY_1);
+                changed = ResolveExpresionRules(stack, ID_CURLY_1, scope);
                 if (changed == false)
                 {
                     printf("} - replacing\n");
@@ -291,7 +291,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             tToken *funcT = tsPopToken(stack);
                             tToken *argsRetToken = malloc(sizeof(tToken));
                             argsRetToken->id = ID_SEMICOLLON;
-                            Exp *argsRet = makeTree(args, ret, argsRetToken);
+                            Exp *argsRet = makeTree(args, ret, argsRetToken, scope->top);
 
                             tsPushExp(stack, makeIfTree(name, argsRet, body, funcT));
                             break;
@@ -329,7 +329,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     Exp *body = tsPopExp(stack);
                     Exp *head = tsPopExp(stack);
                     tToken *t = tsPopToken(stack);
-                    Exp *forExp = makeTree(head, body, t);
+                    Exp *forExp = makeTree(head, body, t, scope->top);
                     tsPushExp(stack, forExp);
 
                     changed = true;
