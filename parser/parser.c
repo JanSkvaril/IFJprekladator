@@ -127,7 +127,6 @@ bool ResolveRules(TokenStack *stack)
                     {
                         if (getValue(stack->top->prev->exp)->id == ID_IDENTIFIER)
                         {
-                            printf("Detected cunction call\n");
                             Exp *funcArgs = tsPopExp(stack);
                             Exp *funcName = tsPopExp(stack);
                             tToken *funcToken = malloc(sizeof(tToken));
@@ -137,6 +136,22 @@ bool ResolveRules(TokenStack *stack)
                             tsPushExp(stack, makeTree(funcName, funcArgs, funcToken));
                         }
                     }
+                }
+                /* Empty brackets */
+                else if (IsToken(stack->top->prev) && stack->top->prev->token->id == ID_ROUND_1)
+                {
+                    tsPopToken(stack);
+                    tsPopToken(stack);
+                    if (IsToken(stack->top) == false && getValue(stack->top->exp)->id == ID_IDENTIFIER)
+                    {
+                        Exp *funcName = tsPopExp(stack);
+                        tToken *funcToken = malloc(sizeof(tToken));
+                        funcToken->id = ID_FUNC_CALL;
+                        if (funcToken == NULL)
+                            return false; //TODO: error?
+                        tsPushExp(stack, makeTree(funcName, NULL, funcToken));
+                    }
+                    changed = true;
                 }
                 else
                 {
