@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../scanner/scanner.h"
+#include "scope.h"
+#include "../sym_table/sym_table.h"
 
 typedef struct T
 {
@@ -15,7 +17,7 @@ typedef struct T
 
 tToken *getValue(Tree *);
 Tree *makeLeaf(tToken *);
-Tree *makeTree(Tree *, Tree *, tToken *);
+Tree *makeTree(Tree *, Tree *, tToken *, Scope *);
 Tree *makeIfTree(Tree *tru, Tree *cond, Tree *fals, tToken *token);
 Tree *AddToIfTree(Tree *, Tree *);
 void disposeTree(Tree *);
