@@ -6,27 +6,20 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+
 #define TRUE 1
 #define FALSE 0
 typedef enum
 {
-	INT,
 	DOUBLE,
+	INT,
 	STRING
 } TYPE;
-
-union Value
-{
-	int i;
-	double f;
-	char *s;
-};
 
 typedef struct Data_struct
 {
 	TYPE type;
 	int defined;
-	union Value value;
 	int paramsNumber;
 	char params[];
 } Data;
@@ -34,7 +27,7 @@ typedef struct Data_struct
 typedef struct Node
 {
 	unsigned long Key; /* klíč */
-	Data data;		   /* užitečný obsah uzlu */
+	Data *data;		   /* užitečný obsah uzlu */
 	struct Node *LPtr; /* levý podstrom */
 	struct Node *RPtr; /* pravý podstrom */
 } * NodePtr;
