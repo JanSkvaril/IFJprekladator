@@ -16,7 +16,9 @@ compiler: $(OBJS)
 
 .PHONY: clean test deploy zip
 test:
-#todo
+	cd tests;\
+	python2 testsuite.py --compiler ../compiler;\
+	cd ..
 #creates folder deploy, copies all source files and updates includes so that everything works wow
 deploy:
 	./deploy.sh
