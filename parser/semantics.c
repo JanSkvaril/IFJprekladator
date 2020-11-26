@@ -6,7 +6,7 @@ tToken *getValue(Tree *tree)
     return tree->value;
 }
 
-void symTabDefine(Scope *scope, tToken *name, Tree *Value)
+int symTabAdd(Scope *scope, tToken *name, Tree *Value)
 {
     Data *data = malloc(sizeof(struct Data_struct));
     if (data == NULL)
@@ -19,40 +19,31 @@ void symTabDefine(Scope *scope, tToken *name, Tree *Value)
     }
     if (Value->value->id == ID_IDENTIFIER)
     {
-        Data *dataType = malloc(sizeof(struct Data_struct));
+        Data dataType;
         Search(scope->table, Value->value->att.s, &dataType);
-        data->type = (int)dataType->type;
+        data->type = dataType.type;
     }
     else
-        data->type = (int)Value->value->id - 1;
-
+        data->type = Value->value->id;
     Insert(&scope->table, name->att.s, data);
-    DEBUG_PRINT(("inserted %s, type: %d \n",name->att.s, (int)data->type));
 }
 
 tID member = ID_SEMICOLLON;
 tID nextMember = ID_SEMICOLLON;
 void assignCheck(Scope *scope, Tree *tree)
 {
-    if(tree->value->id == ID_IDENTIFIER)
+    Data data;
+    if (Search(scope->table, term->att.s, &data))
     {
-        Data *dataType = malloc(sizeof(struct Data_struct));
-        if(Search(scope->table, tree->value->att.s, &dataType))
-        { 
-            nextMember = dataType->type+1;
-            if(member!=nextMember && member != ID_SEMICOLLON)
-                parser_free_exit(3);
-            member = nextMember;
-            
-        }  
+        return TRUE;
     }
-    if(tree->value->id < 4 && tree->value->id > 0)
+    else
     {
-        nextMember = tree->value->id;
-        if(member!=nextMember && member != ID_SEMICOLLON)
-            parser_free_exit(3);
-        member = nextMember;
+        if (scope->prev != NULL)
+            identifierScopeCheck(scope->prev, term, Value);
     }
+    return FALSE;
+}
 
     
     
@@ -90,9 +81,11 @@ Tree *makeLeaf(tToken *term)
 
 Tree *makeTree(Tree *x, Tree *y, tToken *op, Scope *scope)
 {
-    //if(op->id == ID_DEFINE)
-    //symTabAdd(scope, y->value,x);
-
+    if (op->id == ID_DEFINE)
+        symTabAdd(scope, x->value, y);
+    //if(op->id == ID_ASSIGN)
+    //identifierScopeCheck(scope,x, y);
+    //if(identifierCheck(scope))
     Tree *newTree = malloc(sizeof(struct T));
     newTree->value = op;
     newTree->LPtr = x;
@@ -165,4 +158,10 @@ void disposeTree(Tree *tree)
         free(tree);
         tree = NULL;
     }
+}
+
+void CheckTypes(Tree *tree)
+{
+    printf("Type check started\n");
+    //tutaj pisaj
 }

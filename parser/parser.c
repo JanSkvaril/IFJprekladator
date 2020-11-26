@@ -471,5 +471,6 @@ Exp *Parse()
     CheckTypes(final_tree, scopeStack);
     ssDispose(scopeStack);
 
+    CheckTypes(final_tree);
     return final_tree;
 }
