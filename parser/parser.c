@@ -242,6 +242,14 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 changed = ResolveExpresionRules(stack, ID_CURLY_1, scope);
                 if (changed == false)
                 {
+                    if (stack->top == NULL || stack->top->prev == NULL || stack->top->prev->prev == NULL)
+                    {
+                        return false; //TODO: error
+                    }
+                    else if ((IsToken(stack->top->prev) == false && IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_CURLY_1) == false)
+                    {
+                        return false; //TODO: error
+                    }
                     printf("} - replacing\n");
                     //should like this {EXP}
                     tsPopToken(stack);          //}
@@ -361,7 +369,11 @@ Exp *Parse()
     if (stack == NULL)
         return NULL; //TODO: rework
     tsInit(stack);
-
+    tToken *oBracker = malloc(sizeof(oBracker));
+    oBracker->id = ID_CURLY_1;
+    tToken *oBracker2 = malloc(sizeof(oBracker));
+    oBracker2->id = ID_CURLY_2;
+    tsPushToken(stack, oBracker);
     /* == Parse == */
     printf("    == Parsing starts ==\n");
     tTokenRet status;
@@ -375,10 +387,18 @@ Exp *Parse()
             ResolveRules(stack, scopeS);
         }
     } while (status == RET_OK);
-    printf("    == Parsing finished ==\n");
+    //add ending brackert
+    tsPushToken(stack, oBracker2);
+    ResolveRules(stack, scopeS);
 
+    printf("    == Parsing finished ==\n");
     /* == Cleanup and return tree == */
     /* Stack should end in state: ; EXP ;   */
+    if (stack->top == NULL || IsToken(stack->top))
+    {
+        printf("!! Error durring parsing !! \n");
+        return NULL; //TODO: Error
+    }
     Exp *final_tree = tsPopExp(stack); //EXP
     printf("Root token is: ");
     print_token(final_tree->value);
