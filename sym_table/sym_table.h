@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-
 #define TRUE 1
 #define FALSE 0
 typedef enum
