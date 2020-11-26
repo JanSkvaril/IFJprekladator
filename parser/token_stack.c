@@ -130,6 +130,28 @@ sToken *searchForDoubleExp(TokenStack *stack)
     }
     return NULL;
 }
+sToken *searchForDualRule(TokenStack *stack, tID tokenID, tID endToken)
+{
+    sToken *current = stack->top->prev;
+    while (1)
+    {
+        if (current == NULL || current->prev == NULL)
+            return NULL;
+        if (IsToken(current))
+        {
+            if (current->token->id == endToken)
+                return NULL;
+        }
+        else
+        {
+            if (IsToken(current->prev) && current->prev->token->id == tokenID)
+            {
+                return current;
+            }
+        }
+        current = current->prev;
+    }
+}
 
 void ReplaceWithExp(sToken *token, Exp *exp, int delete)
 {

@@ -43,4 +43,5 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete);
 void AddSemicolom(TokenStack *stack);
 
 sToken *searchForDoubleExp(TokenStack *stack);
+sToken *searchForDualRule(TokenStack *stack, tID tokenID, tID endToken);
 #endif

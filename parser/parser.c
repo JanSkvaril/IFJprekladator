@@ -50,6 +50,26 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
     solve_and_replace_exp(ID_COMMA);
     /* == DEFINE == */
     solve_and_replace_exp(ID_DEFINE);
+    /* == RETURN == */
+    st = searchForDualRule(stack, ID_KEY_RETURN, endToken);
+    if (st != NULL)
+    {
+        tToken *init_token = malloc(sizeof(tToken));
+        init_token->id = ID_KEY_RETURN;
+        new_exp = makeTree(st->exp, NULL, init_token, scope->top);
+        ReplaceWithExp(st, new_exp, 1);
+        return true;
+    }
+    /* == PACKAGE == */
+    st = searchForDualRule(stack, ID_KEY_PACKAGE, endToken);
+    if (st != NULL)
+    {
+        tToken *init_token = malloc(sizeof(tToken));
+        init_token->id = ID_KEY_PACKAGE;
+        new_exp = makeTree(st->exp, NULL, init_token, scope->top);
+        ReplaceWithExp(st, new_exp, 1);
+        return true;
+    }
     /* == CONNECT == */
     st = searchForDoubleExp(stack);
     if (st != NULL)
