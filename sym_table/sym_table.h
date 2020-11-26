@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-
 #define TRUE 1
 #define FALSE 0
 typedef enum
@@ -35,7 +34,7 @@ typedef struct Node
 /* prototypy funkcí */
 
 void Init(NodePtr *);
-int Search(NodePtr, char *, Data *);
+int Search(NodePtr, char *, Data **);
 void Insert(NodePtr *, char *, Data *);
 void Delete(NodePtr *, char *);
 void Dispose(NodePtr *);
