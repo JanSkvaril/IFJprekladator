@@ -388,5 +388,6 @@ Exp *Parse()
     }
     tsDispose(stack);
     ssDispose(scopeS);
+    CheckTypes(final_tree);
     return final_tree;
 }
