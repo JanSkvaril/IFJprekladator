@@ -1,6 +1,4 @@
 {
-    i := a+b+c
-    j := e+m*n
-    p := e+m+n+e+m*n
-    s := e-n
+    a:=5
+    b:=a
 }

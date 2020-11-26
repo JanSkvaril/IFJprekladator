@@ -428,6 +428,15 @@ Exp *Parse()
     }
     tsDispose(stack);
     ssDispose(scopeS);
-    CheckTypes(final_tree);
+
+    scopeStack *scopeStack = malloc(sizeof(scopeStack));
+    if (scopeStack == NULL)
+        return NULL;
+    ssInit(scopeStack);
+    printf("Type check started\n");
+    ssAdd(scopeStack);
+    CheckTypes(final_tree, scopeStack);
+    ssDispose(scopeStack);
+
     return final_tree;
 }
