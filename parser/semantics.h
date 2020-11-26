@@ -22,5 +22,5 @@ Tree *makeTree(Tree *, Tree *, tToken *, Scope *);
 Tree *makeIfTree(Tree *tru, Tree *cond, Tree *fals, tToken *token);
 Tree *AddToIfTree(Tree *, Tree *);
 void disposeTree(Tree *);
-void CheckTypes(Tree *tree);
+void CheckTypes(Tree *, scopeStack *);
 #endif

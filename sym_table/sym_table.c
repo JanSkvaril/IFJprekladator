@@ -34,9 +34,12 @@ int BSTSearch(NodePtr RootPtr, unsigned long K, Data **Content)
 	//printf("key is: %ld", RootPtr->Key);
 	if (RootPtr->Key == K)
 	{
-		*Content = RootPtr->data;
-		return TRUE;
+		Content = RootPtr->data;
+		printf("searched type in search: %d \n", (int)RootPtr->data->type);
+		printf("searched type in search: %d \n", (int)RootPtr->data->type);
+    	return TRUE;
 	}
+
 
 	if (RootPtr->Key < K)
 		return BSTSearch(RootPtr->RPtr, K, Content);
@@ -66,10 +69,11 @@ void BSTInsert(NodePtr *RootPtr, unsigned long K, Data *Content)
 		new->RPtr = NULL;
 		new->LPtr = NULL;
 		(*RootPtr) = new;
-	}
+		printf("inserted type: %d \n",(int)Content->type);
+	} 
 	else
 	{
-		if (K == (*RootPtr)->Key)
+		if(K == (*RootPtr)->Key)
 			(*RootPtr)->data = Content;
 		else if (K < (*RootPtr)->Key)
 			BSTInsert(&(*RootPtr)->LPtr, K, Content);
@@ -163,7 +167,7 @@ void Insert(NodePtr *RootPtr, char *k, Data *Content)
 {
 	if (k == NULL)
 		return;
-
+	
 	unsigned long key = hash(k);
 	BSTInsert(RootPtr, key, Content);
 }
