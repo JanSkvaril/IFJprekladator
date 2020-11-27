@@ -88,5 +88,8 @@ tTokenRet get_token(tTokenPtr *, tEolFlag);
 //printf conviniently token id and its attribute
 //note that if ret value of get_token is not zero, the token data is undefined
 void print_token(tTokenPtr);
+int is_token(tTokenPtr);
+char* is_token_lit(tTokenPtr);
+char* is_token_add(tTokenPtr, char *name, char *name2);
 
 #endif

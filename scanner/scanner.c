@@ -121,6 +121,173 @@ void print_token(tTokenPtr token)
 	}
 }
 
+
+int is_token(tTokenPtr token)
+{
+	switch (token->id)
+	{
+	case ID_IDENTIFIER:
+		return ID_IDENTIFIER;
+		break;
+	case ID_INT_LIT:
+		return ID_INT_LIT;
+		break;
+	case ID_FLOAT_LIT:
+		return ID_FLOAT_LIT;
+		break;
+	case ID_STRING_LIT:
+		return ID_STRING_LIT;
+		break;
+	case ID_KEY_INT:
+		return ID_KEY_INT;
+		break;
+	case ID_KEY_FLOAT64:
+		return ID_KEY_FLOAT64;
+		break;
+	case ID_KEY_STRING:
+		return ID_KEY_STRING;
+		break;
+	case ID_KEY_FUNC:
+		return ID_KEY_FUNC;
+		break;
+	case ID_KEY_RETURN:
+		return ID_KEY_RETURN;
+		break;
+	case ID_KEY_PACKAGE:
+		return ID_KEY_PACKAGE;
+		break;
+	case ID_KEY_IF:
+		return ID_KEY_IF;
+		break;
+	case ID_KEY_ELSE:
+		return ID_KEY_ELSE;
+		break;
+	case ID_KEY_FOR:
+		return ID_KEY_FOR;
+		break;
+	case ID_ROUND_1:
+		return ID_ROUND_1;
+		break;
+	case ID_ROUND_2:
+		return ID_ROUND_2;
+		break;
+	case ID_CURLY_1:
+		return ID_CURLY_1;
+		break;
+	case ID_CURLY_2:
+		return ID_CURLY_2;
+		break;
+	case ID_ADD:
+		return ID_ADD;
+		break;
+	case ID_SUB:
+		return ID_SUB;
+		break;
+	case ID_MULT:
+		return ID_MULT;
+		break;
+	case ID_DIV:
+		return ID_DIV;
+		break;
+	case ID_EQ:
+		return ID_EQ;
+		break;
+	case ID_NEQ:
+		return ID_NEQ;
+		break;
+	case ID_LESS:
+		return ID_LESS;
+		break;
+	case ID_GREATER:
+		return ID_GREATER;
+		break;
+	case ID_LESS_EQ:
+		return ID_LESS_EQ;
+		break;
+	case ID_GREATER_EQ:
+		return ID_GREATER_EQ;
+		break;
+	case ID_DEFINE:
+		return ID_DEFINE;
+		break;
+	case ID_ASSIGN:
+		return ID_ASSIGN;
+		break;
+	case ID_COMMA:
+		return ID_COMMA;
+		break;
+	case ID_SEMICOLLON:
+		return ID_SEMICOLLON;
+		break;
+	case ID_UNDER:
+		return ID_UNDER;
+		break;
+
+	default:
+		return 0;
+		printf("lol je to v riti\n");
+		break;
+	}
+}
+
+char* is_token_lit(tTokenPtr token)
+{
+	switch (token->id)
+	{
+	case ID_IDENTIFIER:
+		return token->att.s;
+		break;
+
+	case ID_INT_LIT:
+			return (char *)(token->att.i);
+
+		break;
+
+	default:
+		//token->id = ID_IDENTIFIER;
+		//token->att.s = "yip";
+		return NULL;
+		printf("lol je to v riti\n");
+		break;
+	}
+
+}
+
+char* is_token_add(tTokenPtr token, char *name, char *name2)
+{
+		char *array = NULL;
+
+		array = (malloc((char) *name2));
+		strcat(array, name);
+		strcat(array, name2);
+
+		switch (token->id)
+		{
+		case ID_IDENTIFIER:
+			token->id = ID_IDENTIFIER;
+			token->att.s = array;
+						//printf("bbbbb\n");
+			return token->att.s;
+			break;
+
+		case ID_INT_LIT:
+				token->id = ID_INT_LIT;
+				token->att.i = (int) *array;
+				return (char *)(token->att.i);
+			break;
+
+		default:
+			token->id = ID_IDENTIFIER;
+			token->att.s = array;
+			//printf("aaaaa\n");
+			return token->att.s;
+
+			break;
+		}
+
+
+}
+
 int str_alloc(char **str)
 {
 	*str = malloc(256 * sizeof(char));
