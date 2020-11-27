@@ -1,13 +1,6 @@
 {
-    func funkce(b int) (){
-        b = 3
-    }
-    func main(){
-        a := 5 + 3
-        if (a > 10){
-            a = 6
-        }else{
-            funkce(a)
-        }
-    }
+    i := a+b+c
+    j := e+m*n
+    p := e+m+n+e+m*n
+    s := e-n
 }
