@@ -35,8 +35,6 @@ int BSTSearch(NodePtr RootPtr, unsigned long K, Data **Content)
 	if (RootPtr->Key == K)
 	{
 		*Content = RootPtr->data;
-		printf("searched type in search: %d \n", (int)RootPtr->data->type);
-		printf("searched type in search: %d \n", (int)RootPtr->data->type);
 		return TRUE;
 	}
 
@@ -68,7 +66,6 @@ void BSTInsert(NodePtr *RootPtr, unsigned long K, Data *Content)
 		new->RPtr = NULL;
 		new->LPtr = NULL;
 		(*RootPtr) = new;
-		printf("inserted type: %d \n", (int)Content->type);
 	}
 	else
 	{

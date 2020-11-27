@@ -17,64 +17,66 @@ void symTabDefine(Scope *scope, tToken *name, Tree *Value)
     {
         Value = Value->LPtr;
     }
-    if (Value->value->id == 0)
+    if (Value->value->id == ID_IDENTIFIER)
     {
         Data *dataType = malloc(sizeof(struct Data_struct));
-
-        printf("searched: %d \n", Search(scope->table, Value->value->att.s, &dataType));
+        Search(scope->table, Value->value->att.s, &dataType);
         data->type = (int)dataType->type;
-        printf("searched type: %d \n", (int)data->type);
     }
     else
         data->type = (int)Value->value->id - 1;
 
     Insert(&scope->table, name->att.s, data);
-    //printf("inserted %s ",name->att.s);
-    //printf(", type: %d \n", (int)data->type);
-}
-
-int getTreeType(Scope *scope, Tree *tree, tID treeType)
-{
-    if (tree->LPtr != NULL)
-    {
-        if (tree->LPtr->value->id == ID_IDENTIFIER)
-        {
-            Data dataType;
-            Search(scope->table, tree->value->att.s, &dataType);
-            //data->type = dataType.type;
-            //data->value = dataType.value;
-        }
-        else if (tree->value->id != tree->LPtr->value->id)
-            return FALSE;
-        getTreeType(scope, tree->LPtr, treeType);
-    }
-    if (tree->RPtr != NULL)
-    {
-
-        getTreeType(scope, tree->RPtr, treeType);
-    }
+    printf("inserted %s, type: %d \n",name->att.s, (int)data->type);
 }
 
 tID member = ID_SEMICOLLON;
 tID nextMember = ID_SEMICOLLON;
 void assignCheck(Scope *scope, Tree *tree)
 {
-    Data data;
-    if (Search(scope->table, term->att.s, &data))
+    if(tree->value->id == ID_IDENTIFIER)
     {
-        return TRUE;
+        Data *dataType = malloc(sizeof(struct Data_struct));
+        if(Search(scope->table, tree->value->att.s, &dataType))
+        { 
+            nextMember = dataType->type+1;
+            if(member!=nextMember && member != ID_SEMICOLLON)
+                parser_free_exit(3);
+            member = nextMember;
+            
+        }  
     }
-    else
+    if(tree->value->id < 4 && tree->value->id > 0)
     {
-        if (scope->prev != NULL)
-            identifierScopeCheck(scope->prev, term, Value);
+        nextMember = tree->value->id;
+        if(member!=nextMember && member != ID_SEMICOLLON)
+            parser_free_exit(3);
+        member = nextMember;
     }
-    return FALSE;
+
+    
+    
+    if(tree->LPtr == NULL)
+        return;
+    if(tree->RPtr == NULL)
+        return;
+
+    assignCheck(scope,tree->LPtr);
+    assignCheck(scope,tree->RPtr);
 }
 
-//int identifierValueCheck(Scope *scope, Tree *Value)
-//{
-//}
+void identifierScopeCheck(Scope *scope, tToken *term)
+{
+    Data *dataType = malloc(sizeof(struct Data_struct));
+    if (!Search(scope->table, term->att.s, &dataType))
+    {
+        if (scope->prev != NULL)
+            identifierScopeCheck(scope->prev, term);
+        else
+            parser_free_exit(3);
+    }
+}
+
 
 void identifierScopeCheck(Scope *scope, tToken *term)
 {
@@ -136,15 +138,31 @@ Tree *AddToIfTree(Tree *mainTree, Tree *minorTree)
 
 void CheckTypes(Tree *tree, scopeStack *scopeS)
 {
-    //printf("Type check started\n");
     //tutaj pisaj
     if (tree != NULL)
     {
-        //ssAdd(scopeS);
+        if(tree->value->id == ID_KEY_IF || tree->value->id == ID_KEY_FOR || tree->value->id == ID_KEY_FUNC || tree->value->id == ID_KEY_ELSE)
+            ssAdd(scopeS);
+
+        //if(tree->value->id == ID_IDENTIFIER)
+            //identifierScopeCheck(scopeS->top, tree->value); //not done yet
 
         if (tree->value->id == ID_DEFINE)
+        {
+            assignCheck(scopeS->top, tree);
             symTabDefine(scopeS->top, tree->RPtr->value, tree->LPtr);
-
+            member = ID_SEMICOLLON;
+            nextMember = ID_SEMICOLLON;
+        }
+        
+        if(tree->value->id == ID_ASSIGN)
+        {
+            assignCheck(scopeS->top, tree);
+            printf("type is alright\n");
+            member = ID_SEMICOLLON;
+            nextMember = ID_SEMICOLLON;
+        }        
+            
         CheckTypes(tree->RPtr, scopeS);
         CheckTypes(tree->Condition, scopeS);
         CheckTypes(tree->LPtr, scopeS);
