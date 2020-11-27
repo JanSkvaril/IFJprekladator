@@ -5,7 +5,7 @@
 int main()
 {
 	//Parse();
-	printf("Program compiled! yay\n");
+	//printf("Program compiled! yay\n");
 
 
 	//Exp *Exp = Parse();
@@ -14,9 +14,9 @@ int main()
 	Exp *exp = Parse();
 	Exp *root = NULL;
 	root = exp;
-	printf("----------Generator start ----------\n");
+	//printf("----------Generator start ----------\n");
 	generator(exp, root);
-	printf("------------Generator exit!---------\n");
+	//printf("------------Generator exit!---------\n");
 
 
 

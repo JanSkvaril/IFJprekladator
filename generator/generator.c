@@ -2,7 +2,7 @@
 
 void gen_code(tTokenPtr token, Exp *exp) {
 
-  printf("---------- start gen ----------\n");
+  //printf("---------- start gen ----------\n");
   int type = is_token(token);
   char *a;
 
@@ -107,7 +107,7 @@ void gen_code(tTokenPtr token, Exp *exp) {
       break;
   }
 
-  printf("---------- stop gen ----------\n");
+  //printf("---------- stop gen ----------\n");
 }
 
 
