@@ -10,8 +10,8 @@
 #define FALSE 0
 typedef enum
 {
-	DOUBLE,
 	INT,
+	FLOAT,
 	STRING
 } TYPE;
 
