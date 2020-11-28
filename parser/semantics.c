@@ -7,6 +7,10 @@ tToken *getValue(Tree *tree)
 
 void symTabDefine(Scope *scope, tToken *name, Tree *Value)
 {
+    Data *dataType = malloc(sizeof(struct Data_struct));
+    if(Search(scope->table, name->att.s, &dataType))
+        parser_free_exit(3);
+
     Data *data = malloc(sizeof(struct Data_struct));
     if (data == NULL)
         return;
@@ -18,7 +22,6 @@ void symTabDefine(Scope *scope, tToken *name, Tree *Value)
     }
     if (Value->value->id == ID_IDENTIFIER)
     {
-        Data *dataType = malloc(sizeof(struct Data_struct));
         Search(scope->table, Value->value->att.s, &dataType);
         data->type = (int)dataType->type;
     }
@@ -31,27 +34,32 @@ void symTabDefine(Scope *scope, tToken *name, Tree *Value)
 
 tID member = ID_SEMICOLLON;
 tID nextMember = ID_SEMICOLLON;
-void assignCheck(Scope *scope, Tree *tree)
+void checkMembersType(tID value, int error)
+{
+    nextMember = value;
+    if(member!=nextMember && member != ID_SEMICOLLON)
+        parser_free_exit(error);
+    member = nextMember;
+}
+
+void assignCheck(Scope *scope, Tree *tree, tID action)
 {
     if(tree->value->id == ID_IDENTIFIER)
     {
+        
         Data *dataType = malloc(sizeof(struct Data_struct));
         if(Search(scope->table, tree->value->att.s, &dataType))
-        { 
-            nextMember = dataType->type+1;
-            if(member!=nextMember && member != ID_SEMICOLLON)
-                parser_free_exit(3);
-            member = nextMember;
+            checkMembersType(dataType->type+1, 3);
             
-        }  
+        else if(action == ID_ASSIGN)
+            identifierScopeCheck(scope, tree->value);
+            
+        
     }
-    if(tree->value->id < 4 && tree->value->id > 0)
-    {
-        nextMember = tree->value->id;
-        if(member!=nextMember && member != ID_SEMICOLLON)
-            parser_free_exit(3);
-        member = nextMember;
-    }
+    if(tree->value->id < 4 && tree->value->id > 0 && action == ID_ASSIGN)
+        checkMembersType(tree->value->id, 5);
+    else if(tree->value->id < 4 && tree->value->id > 0 && action == ID_DEFINE)
+        checkMembersType(tree->value->id, 4);
 
     
     
@@ -60,8 +68,8 @@ void assignCheck(Scope *scope, Tree *tree)
     if(tree->RPtr == NULL)
         return;
 
-    assignCheck(scope,tree->LPtr);
-    assignCheck(scope,tree->RPtr);
+    assignCheck(scope,tree->LPtr, action);
+    assignCheck(scope,tree->RPtr, action);
 }
 
 void identifierScopeCheck(Scope *scope, tToken *term)
@@ -73,7 +81,9 @@ void identifierScopeCheck(Scope *scope, tToken *term)
             identifierScopeCheck(scope->prev, term);
         else
             parser_free_exit(3);
-    }
+            
+    } else
+        checkMembersType(dataType->type+1, 4);    
 }
 
 
@@ -122,20 +132,24 @@ Tree *AddToIfTree(Tree *mainTree, Tree *minorTree)
     return mainTree;
 }
 
+int checkScopeIds(tID id)
+{
+    if(id == ID_KEY_IF || id == ID_KEY_FOR || id == ID_KEY_FUNC || id == ID_KEY_ELSE)
+        return TRUE;
+    return FALSE;
+}
+
 void CheckTypes(Tree *tree, scopeStack *scopeS)
 {
     //tutaj pisaj
     if (tree != NULL)
     {
-        if(tree->value->id == ID_KEY_IF || tree->value->id == ID_KEY_FOR || tree->value->id == ID_KEY_FUNC || tree->value->id == ID_KEY_ELSE)
-            ssAdd(scopeS);
-
-        //if(tree->value->id == ID_IDENTIFIER)
-            //identifierScopeCheck(scopeS->top, tree->value); //not done yet
+        if(tree->value->id == ID_DIV && tree->LPtr->value->att.i == 0)
+            parser_free_exit(9);
 
         if (tree->value->id == ID_DEFINE)
         {
-            assignCheck(scopeS->top, tree);
+            assignCheck(scopeS->top, tree, ID_DEFINE);
             symTabDefine(scopeS->top, tree->RPtr->value, tree->LPtr);
             member = ID_SEMICOLLON;
             nextMember = ID_SEMICOLLON;
@@ -143,15 +157,28 @@ void CheckTypes(Tree *tree, scopeStack *scopeS)
         
         if(tree->value->id == ID_ASSIGN)
         {
-            assignCheck(scopeS->top, tree);
-            printf("type is alright\n");
+            assignCheck(scopeS->top, tree, ID_ASSIGN);
             member = ID_SEMICOLLON;
             nextMember = ID_SEMICOLLON;
         }        
-            
+        
+        if(checkScopeIds(tree->value->id))
+            ssAdd(scopeS);
+        
         CheckTypes(tree->RPtr, scopeS);
+
+        if(checkScopeIds(tree->value->id))
+            ssPop(scopeS);
+
         CheckTypes(tree->Condition, scopeS);
+
+        if(checkScopeIds(tree->value->id))
+            ssAdd(scopeS);
+
         CheckTypes(tree->LPtr, scopeS);
+
+        if(checkScopeIds(tree->value->id))
+            ssPop(scopeS);
     }
 }
 
