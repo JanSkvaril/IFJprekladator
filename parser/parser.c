@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "../debug.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -8,7 +9,7 @@
         st = searchForRule(stack, ID_OF_TOKEN, endToken);                                  \
         if (st != NULL)                                                                    \
         {                                                                                  \
-            /*printf("Expression rule found: %d\n", ID_OF_TOKEN);     */                   \
+            /*DEBUG_PRINT(("Expression rule found: %d\n", ID_OF_TOKEN));*/                 \
             new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token, scope->top); \
             ReplaceWithExp(st, new_exp, 2);                                                \
             return true;                                                                   \
@@ -270,7 +271,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     {
                         return false; //TODO: error
                     }
-                    printf("} - replacing\n");
+                    DEBUG_PRINT(("} - replacing\n"));
                     //should like this {EXP}
                     tsPopToken(stack);          //}
                     Exp *exp = tsPopExp(stack); //exp
@@ -295,33 +296,33 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     {
                         if (IsToken(curr) && curr->token->id == ID_KEY_FUNC)
                         {
-                            printf("    Function definition: \n");
-                            printf("Body: ");
+                            DEBUG_PRINT(("    Function definition: \n"));
+                            DEBUG_PRINT(("Body: "));
                             Exp *body = tsPopExp(stack);
 
                             Exp *ret;
                             if (expCounter == 3)
                             {
-                                printf("Return value: ");
+                                DEBUG_PRINT(("Return value: "));
                                 ret = tsPopExp(stack);
                             }
                             else
                             {
-                                printf("No return value\n");
+                                DEBUG_PRINT(("No return value\n"));
                                 ret = NULL;
                             }
                             Exp *args;
                             if (expCounter == 1)
                             {
-                                printf("No arguments\n");
+                                DEBUG_PRINT(("No arguments\n"));
                                 args = NULL;
                             }
                             else
                             {
-                                printf("Arguments: ");
+                                DEBUG_PRINT(("Arguments: "));
                                 args = tsPopExp(stack);
                             }
-                            printf("Name: ");
+                            DEBUG_PRINT(("Name: "));
                             Exp *name = tsPopExp(stack);
                             tToken *funcT = tsPopToken(stack);
                             tToken *argsRetToken = malloc(sizeof(tToken));
@@ -348,7 +349,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 /* == IF ==*/
                 if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_KEY_IF)
                 {
-                    printf("Parsing if\n");
+                    DEBUG_PRINT(("Parsing if\n"));
                     Exp *trueExp = tsPopExp(stack);
                     Exp *condExp = tsPopExp(stack);
                     tToken *t = tsPopToken(stack);
@@ -360,7 +361,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 /* == FOR == */
                 else if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_KEY_FOR)
                 {
-                    printf("Parsing for\n");
+                    DEBUG_PRINT(("Parsing for\n"));
                     Exp *body = tsPopExp(stack);
                     Exp *head = tsPopExp(stack);
                     tToken *t = tsPopToken(stack);
@@ -395,7 +396,7 @@ Exp *Parse()
     oBracker2->id = ID_CURLY_2;
     tsPushToken(stack, oBracker);
     /* == Parse == */
-    printf("    == Parsing starts ==\n");
+    DEBUG_PRINT(("    == Parsing starts ==\n"));
     tTokenRet status;
     do
     {
@@ -411,20 +412,20 @@ Exp *Parse()
     tsPushToken(stack, oBracker2);
     ResolveRules(stack, scopeS);
 
-    printf("    == Parsing finished ==\n");
+    DEBUG_PRINT(("    == Parsing finished ==\n"));
     /* == Cleanup and return tree == */
     /* Stack should end in state: ; EXP ;   */
     if (stack->top == NULL || IsToken(stack->top))
     {
-        printf("!! Error durring parsing !! \n");
+        DEBUG_PRINT(("!! Error durring parsing !! \n"));
         return NULL; //TODO: Error
     }
     Exp *final_tree = tsPopExp(stack); //EXP
-    printf("Root token is: ");
+    DEBUG_PRINT(("Root token is: "));
     print_token(final_tree->value);
     if (stack->top == NULL)
     {
-        printf("Succesfuly reduced to one Exp\n");
+        DEBUG_PRINT(("Succesfuly reduced to one Exp\n"));
     }
     tsDispose(stack);
     ssDispose(scopeS);
@@ -433,7 +434,7 @@ Exp *Parse()
     if (scopeStack == NULL)
         return NULL;
     ssInit(scopeStack);
-    printf("Type check started\n");
+    DEBUG_PRINT(("Type check started\n"));
     ssAdd(scopeStack);
     CheckTypes(final_tree, scopeStack);
     ssDispose(scopeStack);

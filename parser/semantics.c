@@ -1,4 +1,5 @@
 #include "semantics.h"
+#include "../debug.h"
 
 tToken *getValue(Tree *tree)
 {
@@ -26,7 +27,7 @@ void symTabDefine(Scope *scope, tToken *name, Tree *Value)
         data->type = (int)Value->value->id - 1;
 
     Insert(&scope->table, name->att.s, data);
-    printf("inserted %s, type: %d \n",name->att.s, (int)data->type);
+    DEBUG_PRINT(("inserted %s, type: %d \n",name->att.s, (int)data->type));
 }
 
 tID member = ID_SEMICOLLON;
@@ -144,7 +145,7 @@ void CheckTypes(Tree *tree, scopeStack *scopeS)
         if(tree->value->id == ID_ASSIGN)
         {
             assignCheck(scopeS->top, tree);
-            printf("type is alright\n");
+            DEBUG_PRINT(("type is alright\n"));
             member = ID_SEMICOLLON;
             nextMember = ID_SEMICOLLON;
         }        

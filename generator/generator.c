@@ -1,8 +1,9 @@
 #include "generator.h"
+#include "../debug.h"
 
 void gen_code(tTokenPtr token, Exp *exp) {
 
-  printf("---------- start gen ----------\n");
+  DEBUG_PRINT(("---------- start gen ----------\n"));
   int type = is_token(token);
   char *a;
 
@@ -107,7 +108,7 @@ void gen_code(tTokenPtr token, Exp *exp) {
       break;
   }
 
-  printf("---------- stop gen ----------\n");
+  DEBUG_PRINT(("---------- stop gen ----------\n"));
 }
 
 
@@ -241,7 +242,7 @@ void generator(Exp *exp, Exp *root)
 
   }
   else {
-    printf("EXIT 0\n");
+    DEBUG_PRINT(("EXIT 0\n"));
     //printf("--else--\n");
     exit(0);
 
