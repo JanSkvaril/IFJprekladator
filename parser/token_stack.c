@@ -9,6 +9,10 @@ void tsInit(TokenStack *stack)
 
 void tsPushToken(TokenStack *stack, tToken *token)
 {
+    if (token == NULL)
+    {
+        parser_free_exit(SYN_ERR);
+    }
     sToken *new_token = malloc(sizeof(sToken));
     if (new_token == NULL)
         return; //TODO: rework!!
@@ -22,6 +26,10 @@ void tsPushToken(TokenStack *stack, tToken *token)
 
 void tsPushExp(TokenStack *stack, Exp *exp)
 {
+    if (exp == NULL)
+    {
+        parser_free_exit(SYN_ERR);
+    }
     sToken *new_token = malloc(sizeof(sToken));
     if (new_token == NULL)
         return; //TODO: rework!!
@@ -36,7 +44,13 @@ void tsPushExp(TokenStack *stack, Exp *exp)
 tToken *tsPopToken(TokenStack *stack)
 {
     if (stack->top == NULL)
-        return NULL;
+    {
+        parser_free_exit(SYN_ERR);
+    }
+    if (stack->top->token == NULL)
+    {
+        parser_free_exit(SYN_ERR);
+    }
     tToken *token = stack->top->token;
     sToken *deleted = stack->top;
     stack->top = deleted->prev;
@@ -49,7 +63,13 @@ tToken *tsPopToken(TokenStack *stack)
 Exp *tsPopExp(TokenStack *stack)
 {
     if (stack->top == NULL)
-        return NULL;
+    {
+        parser_free_exit(SYN_ERR);
+    }
+    if (stack->top->exp == NULL)
+    {
+        parser_free_exit(SYN_ERR);
+    }
     Exp *token = stack->top->exp;
     sToken *deleted = stack->top;
     stack->top = deleted->prev;
@@ -169,7 +189,7 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete)
         }
     }
     else
-        return; //TODO: error?
+        parser_free_exit(SYN_ERR);
 }
 
 void AddSemicolom(TokenStack *stack)

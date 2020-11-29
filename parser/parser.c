@@ -260,16 +260,28 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
             /* == Right Curly bracket: } ==*/
             else if (stack->top->token->id == ID_CURLY_2)
             {
+                //empty
+                if (stack->top->prev != NULL && IsToken(stack->top->prev) && stack->top->prev->token->id == ID_CURLY_1)
+                {
+                    tToken *bracket = tsPopToken(stack);
+
+                    tToken *init_token = malloc(sizeof(tToken));
+                    init_token->id = ID_SEMICOLLON;
+                    //adds empty exp to bracket so function, if and for rules work corretly
+                    tsPushExp(stack, makeTree(NULL, NULL, init_token, NULL));
+                    tsPushToken(stack, bracket);
+                }
+                //not empty
                 changed = ResolveExpresionRules(stack, ID_CURLY_1, scope);
                 if (changed == false)
                 {
                     if (stack->top == NULL || stack->top->prev == NULL || stack->top->prev->prev == NULL)
                     {
-                        return false; //TODO: error
+                        parser_free_exit(SYN_ERR);
                     }
                     else if ((IsToken(stack->top->prev) == false && IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_CURLY_1) == false)
                     {
-                        return false; //TODO: error
+                        parser_free_exit(SYN_ERR);
                     }
                     DEBUG_PRINT(("} - replacing\n"));
                     //should like this {EXP}
@@ -401,7 +413,7 @@ Exp *Parse()
     do
     {
         tToken *token = NULL;
-        status = get_token(&token, EOL_OPT); //TODO: error handling
+        status = get_token(&token, EOL_OPT);
         if (status == RET_OK)
         {
             tsPushToken(stack, token);
@@ -418,7 +430,7 @@ Exp *Parse()
     if (stack->top == NULL || IsToken(stack->top))
     {
         DEBUG_PRINT(("!! Error durring parsing !! \n"));
-        return NULL; //TODO: Error
+        parser_free_exit(SYN_ERR);
     }
     Exp *final_tree = tsPopExp(stack); //EXP
     DEBUG_PRINT(("Root token is: "));

@@ -3,6 +3,7 @@
 
 #include "./semantics.h"
 #include "../scanner/scanner.h"
+#include "../error/error.h"
 #include <stdbool.h>
 //placeholder - tohle bude v .h semantických akcí
 typedef Tree Exp;
