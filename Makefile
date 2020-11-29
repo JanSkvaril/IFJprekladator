@@ -2,17 +2,20 @@
 # Team 115
 
 CC = gcc
-CFLAGS = -g -Wall -pedantic -Wextra
-LDFLAGS=-lm
+all: CFLAGS = -g -Wall -pedantic -Wextra
+debug: CFLAGS = -g -Wall -pedantic -Wextra -DDEBUG
+
+LDFLAGS	=-lm
 
 SRC_DIRS = scanner parser generator error sym_table
 SRCS = $(shell find $(SRC_DIRS) -name "*.c")
 SRCS += main.c
 OBJS = $(addsuffix .o,$(basename $(SRCS)))
 
+all: compiler
+debug: compiler
 compiler: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
-
 
 .PHONY: clean test deploy zip
 test:
@@ -26,4 +29,4 @@ zip:
 	zip -r -j xzavad18.zip deploy
 clean:
 	find -name "*.o" -delete
-	rm -r -f compiler
+	rm -r -f compiler compiler_dbg

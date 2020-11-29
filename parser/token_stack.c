@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include "../debug.h"
 #include "token_stack.h"
 void tsInit(TokenStack *stack)
 {
@@ -16,7 +16,7 @@ void tsPushToken(TokenStack *stack, tToken *token)
     new_token->token = token;
     new_token->exp = NULL;
     stack->top = new_token;
-    printf("Adding token to stack: ");
+    DEBUG_PRINT(("Adding token to stack: "));
     print_token(token);
 }
 
@@ -28,7 +28,7 @@ void tsPushExp(TokenStack *stack, Exp *exp)
     new_token->prev = stack->top;
     new_token->exp = exp;
     new_token->token = NULL;
-    printf("Adding exp to stack:");
+    DEBUG_PRINT(("Adding exp to stack:"));
     print_token(exp->value);
     stack->top = new_token;
 }
@@ -40,7 +40,7 @@ tToken *tsPopToken(TokenStack *stack)
     tToken *token = stack->top->token;
     sToken *deleted = stack->top;
     stack->top = deleted->prev;
-    printf("Poping token: ");
+    DEBUG_PRINT(("Poping token: "));
     print_token(token);
     free(deleted);
     return token;
@@ -53,7 +53,7 @@ Exp *tsPopExp(TokenStack *stack)
     Exp *token = stack->top->exp;
     sToken *deleted = stack->top;
     stack->top = deleted->prev;
-    printf("Poping Exp: ");
+    DEBUG_PRINT(("Poping Exp: "));
     free(deleted);
     print_token(token->value);
     return token;
@@ -158,7 +158,7 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete)
     if (IsToken(token) == false)
     {
         token->exp = exp;
-        printf("Replacing with exp: ");
+        DEBUG_PRINT(("Replacing with exp: "));
         print_token(token->exp->value);
         sToken *prev = token->prev;
         for (int i = 1; i <= delete; i++)

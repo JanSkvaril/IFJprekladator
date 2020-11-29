@@ -1,24 +1,17 @@
 #include "./parser/parser.h"
 #include "./generator/generator.h"
-
+#include "debug.h"
+#include "error.h"
 #include <stdio.h>
 int main()
 {
 	//Parse();
-	printf("Program compiled! yay\n");
-
-
 	//Exp *Exp = Parse();
-
-
 	Exp *exp = Parse();
 	Exp *root = NULL;
 	root = exp;
-	printf("----------Generator start ----------\n");
+	DEBUG_PRINT(("----------Generator start ----------\n"));
 	generator(exp, root);
-	printf("------------Generator exit!---------\n");
-
-
-
+	DEBUG_PRINT(("------------Generator exit!---------\n"));
 	return 0;
 }
