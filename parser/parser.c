@@ -16,6 +16,8 @@
         }                                                                                  \
     } while (false)
 
+#define replace_return
+
 /* Returns true if anything changed */
 bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
 {
@@ -51,7 +53,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
     solve_and_replace_exp(ID_COMMA);
     /* == DEFINE == */
     solve_and_replace_exp(ID_DEFINE);
-    /* == RETURN == */
+    /* == RETURN VAL == */
     st = searchForDualRule(stack, ID_KEY_RETURN, endToken);
     if (st != NULL)
     {
@@ -71,6 +73,24 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
         ReplaceWithExp(st, new_exp, 1);
         return true;
     }
+    /* == ONLY RETURN == */
+    sToken *curr = stack->top->prev;
+    while ((IsToken(curr) && curr->token->id == endToken) == false)
+    {
+        if (IsToken(curr) && curr->token->id == ID_KEY_RETURN)
+        {
+            DEBUG_PRINT(("Replacing return without value\n"));
+            tToken *init_token = malloc(sizeof(tToken));
+            init_token->id = ID_KEY_RETURN;
+            free(curr->token);
+            curr->token = NULL;
+            new_exp = makeTree(NULL, NULL, init_token, scope->top);
+            curr->exp = new_exp;
+            return true;
+        }
+        curr = curr->prev;
+    }
+
     /* == CONNECT == */
     st = searchForDoubleExp(stack);
     if (st != NULL)

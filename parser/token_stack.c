@@ -82,7 +82,7 @@ Exp *tsPopExp(TokenStack *stack)
 bool IsToken(sToken *token)
 {
     if (token == NULL)
-        return false;
+        parser_free_exit(SYN_ERR);
     return token->token != NULL;
 }
 
