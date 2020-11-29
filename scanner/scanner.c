@@ -775,6 +775,8 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 		case BLOCK_COMMENT_S:
 			if (c == '*')
 				state = BLOCK_COMMENT_END_S;
+			else if (c == EOF)
+				scanner_free_exit(*token, LEX_ERR);
 			break;
 		case BLOCK_COMMENT_END_S:
 			if (c == '/')
