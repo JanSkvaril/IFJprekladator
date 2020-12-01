@@ -42,6 +42,7 @@ void checkMembersType(tID value, int error)
     member = nextMember;
 }
 
+int right = 0;
 void assignCheck(Scope *scope, Tree *tree, tID action)
 {
     if(tree->value->id == ID_IDENTIFIER)
@@ -51,12 +52,14 @@ void assignCheck(Scope *scope, Tree *tree, tID action)
         if(Search(scope->table, tree->value->att.s, &dataType))
             checkMembersType(dataType->type+1, 3);
             
-        else if(action == ID_ASSIGN)
+        else if(action == ID_ASSIGN || action == ID_EQ)
+            identifierScopeCheck(scope, tree->value);
+        else if(action == ID_DEFINE && right == 0)
             identifierScopeCheck(scope, tree->value);
             
         
     }
-    if(tree->value->id < 4 && tree->value->id > 0 && action == ID_ASSIGN)
+    if(tree->value->id < 4 && tree->value->id > 0 && action == ID_ASSIGN || tree->value->id < 4 && tree->value->id > 0 && action == ID_EQ)
         checkMembersType(tree->value->id, 5);
     else if(tree->value->id < 4 && tree->value->id > 0 && action == ID_DEFINE)
         checkMembersType(tree->value->id, 4);
@@ -68,8 +71,11 @@ void assignCheck(Scope *scope, Tree *tree, tID action)
     if(tree->RPtr == NULL)
         return;
 
+    
     assignCheck(scope,tree->LPtr, action);
+    right++;
     assignCheck(scope,tree->RPtr, action);
+    right--;
 }
 
 void identifierScopeCheck(Scope *scope, tToken *term)
@@ -139,6 +145,13 @@ int checkScopeIds(tID id)
     return FALSE;
 }
 
+int checkRelationIds(tID id)
+{
+    if(id == ID_EQ || id == ID_NEQ || id == ID_LESS || id == ID_GREATER || id == ID_LESS_EQ || id == ID_GREATER_EQ)
+        return TRUE;
+    return FALSE;
+}
+
 void CheckTypes(Tree *tree, scopeStack *scopeS)
 {
     //tutaj pisaj
@@ -146,6 +159,9 @@ void CheckTypes(Tree *tree, scopeStack *scopeS)
     {
         if(tree->value->id == ID_DIV && tree->LPtr->value->att.i == 0)
             parser_free_exit(9);
+
+        if(checkRelationIds(tree->value->id))
+            assignCheck(scopeS->top, tree, ID_EQ);
 
         if (tree->value->id == ID_DEFINE)
         {
