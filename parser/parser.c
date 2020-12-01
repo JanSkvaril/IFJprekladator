@@ -117,6 +117,16 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 }
                 if (stack->top->prev != NULL)
                 {
+                    if (IsToken(stack->top->prev) && (stack->top->prev->token->id == ID_SEMICOLLON))
+                    {
+                        tToken *bracket = tsPopToken(stack);
+                        tToken *empty = malloc(sizeof(tToken));
+                        empty->id = ID_SEMICOLLON;
+                        Exp *emptyExp = makeTree(NULL, NULL, empty, NULL);
+                        tsPushExp(stack, emptyExp);
+                        tsPushToken(stack, bracket);
+                        changed = true;
+                    }
                     sToken *curr = stack->top->prev;
                     /* Try to find if or for */
                     while ((IsToken(curr) && curr->token->id == ID_CURLY_1) != true)
@@ -227,12 +237,17 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 }
             }
             /* == Semicollon: ; == */
-            else if (false && stack->top->token->id == ID_SEMICOLLON)
+            else if (stack->top->token->id == ID_SEMICOLLON)
             {
-                changed = true;
-                while (changed)
+                if (IsToken(stack->top->prev) && (stack->top->prev->token->id == ID_KEY_FOR || stack->top->prev->token->id == ID_SEMICOLLON))
                 {
-                    changed = ResolveExpresionRules(stack, ID_KEY_FOR, scope);
+                    tToken *semicol = tsPopToken(stack);
+                    tToken *empty = malloc(sizeof(tToken));
+                    empty->id = ID_SEMICOLLON;
+                    Exp *emptyExp = makeTree(NULL, NULL, empty, NULL);
+                    tsPushExp(stack, emptyExp);
+                    tsPushToken(stack, semicol);
+                    changed = true;
                 }
                 //tsPopToken(stack);
             }
