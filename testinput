@@ -1,12 +1,16 @@
 {
-    b:=2
-    b=2/2
+    a:=3.2
+    b:=2 + a
     func funkce(b int) (){
         b = b
     }
     func main(){
         a := 5 + 3+2
         a=b
+    }
+    if(a>x)
+    {
+        c:=3
     }
 }
 >>>>>>> Added type validation
