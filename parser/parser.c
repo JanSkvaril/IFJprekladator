@@ -351,7 +351,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     Exp *body = tsPopExp(stack);
                     Exp *head = tsPopExp(stack);
                     tToken *t = tsPopToken(stack);
-                    Exp *forExp = makeTree(head, body, t, scope->top);
+                    Exp *forExp = makeTree(body, head, t, scope->top);
                     tsPushExp(stack, forExp);
 
                     changed = true;
@@ -411,7 +411,9 @@ Exp *Parse()
     printf("Type check started\n");
     ssAdd(scopeStack);
     CheckTypes(final_tree, scopeStack);
+    printf("Type check alright\n");
     ssDispose(scopeStack);
+    free(scopeStack);
 
     return final_tree;
 }
