@@ -7,8 +7,10 @@
         f:=2
         i = 2
     }
+    i = 3
     //c = 2
     //b = 3.4
     //f = 2
+    tohle_hodi_error = 1212
 }
->>>>>>> Added type validation
+

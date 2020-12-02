@@ -77,6 +77,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
     sToken *curr = stack->top->prev;
     while ((IsToken(curr) && curr->token->id == endToken) == false)
     {
+
         if (IsToken(curr) && curr->token->id == ID_KEY_RETURN)
         {
             DEBUG_PRINT(("Replacing return without value\n"));
@@ -90,7 +91,6 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
         }
         curr = curr->prev;
     }
-
     /* == CONNECT == */
     st = searchForDoubleExp(stack);
     if (st != NULL)
@@ -101,6 +101,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
         ReplaceWithExp(st, new_exp, 1);
         return true;
     }
+
     /* == CONNECT FOR == */
     solve_and_replace_exp(ID_SEMICOLLON);
 
@@ -188,7 +189,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             bool changed = true;
                             while (changed)
                             {
-                                changed = ResolveExpresionRules(stack, ID_KEY_IF, scope);
+                                changed = ResolveExpresionRules(stack, ID_KEY_FOR, scope);
                             }
                             break;
                         }
@@ -487,7 +488,5 @@ Exp *Parse()
     printf("Type check alright\n");
     ssDispose(scopeStack);
     free(scopeStack);
-
-    CheckTypes(final_tree);
     return final_tree;
 }
