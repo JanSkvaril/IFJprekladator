@@ -1,6 +1,16 @@
 #include "semantics.h"
 #include "../debug.h"
 
+tID member = ID_SEMICOLLON;
+tID nextMember = ID_SEMICOLLON;
+int right = 0;
+
+void membersDel()
+{
+    member = ID_SEMICOLLON;
+    nextMember = ID_SEMICOLLON;
+}
+
 tToken *getValue(Tree *tree)
 {
     return tree->value;
@@ -29,36 +39,34 @@ void symTabDefine(Scope *scope, tToken *name, Tree *Value)
     else
         data->type = (int)Value->value->id - 1;
 
+    
     Insert(&scope->table, name->att.s, data);
-    printf("inserted %s, type: %d \n",name->att.s, (int)data->type);
+    printf("inserted %s, type: %d, scope: %ld \n",name->att.s, (int)data->type,scope->table->Key);
+    free(dataType);
 }
 
-tID member = ID_SEMICOLLON;
-tID nextMember = ID_SEMICOLLON;
+
 void checkMembersType(tID value, int error)
 {
     nextMember = value;
     if(member!=nextMember && member != ID_SEMICOLLON)
         parser_free_exit(error);
+
     member = nextMember;
 }
 
-int right = 0;
 void assignCheck(Scope *scope, Tree *tree, tID action)
 {
     if(tree->value->id == ID_IDENTIFIER)
     {
-        
         Data *dataType = malloc(sizeof(struct Data_struct));
+
         if(Search(scope->table, tree->value->att.s, &dataType))
             checkMembersType(dataType->type+1, 3);
-            
         else if(action == ID_ASSIGN || action == ID_EQ)
             identifierScopeCheck(scope, tree->value);
         else if(action == ID_DEFINE && right == 0)
-            identifierScopeCheck(scope, tree->value);
-            
-        
+            identifierScopeCheck(scope, tree->value);    
     }
     if(tree->value->id < 4 && tree->value->id > 0 && action == ID_ASSIGN || tree->value->id < 4 && tree->value->id > 0 && action == ID_EQ)
         checkMembersType(tree->value->id, 5);
@@ -154,7 +162,7 @@ Tree *AddToIfTree(Tree *mainTree, Tree *minorTree)
 
 int checkScopeIds(tID id)
 {
-    if(id == ID_KEY_IF || id == ID_KEY_FOR || id == ID_KEY_FUNC || id == ID_KEY_ELSE)
+    if(id == ID_KEY_IF || id == ID_KEY_FUNC || id == ID_KEY_ELSE)
         return TRUE;
     return FALSE;
 }
@@ -175,24 +183,25 @@ void CheckTypes(Tree *tree, scopeStack *scopeS)
             parser_free_exit(9);
 
         if(checkRelationIds(tree->value->id))
+        {
             assignCheck(scopeS->top, tree, ID_EQ);
-
+            membersDel();
+        }
+            
         if (tree->value->id == ID_DEFINE)
         {
             assignCheck(scopeS->top, tree, ID_DEFINE);
             symTabDefine(scopeS->top, tree->RPtr->value, tree->LPtr);
-            member = ID_SEMICOLLON;
-            nextMember = ID_SEMICOLLON;
+            membersDel();
         }
         
         if(tree->value->id == ID_ASSIGN)
         {
             assignCheck(scopeS->top, tree, ID_ASSIGN);
-            member = ID_SEMICOLLON;
-            nextMember = ID_SEMICOLLON;
+            membersDel();
         }        
         
-        if(checkScopeIds(tree->value->id))
+        if(checkScopeIds(tree->value->id) || tree->value->id == ID_KEY_FOR)
             ssAdd(scopeS);
         
         CheckTypes(tree->RPtr, scopeS);
@@ -207,7 +216,7 @@ void CheckTypes(Tree *tree, scopeStack *scopeS)
 
         CheckTypes(tree->LPtr, scopeS);
 
-        if(checkScopeIds(tree->value->id))
+        if(checkScopeIds(tree->value->id) || tree->value->id == ID_KEY_FOR)
             ssPop(scopeS);
     }
 }
