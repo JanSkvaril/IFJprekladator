@@ -1,15 +1,8 @@
 {
-<<<<<<< Updated upstream
-    i := a+b+c
-    j := e+m*n
-    p := e+m+n+e+m*n
-    s := e-n
-=======
   a = x/b
   l := a-b
   h = 1+b*((3*q)-1)+4*r
   s = "hoj"
   s := 1.6
 
->>>>>>> Stashed changes
 }

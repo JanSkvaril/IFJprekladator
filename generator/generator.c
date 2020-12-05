@@ -1,65 +1,6 @@
 #include "generator.h"
+#include "../debug.h"
 
-<<<<<<< Updated upstream
-void gen_code(tTokenPtr token, Exp *exp) {
-
-  //printf("---------- start gen ----------\n");
-  int type = is_token(token);
-  char *a;
-
-  switch (type) {
-    case ID_ADD:
-    a = is_token_add(exp->value, is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    printf("DEFVAR GF@%s\n", a);
-
-    printf("ADD GF@%s GF@%s GF@%s\n", a, is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    //printf("ADD\n");
-    break;
-
-    case ID_SUB:
-    a = is_token_add(exp->value, is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    printf("DEFVAR GF@%s\n", a);
-
-    printf("SUB GF@%s GF@%s GF@%s\n", a, is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    //printf("SUB\n");
-    break;
-
-    case ID_MULT:
-
-    a = is_token_add(exp->value, is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    printf("DEFVAR GF@%s\n", a);
-
-    printf("MUL GF@%s GF@%s GF@%s\n", a, is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    //printf("MULT\n");
-    break;
-
-    case ID_DIV:
-    a = is_token_add(exp->value, is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    printf("DEFVAR GF@%s\n", a);
-
-    printf("DIV GF@%s GF@%s GF@%s\n", a,is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    //printf("DIV\n");
-    break;
-
-    case ID_DEFINE:
-    a = is_token_add(exp->value, is_token_lit(exp->LPtr->value), is_token_lit(exp->RPtr->value));
-    printf("DEFVAR GF@%s\n", a);
-
-    printf("MOVE GF@%s GF@%s\n", a, is_token_lit(exp->LPtr->value));
-
-    printf("WRITE %s\n", a);
-    //printf("MOVE\n");
-    break;
-
-    case ID_KEY_IF:
-
-    //todo
-
-    printf("JUMPIFEQ else%s GF@b GF@b\n", is_token_lit(exp->value));
-
-    printf("JUMP if&end%s\n", is_token_lit(exp->RPtr->value));
-    printf("LABEL else%s\n", is_token_lit(exp->RPtr->value));
-=======
 int inFunction = 0;
 int inMain = 0;
 char isMain[] = "main";
@@ -101,7 +42,6 @@ char *buffer;
 //   	break;
 //   }
 // }
->>>>>>> Stashed changes
 
 void gen_code(tTokenPtr token, Exp *exp) {
 
@@ -433,11 +373,7 @@ void gen_code(tTokenPtr token, Exp *exp) {
 		break;
 	}
 
-<<<<<<< Updated upstream
-  //printf("---------- stop gen ----------\n");
-=======
 	DEBUG_PRINT(("---------- stop gen ----------\n"));
->>>>>>> Stashed changes
 }
 
 
@@ -650,14 +586,6 @@ void generator(Exp *exp, Exp *root)
 
 
 
-<<<<<<< Updated upstream
-  }
-  else {
-    printf("EXIT 0\n");
-    //printf("--else--\n");
-    exit(0);
-=======
->>>>>>> Stashed changes
 
 
 

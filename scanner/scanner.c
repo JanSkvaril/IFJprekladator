@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "scanner.h"
 #include "../error/error.h"
+#include "../debug.h"
 
 static int strIter;
 static int strSize;
@@ -14,109 +15,109 @@ void print_token(tTokenPtr token)
 	switch (token->id)
 	{
 	case ID_IDENTIFIER:
-		printf("type: identifier, name: %s\n", token->att.s);
+		DEBUG_PRINT(("type: identifier, name: %s\n", token->att.s));
 		break;
 	case ID_INT_LIT:
-		printf("type: int literal, value: %ld\n", token->att.i);
+		DEBUG_PRINT(("type: int literal, value: %ld\n", token->att.i));
 		break;
 	case ID_FLOAT_LIT:
-		printf("type: float literal, value: %.16lf\n", token->att.d);
+		DEBUG_PRINT(("type: float literal, value: %.16lf\n", token->att.d));
 		break;
 	case ID_STRING_LIT:
-		printf("type: string literal, value: >%s<\n", token->att.s);
+		DEBUG_PRINT(("type: string literal, value: >%s<\n", token->att.s));
 		break;
 	case ID_KEY_INT:
-		printf("int (keyword)\n");
+		DEBUG_PRINT(("int (keyword)\n"));
 		break;
 	case ID_KEY_FLOAT64:
-		printf("float64 (keyword)\n");
+		DEBUG_PRINT(("float64 (keyword)\n"));
 		break;
 	case ID_KEY_STRING:
-		printf("string (keyword)\n");
+		DEBUG_PRINT(("string (keyword)\n"));
 		break;
 	case ID_KEY_FUNC:
-		printf("func (keyword)\n");
+		DEBUG_PRINT(("func (keyword)\n"));
 		break;
 	case ID_KEY_RETURN:
-		printf("return (keyword)\n");
+		DEBUG_PRINT(("return (keyword)\n"));
 		break;
 	case ID_KEY_PACKAGE:
-		printf("package (keyword)\n");
+		DEBUG_PRINT(("package (keyword)\n"));
 		break;
 	case ID_KEY_IF:
-		printf("if (keyword)\n");
+		DEBUG_PRINT(("if (keyword)\n"));
 		break;
 	case ID_KEY_ELSE:
-		printf("else (keyword)\n");
+		DEBUG_PRINT(("else (keyword)\n"));
 		break;
 	case ID_KEY_FOR:
-		printf("for (keyword)\n");
+		DEBUG_PRINT(("for (keyword)\n"));
 		break;
 	case ID_ROUND_1:
-		printf("\"(\"\n");
+		DEBUG_PRINT(("\"(\"\n"));
 		break;
 	case ID_ROUND_2:
-		printf("\")\"\n");
+		DEBUG_PRINT(("\")\"\n"));
 		break;
 	case ID_CURLY_1:
-		printf("\"{\"\n");
+		DEBUG_PRINT(("\"{\"\n"));
 		break;
 	case ID_CURLY_2:
-		printf("\"}\"\n");
+		DEBUG_PRINT(("\"}\"\n"));
 		break;
 	case ID_ADD:
-		printf("\"+\"\n");
+		DEBUG_PRINT(("\"+\"\n"));
 		break;
 	case ID_SUB:
-		printf("\"-\"\n");
+		DEBUG_PRINT(("\"-\"\n"));
 		break;
 	case ID_MULT:
-		printf("\"*\"\n");
+		DEBUG_PRINT(("\"*\"\n"));
 		break;
 	case ID_DIV:
-		printf("\"/\"\n");
+		DEBUG_PRINT(("\"/\"\n"));
 		break;
 	case ID_EQ:
-		printf("\"==\"\n");
+		DEBUG_PRINT(("\"==\"\n"));
 		break;
 	case ID_NEQ:
-		printf("\"!=\"\n");
+		DEBUG_PRINT(("\"!=\"\n"));
 		break;
 	case ID_LESS:
-		printf("\"<\"\n");
+		DEBUG_PRINT(("\"<\"\n"));
 		break;
 	case ID_GREATER:
-		printf("\">\"\n");
+		DEBUG_PRINT(("\">\"\n"));
 		break;
 	case ID_LESS_EQ:
-		printf("\"<=\"\n");
+		DEBUG_PRINT(("\"<=\"\n"));
 		break;
 	case ID_GREATER_EQ:
-		printf("\">=\"\n");
+		DEBUG_PRINT(("\">=\"\n"));
 		break;
 	case ID_DEFINE:
-		printf("\":=\"\n");
+		DEBUG_PRINT(("\":=\"\n"));
 		break;
 	case ID_ASSIGN:
-		printf("\"=\"\n");
+		DEBUG_PRINT(("\"=\"\n"));
 		break;
 	case ID_COMMA:
-		printf("\",\"\n");
+		DEBUG_PRINT(("\",\"\n"));
 		break;
 	case ID_SEMICOLLON:
-		printf("\";\"\n");
+		DEBUG_PRINT(("\";\"\n"));
 		break;
 	case ID_UNDER:
-		printf("\"_\"\n");
+		DEBUG_PRINT(("\"_\"\n"));
 		break;
 	case ID_FUNC_CALL:
-		printf("FUNC_CALL\n");
+		DEBUG_PRINT(("FUNC_CALL\n"));
 		break;
 	case ID_TYPE_DEF:
-		printf("TYPE DEF\n");
+		DEBUG_PRINT(("TYPE DEF\n"));
 		break;
 	default:
-		printf("lol je to v riti\n");
+		DEBUG_PRINT(("lol je to v riti\n"));
 		break;
 	}
 }
@@ -784,6 +785,8 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 		case BLOCK_COMMENT_S:
 			if (c == '*')
 				state = BLOCK_COMMENT_END_S;
+			else if (c == EOF)
+				scanner_free_exit(*token, LEX_ERR);
 			break;
 		case BLOCK_COMMENT_END_S:
 			if (c == '/')
