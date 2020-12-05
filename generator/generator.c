@@ -514,118 +514,36 @@ void syntax(Exp *exp, Exp *root)
 	}
 }
 
+void process_func(Exp *exp, Exp *root)
+{
+	if (exp != NULL)
+	{
+		if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
+			syntax(exp, root);
+			exp = root;
+		}
+	process_func(exp->LPtr, root);
+	process_func(exp->Condition, root);
+	process_func(exp->RPtr, root);
+	}
+}
 
 void generator(Exp *exp, Exp *root)
 {
 	root = exp;
-
-
-
-	if (exp->value->id == ID_SEMICOLLON) {
-
-		// // verify: is package?
-		// if (exp->RPtr->value->id) == ID_KEY_PACKAGE) {
-		// 	exp = exp->LPtr;
-		// 	DEBUG_PRINT(("- package found! -\n"));
-		// 	generator(exp, root);
-		// }
-		// else
-		// {
-		//   // set label - if main
-		//   if (!strcmp((exp->RPtr->LPtr->value->att.s), isMain)) {
-		//     printf("LABEL %s\n", exp->RPtr->LPtr->value->att.s);
-		//   }
-		//   else
-		//   {
-		//     printf("LABEL %s\n", isMain);
-		//     printf("\n");
-		//     printf("LABEL %s\n", exp->RPtr->LPtr->value->att.s);
-		//   }
-		//
-		// }
-
-		if (exp->RPtr->value->id == ID_DEFINE || exp->RPtr->value->id == ID_ASSIGN) {
-			exp = exp->RPtr;
-			syntax(exp, exp);
-			exp = root;
-			//print_token(exp->value);
-			generator(exp, root);
-		}
-
-		if (exp->LPtr->value->id == ID_DEFINE || exp->LPtr->value->id == ID_ASSIGN) {
+	if (exp->value->id == ID_SEMICOLLON){
+		printf("LABEL $%s", exp->LPtr->value->att.s);
+		process_func(exp->RPtr, root);
+		if (exp->LPtr != NULL)
 			exp = exp->LPtr;
-			syntax(exp, exp);
-			exp = root;
-			//print_token(exp->value);
-			generator(exp, root);
-		}
-
-		exp = exp->LPtr;
 		generator(exp, root);
 
 
 	}
-	else if (exp->value->id == ID_KEY_FUNC) {
-		DEBUG_PRINT(("---------- here here ----------\n"));
-		printf("LABEL %s\n", exp->value->att.s);
-		printf("CREATEFRAME\n");
-
-
+	else if (exp->value->id == ID_KEY_FUNC)
+	{
+		printf("LABEL $%s\n", exp->LPtr->value->att.s);
+		process_func(exp->RPtr, root);
 	}
-	else if (exp->value->id == ID_KEY_RETURN) {
-		printf("POPFRAME\n");
-		printf("RETURN\n");
-
-	}
-	else if (exp->value->id == ID_FUNC_CALL) {
-
-	}
-	else if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
-		syntax(exp, exp);
-		exp = root;
-		//print_token(exp->value);
-		generator(exp, root);
-	}
-	else if (exp->value->id == ID_KEY_IF) {
-
-
-
-
-		if (exp->Condition->value->id == ID_LESS) {
-			printf("LT");
-		}
-		else if (exp->Condition->value->id == ID_LESS_EQ) {
-			printf("LT");
-		}
-		else if (exp->Condition->value->id == ID_GREATER) {
-			printf("GT");
-		}
-		else if (exp->Condition->value->id == ID_GREATER_EQ) {
-			printf("GT");
-		}
-		else if (exp->Condition->value->id == ID_EQ) {
-			printf("EQ");
-		}
-		else if (exp->Condition->value->id == ID_NEQ) {
-			printf("EQ");
-		}
-
-
-		if (exp->LPtr->value->id) {
-			DEBUG_PRINT(("---------- if true----------\n"));
-		}
-		else if (exp->RPtr->value->id) {
-			DEBUG_PRINT(("---------- if false ----------\n"));
-
-		}
-
-		DEBUG_PRINT(("---------- here if ----------\n"));
-	}
-
-
-
-
-
-
-
+	return;
 }

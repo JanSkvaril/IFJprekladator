@@ -40,9 +40,10 @@ int main()
 	Exp *root = NULL;
 	root = exp;
 
-
+	#ifdef DEBUG
 	int spaces_num = 0;
 	print_tree(exp, spaces_num);
+	#endif
 
 	DEBUG_PRINT(("----------Generator start ----------\n"));
 	// print_token(exp->value);
@@ -55,7 +56,7 @@ int main()
 	// 	print_token(exp->Condition->RPtr->value);
 	//DEBUG_PRINT(("----\n"));
 	//print_token(exp->RPtr->RPtr->value);
-	generator(exp, root);
+	generator(exp->LPtr, root);
 	DEBUG_PRINT(("------------Generator exit!---------\n"));
 	return 0;
 }
