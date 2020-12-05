@@ -13,7 +13,7 @@ void print_tree(Exp *exp, int spaces_num)
 		for (int i = 0; i < spaces_num; i++)
 			printf("      ");
 		printf("Cond->  ");
-		print_tree(exp->Condition, spaces_num);		
+		print_tree(exp->Condition, spaces_num);
 	}
 	if (exp->RPtr != NULL)
 	{
@@ -45,14 +45,14 @@ int main()
 	print_tree(exp, spaces_num);
 
 	DEBUG_PRINT(("----------Generator start ----------\n"));
-	print_token(exp->value);
-	// DEBUG_PRINT(("----\n"));
-	print_token(exp->LPtr->value);
-	print_token(exp->RPtr->value);
-	DEBUG_PRINT(("---------- if true----------\n"));
-		print_token(exp->Condition->value);
-	print_token(exp->Condition->LPtr->value);
-		print_token(exp->Condition->RPtr->value);
+	// print_token(exp->value);
+	// // DEBUG_PRINT(("----\n"));
+	// print_token(exp->LPtr->value);
+	// print_token(exp->RPtr->value);
+	// DEBUG_PRINT(("---------- if true----------\n"));
+	// 	print_token(exp->Condition->value);
+	// print_token(exp->Condition->LPtr->value);
+	// 	print_token(exp->Condition->RPtr->value);
 	//DEBUG_PRINT(("----\n"));
 	//print_token(exp->RPtr->RPtr->value);
 	generator(exp, root);
