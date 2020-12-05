@@ -522,9 +522,9 @@ void process_func(Exp *exp, Exp *root)
 			syntax(exp, root);
 			exp = root;
 		}
-	process_func(exp->LPtr, root);
-	process_func(exp->Condition, root);
-	process_func(exp->RPtr, root);
+	process_func(exp->RPtr, exp->RPtr);
+	process_func(exp->Condition, exp->Condition);
+	process_func(exp->LPtr, exp->LPtr);
 	}
 }
 
@@ -533,7 +533,7 @@ void generator(Exp *exp, Exp *root)
 	root = exp;
 	if (exp->value->id == ID_SEMICOLLON){
 		printf("LABEL $%s", exp->LPtr->value->att.s);
-		process_func(exp->RPtr, root);
+		process_func(exp->RPtr, exp->RPtr);
 		if (exp->LPtr != NULL)
 			exp = exp->LPtr;
 		generator(exp, root);
@@ -543,7 +543,7 @@ void generator(Exp *exp, Exp *root)
 	else if (exp->value->id == ID_KEY_FUNC)
 	{
 		printf("LABEL $%s\n", exp->LPtr->value->att.s);
-		process_func(exp->RPtr, root);
+		process_func(exp->RPtr, exp->RPtr);
 	}
 	return;
 }
