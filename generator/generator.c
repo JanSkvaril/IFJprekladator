@@ -27,7 +27,7 @@ char *buffer;
 //   switch (type) {
 //   case ID_IDENTIFIER:
 //
-//     return snprintf((char *)token->att.s, 128, (char *)"TF@%s");
+//     return snprintf((char *)token->att.s, 128, (char *)"LF@%s");
 //     break;
 //   case ID_INT_LIT:
 //     return("int@%ld", (char *)token->att.i);
@@ -46,7 +46,6 @@ char *buffer;
 
 void gen_code(Exp *exp) {
 
-	DEBUG_PRINT(("---------- start gen ----------\n"));
 	int type = exp->value->id;
 	char *a;
 
@@ -61,29 +60,29 @@ void gen_code(Exp *exp) {
 		exp->value->att.s = buffer;
 
 		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		printf("DEFVAR TF@%s\n", exp->value->att.s);
+		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
 
 		type = exp->LPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("ADD TF@%s TF@%s ", exp->value->att.s, exp->LPtr->value->att.s);
+			printf("ADD LF@%s LF@%s ", exp->value->att.s, exp->LPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
-			printf("ADD TF@%s int@%ld ", exp->value->att.s, exp->LPtr->value->att.i);
+			printf("ADD LF@%s int@%ld ", exp->value->att.s, exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("ADD TF@%s float@%.16lf ", exp->value->att.s, exp->LPtr->value->att.d);
+			printf("ADD LF@%s float@%.16lf ", exp->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("ADD TF@%s string@%s ", exp->value->att.s, exp->LPtr->value->att.s);
+			printf("ADD LF@%s string@%s ", exp->value->att.s, exp->LPtr->value->att.s);
 			break;
 		}
 
 		type = exp->RPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("TF@%s\n", exp->RPtr->value->att.s);
+			printf("LF@%s\n", exp->RPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
 			printf("int@%ld\n", exp->RPtr->value->att.i);
@@ -109,29 +108,29 @@ void gen_code(Exp *exp) {
 		exp->value->id = ID_IDENTIFIER;
 		exp->value->att.s = buffer;
 		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		printf("DEFVAR TF@%s\n", exp->value->att.s);
+		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
 
 		type = exp->RPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("SUB TF@%s TF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+			printf("SUB LF@%s LF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
-			printf("SUB TF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
+			printf("SUB LF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("SUB TF@%s float@%.16lf ", exp->value->att.s, exp->RPtr->value->att.d);
+			printf("SUB LF@%s float@%.16lf ", exp->value->att.s, exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("SUB TF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+			printf("SUB LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
 			break;
 		}
 
 		type = exp->LPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("TF@%s\n", exp->LPtr->value->att.s);
+			printf("LF@%s\n", exp->LPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
 			printf("int@%ld\n", exp->LPtr->value->att.i);
@@ -155,29 +154,29 @@ void gen_code(Exp *exp) {
 		exp->value->id = ID_IDENTIFIER;
 		exp->value->att.s = buffer;
 		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		printf("DEFVAR TF@%s\n", exp->value->att.s);
+		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
 
 		type = exp->LPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("MUL TF@%s TF@%s ", exp->value->att.s, exp->LPtr->value->att.s);
+			printf("MUL LF@%s LF@%s ", exp->value->att.s, exp->LPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
-			printf("MUL TF@%s int@%ld ", exp->value->att.s, exp->LPtr->value->att.i);
+			printf("MUL LF@%s int@%ld ", exp->value->att.s, exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("MUL TF@%s float@%.16lf ", exp->value->att.s, exp->LPtr->value->att.d);
+			printf("MUL LF@%s float@%.16lf ", exp->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("MUL TF@%s string@%s ", exp->value->att.s, exp->LPtr->value->att.s);
+			printf("MUL LF@%s string@%s ", exp->value->att.s, exp->LPtr->value->att.s);
 			break;
 		}
 
 		type = exp->RPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("TF@%s\n", exp->RPtr->value->att.s);
+			printf("LF@%s\n", exp->RPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
 			printf("int@%ld\n", exp->RPtr->value->att.i);
@@ -204,29 +203,29 @@ void gen_code(Exp *exp) {
 		exp->value->id = ID_IDENTIFIER;
 		exp->value->att.s = buffer;
 		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		printf("DEFVAR TF@%s\n", exp->value->att.s);
+		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
 
 		type = exp->RPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("DIV TF@%s TF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+			printf("DIV LF@%s LF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
-			printf("DIV TF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
+			printf("DIV LF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("DIV TF@%s float@%.16lf ", exp->value->att.s, exp->RPtr->value->att.d);
+			printf("DIV LF@%s float@%.16lf ", exp->value->att.s, exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("DIV TF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+			printf("DIV LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
 			break;
 		}
 
 		type = exp->LPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("TF@%s\n", exp->LPtr->value->att.s);
+			printf("LF@%s\n", exp->LPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
 			printf("int@%ld\n", exp->LPtr->value->att.i);
@@ -252,7 +251,7 @@ void gen_code(Exp *exp) {
 		switch (type) {
 		case ID_IDENTIFIER:
 			exp->value->att.s = exp->RPtr->value->att.s;
-			printf("DEFVAR TF@%s\n", exp->RPtr->value->att.s);
+			printf("DEFVAR LF@%s\n", exp->RPtr->value->att.s);
 			break;
 		}
 
@@ -260,16 +259,16 @@ void gen_code(Exp *exp) {
 		type = exp->LPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("MOVE TF@%s TF@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
+			printf("MOVE LF@%s LF@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
-			printf("MOVE TF@%s int@%ld\n", exp->RPtr->value->att.s, exp->LPtr->value->att.i);
+			printf("MOVE LF@%s int@%ld\n", exp->RPtr->value->att.s, exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("MOVE TF@%s float@%.16lf\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
+			printf("MOVE LF@%s float@%.16lf\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("MOVE TF@%s string@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
+			printf("MOVE LF@%s string@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
 			break;
 		}
 
@@ -289,16 +288,16 @@ void gen_code(Exp *exp) {
 
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("MOVE TF@%s TF@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
+			printf("MOVE LF@%s LF@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
 			break;
 		case ID_INT_LIT:
-			printf("MOVE TF@%s int@%ld\n", exp->RPtr->value->att.s, exp->LPtr->value->att.i);
+			printf("MOVE LF@%s int@%ld\n", exp->RPtr->value->att.s, exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("MOVE TF@%s float@%.16lf\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
+			printf("MOVE LF@%s float@%.16lf\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("MOVE TF@%s string@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
+			printf("MOVE LF@%s string@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
 			break;
 		}
 
@@ -309,9 +308,9 @@ void gen_code(Exp *exp) {
 
 	case ID_INT_LIT:
 		a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		printf("DEFVAR TF@%s\n", a);
+		printf("DEFVAR LF@%s\n", a);
 
-		printf("MOVE TF@%s TF@%s\n", a, exp->LPtr->value->att.s);
+		printf("MOVE LF@%s LF@%s\n", a, exp->LPtr->value->att.s);
 
 		printf("WRITE %s\n", a);
 		//printf("MOVE\n");
@@ -321,7 +320,7 @@ void gen_code(Exp *exp) {
 
 		//todo
 
-		printf("JUMPIFEQ else%s TF@b TF@b\n", is_token_lit(exp->value));
+		printf("JUMPIFEQ else%s LF@b LF@b\n", is_token_lit(exp->value));
 
 		printf("JUMP if&end%s\n", is_token_lit(exp->RPtr->value));
 		printf("LABEL else%s\n", is_token_lit(exp->RPtr->value));
@@ -374,7 +373,6 @@ void gen_code(Exp *exp) {
 		break;
 	}
 
-	DEBUG_PRINT(("---------- stop gen ----------\n"));
 }
 
 
@@ -507,13 +505,12 @@ void syntax(Exp *exp)
 	}
 	else
 	{
-		DEBUG_PRINT(("__NEW TREE__\n"));
 		//DEBUG_PRINT(("EXIT 0\n"));
 		//exit(0);
 	}
 }
 
-void process_builtin(int builtin_func, Exp *exp)
+void proc_builtin(int builtin_func, Exp *exp)
 {
 	switch(builtin_func)
 	{
@@ -524,6 +521,8 @@ void process_builtin(int builtin_func, Exp *exp)
 		case BUILT_INPUTF:
 			break;
 		case BUILT_PRINT:
+			//funguje jen pro jeden parametr v print
+			//TODO
 			printf("WRITE LF@%s\n", exp->RPtr->value->att.s);
 			break;
 		case BUILT_INT2FLOAT:
@@ -552,7 +551,66 @@ int is_builtin(char *func_name)
 	}
 	return -1;
 }
-void process_func(Exp *exp)
+
+//printf instructions to define argument variable on temp stack and to move value in the variable
+void print_arg(Exp *exp, int counter)
+{
+	printf("DEFVAR TF@?%d\n", counter);
+		switch (exp->value->id)
+		{
+			case ID_IDENTIFIER:
+				printf("MOVE TF@?%d LF@%s\n", counter, exp->value->att.s);
+			break;
+			case ID_INT_LIT:
+				printf("MOVE TF@?%d int@%ld\n", counter, exp->value->att.i);
+			break;
+			case ID_FLOAT_LIT:
+				printf("MOVE TF@?%d float@%f\n", counter, exp->value->att.d);
+			break;
+			case ID_STRING_LIT:
+				printf("MOVE TF@?%d string@%s\n", counter, exp->value->att.s);
+			break;
+			default:
+			break;
+		}
+}
+
+//goes through all the function call parameters
+void proc_func_args(Exp *exp, int counter)
+{
+	if (exp->value->id == ID_COMMA)
+	{
+		print_arg(exp->RPtr, counter);
+		counter++;
+		proc_func_args(exp->LPtr, counter);
+	}
+	else
+		print_arg(exp, counter);
+	return;
+}
+
+void print_param(Exp *exp, int counter)
+{
+	printf("DEFVAR LF@%s\n", exp->LPtr->value->att.s);
+	printf("MOVE LF@%s LF@?%d\n",exp->LPtr->value->att.s, counter);
+	return;
+}
+
+
+void proc_func_params(Exp *exp, int counter)
+{
+	if (exp->value->id == ID_COMMA)
+	{
+		print_param(exp->RPtr, counter);
+		counter++;
+		proc_func_params(exp->LPtr, counter);
+	}
+	else
+		print_param(exp, counter);
+	return;
+}
+
+void proc_func(Exp *exp)
 {
 	if (exp != NULL)
 	{
@@ -560,40 +618,58 @@ void process_func(Exp *exp)
 			syntax(exp);
 			return;
 		}
+		//is function call
 		if (exp->value->id == ID_FUNC_CALL)
 		{
 			int builtin_func;
 			//is built-in
 			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1) 
-				process_builtin(builtin_func, exp);
+				proc_builtin(builtin_func, exp);
 			//is user function
 			else
 			{
-				//is user function
+				printf("CREATEFRAME\n"); //zbytecne kdyz nema parametry
+				int counter = 0;
+				if (exp->RPtr != NULL) //has parameters
+					proc_func_args(exp->RPtr, counter);
+				printf("CALL $%s\n", exp->LPtr->value->att.s);
 			}
 			return;
 		}
-	process_func(exp->RPtr);
-	process_func(exp->Condition);
-	process_func(exp->LPtr);
+		if (exp->value->id == ID_KEY_RETURN)
+			return;
+	proc_func(exp->RPtr);
+	proc_func(exp->Condition);
+	proc_func(exp->LPtr);
 	}
 }
 
 void generator(Exp *exp)
 {
 	if (exp->value->id == ID_SEMICOLLON){
-		printf("LABEL $%s", exp->LPtr->value->att.s);
-		process_func(exp->RPtr);
+		printf("\nLABEL $%s\n", exp->RPtr->LPtr->value->att.s);
+		printf("PUSHFRAME\n");
+		int counter = 0;
+		if (exp->RPtr->Condition->LPtr != NULL)//has at least one parameter		
+			proc_func_params(exp->RPtr->Condition->LPtr, counter);
+		proc_func(exp->RPtr);
 		if (exp->LPtr != NULL)
 			exp = exp->LPtr;
+		printf("POPFRAME\n");
+		printf("RETURN\n");
 		generator(exp);
 
 
 	}
+
+	//main
 	else if (exp->value->id == ID_KEY_FUNC)
 	{
-		printf("LABEL $%s\n", exp->LPtr->value->att.s);
-		process_func(exp->RPtr);
+		printf("\nLABEL $%s\n", exp->LPtr->value->att.s);
+		printf("CREATEFRAME\n");
+		printf("PUSHFRAME\n");
+		proc_func(exp->RPtr);
+		printf("POPFRAME\n");
 	}
 	return;
 }
