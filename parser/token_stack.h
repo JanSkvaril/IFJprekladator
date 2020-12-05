@@ -3,6 +3,7 @@
 
 #include "./semantics.h"
 #include "../scanner/scanner.h"
+#include "../error/error.h"
 #include <stdbool.h>
 //placeholder - tohle bude v .h semantických akcí
 typedef Tree Exp;
@@ -43,4 +44,5 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete);
 void AddSemicolom(TokenStack *stack);
 
 sToken *searchForDoubleExp(TokenStack *stack);
+sToken *searchForDualRule(TokenStack *stack, tID tokenID, tID endToken);
 #endif

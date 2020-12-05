@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include "../debug.h"
 #include "token_stack.h"
 void tsInit(TokenStack *stack)
 {
@@ -9,6 +9,10 @@ void tsInit(TokenStack *stack)
 
 void tsPushToken(TokenStack *stack, tToken *token)
 {
+    if (token == NULL)
+    {
+        parser_free_exit(SYN_ERR);
+    }
     sToken *new_token = malloc(sizeof(sToken));
     if (new_token == NULL)
         return; //TODO: rework!!
@@ -16,19 +20,23 @@ void tsPushToken(TokenStack *stack, tToken *token)
     new_token->token = token;
     new_token->exp = NULL;
     stack->top = new_token;
-    printf("Adding token to stack: ");
+    DEBUG_PRINT(("Adding token to stack: "));
     print_token(token);
 }
 
 void tsPushExp(TokenStack *stack, Exp *exp)
 {
+    if (exp == NULL)
+    {
+        parser_free_exit(SYN_ERR);
+    }
     sToken *new_token = malloc(sizeof(sToken));
     if (new_token == NULL)
         return; //TODO: rework!!
     new_token->prev = stack->top;
     new_token->exp = exp;
     new_token->token = NULL;
-    printf("Adding exp to stack:");
+    DEBUG_PRINT(("Adding exp to stack:"));
     print_token(exp->value);
     stack->top = new_token;
 }
@@ -36,11 +44,17 @@ void tsPushExp(TokenStack *stack, Exp *exp)
 tToken *tsPopToken(TokenStack *stack)
 {
     if (stack->top == NULL)
-        return NULL;
+    {
+        parser_free_exit(SYN_ERR);
+    }
+    if (stack->top->token == NULL)
+    {
+        parser_free_exit(SYN_ERR);
+    }
     tToken *token = stack->top->token;
     sToken *deleted = stack->top;
     stack->top = deleted->prev;
-    printf("Poping token: ");
+    DEBUG_PRINT(("Poping token: "));
     print_token(token);
     free(deleted);
     return token;
@@ -49,11 +63,17 @@ tToken *tsPopToken(TokenStack *stack)
 Exp *tsPopExp(TokenStack *stack)
 {
     if (stack->top == NULL)
-        return NULL;
+    {
+        parser_free_exit(SYN_ERR);
+    }
+    if (stack->top->exp == NULL)
+    {
+        parser_free_exit(SYN_ERR);
+    }
     Exp *token = stack->top->exp;
     sToken *deleted = stack->top;
     stack->top = deleted->prev;
-    printf("Poping Exp: ");
+    DEBUG_PRINT(("Poping Exp: "));
     free(deleted);
     print_token(token->value);
     return token;
@@ -62,7 +82,7 @@ Exp *tsPopExp(TokenStack *stack)
 bool IsToken(sToken *token)
 {
     if (token == NULL)
-        return false;
+        parser_free_exit(SYN_ERR);
     return token->token != NULL;
 }
 
@@ -130,13 +150,35 @@ sToken *searchForDoubleExp(TokenStack *stack)
     }
     return NULL;
 }
+sToken *searchForDualRule(TokenStack *stack, tID tokenID, tID endToken)
+{
+    sToken *current = stack->top->prev;
+    while (1)
+    {
+        if (current == NULL || current->prev == NULL)
+            return NULL;
+        if (IsToken(current))
+        {
+            if (current->token->id == endToken)
+                return NULL;
+        }
+        else
+        {
+            if (IsToken(current->prev) && current->prev->token->id == tokenID)
+            {
+                return current;
+            }
+        }
+        current = current->prev;
+    }
+}
 
 void ReplaceWithExp(sToken *token, Exp *exp, int delete)
 {
     if (IsToken(token) == false)
     {
         token->exp = exp;
-        printf("Replacing with exp: ");
+        DEBUG_PRINT(("Replacing with exp: "));
         print_token(token->exp->value);
         sToken *prev = token->prev;
         for (int i = 1; i <= delete; i++)
@@ -147,7 +189,7 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete)
         }
     }
     else
-        return; //TODO: error?
+        parser_free_exit(SYN_ERR);
 }
 
 void AddSemicolom(TokenStack *stack)

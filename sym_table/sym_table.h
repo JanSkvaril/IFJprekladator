@@ -11,22 +11,14 @@
 typedef enum
 {
 	INT,
-	DOUBLE,
+	FLOAT,
 	STRING
 } TYPE;
-
-union Value
-{
-	int i;
-	double f;
-	char *s;
-};
 
 typedef struct Data_struct
 {
 	TYPE type;
 	int defined;
-	union Value value;
 	int paramsNumber;
 	char params[];
 } Data;
@@ -34,7 +26,7 @@ typedef struct Data_struct
 typedef struct Node
 {
 	unsigned long Key; /* klíč */
-	Data data;		   /* užitečný obsah uzlu */
+	Data *data;		   /* užitečný obsah uzlu */
 	struct Node *LPtr; /* levý podstrom */
 	struct Node *RPtr; /* pravý podstrom */
 } * NodePtr;
@@ -42,7 +34,7 @@ typedef struct Node
 /* prototypy funkcí */
 
 void Init(NodePtr *);
-int Search(NodePtr, char *, Data *);
+int Search(NodePtr, char *, Data **);
 void Insert(NodePtr *, char *, Data *);
 void Delete(NodePtr *, char *);
 void Dispose(NodePtr *);

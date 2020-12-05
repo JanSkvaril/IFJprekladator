@@ -5,6 +5,7 @@
 #include "../scanner/scanner.h"
 #include "semantics.h"
 #include "scope.h"
+#include "../error/error.h"
 
 /* Creates ASS and returns pointer to root */
 Exp *Parse();
