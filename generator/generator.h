@@ -15,6 +15,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+typedef enum
+{
+	BUILT_INPUTS,
+	BUILT_INPUTI,
+	BUILT_INPUTF,
+	BUILT_PRINT,
+	BUILT_INT2FLOAT,
+	BUILT_FLOAT2INT,
+	BUILT_LEN,
+	BUILT_SUBSTR,
+	BUILT_ORD,
+	BUILT_CHR
+} tBUILT;
 
 void gen_code(Exp *exp);
 void generator(Exp *exp);

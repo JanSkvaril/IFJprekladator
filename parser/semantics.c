@@ -40,7 +40,7 @@ void symTabDefine(Scope *scope, tToken *name, Tree *Value)
         data->type = (int)Value->value->id - 1;
 
     Insert(&scope->table, name->att.s, data);
-    printf("inserted %s, type: %d, scope: %ld \n", name->att.s, (int)data->type, scope->table->Key);
+    DEBUG_PRINT(("inserted %s, type: %d, scope: %ld \n", name->att.s, (int)data->type, scope->table->Key));
     free(dataType);
 }
 

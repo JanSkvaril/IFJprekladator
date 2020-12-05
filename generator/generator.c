@@ -513,12 +513,65 @@ void syntax(Exp *exp)
 	}
 }
 
+void process_builtin(int builtin_func, Exp *exp)
+{
+	switch(builtin_func)
+	{
+		case BUILT_INPUTS:
+			break;
+		case BUILT_INPUTI:
+			break;
+		case BUILT_INPUTF:
+			break;
+		case BUILT_PRINT:
+			printf("WRITE LF@%s\n", exp->RPtr->value->att.s);
+			break;
+		case BUILT_INT2FLOAT:
+			break;
+		case BUILT_FLOAT2INT:
+			break;
+		case BUILT_LEN:
+			break;
+		case BUILT_SUBSTR:
+			break;
+		case BUILT_ORD:
+			break;
+		case BUILT_CHR:
+			break;
+	}
+	return;
+}
+
+int is_builtin(char *func_name)
+{
+	static char *table[10] = {"inputs", "inputi", "inputf", "print", "int2float", "float2int", "len", "substr", "ord", "chr"};
+	for (int i = 0; i < 10; i++)
+	{
+		if (strcmp(func_name, table[i]) == 0)
+			return i;	
+	}
+	return -1;
+}
 void process_func(Exp *exp)
 {
 	if (exp != NULL)
 	{
 		if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
 			syntax(exp);
+			return;
+		}
+		if (exp->value->id == ID_FUNC_CALL)
+		{
+			int builtin_func;
+			//is built-in
+			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1) 
+				process_builtin(builtin_func, exp);
+			//is user function
+			else
+			{
+				//is user function
+			}
+			return;
 		}
 	process_func(exp->RPtr);
 	process_func(exp->Condition);

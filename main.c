@@ -37,8 +37,6 @@ int main()
 	//Parse();
 	//Exp *Exp = Parse();
 	Exp *exp = Parse();
-	Exp *root = NULL;
-	root = exp;
 
 	#ifdef DEBUG
 	int spaces_num = 0;
@@ -56,7 +54,9 @@ int main()
 	// 	print_token(exp->Condition->RPtr->value);
 	//DEBUG_PRINT(("----\n"));
 	//print_token(exp->RPtr->RPtr->value);
-	generator(exp->LPtr, root);
+	printf(".IFJcode20\n");
+	printf("JUMP $main\n");
+	generator(exp->LPtr);
 	DEBUG_PRINT(("------------Generator exit!---------\n"));
 	return 0;
 }
