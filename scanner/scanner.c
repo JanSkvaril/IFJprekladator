@@ -222,6 +222,12 @@ int is_token(tTokenPtr token)
 	case ID_UNDER:
 		return ID_UNDER;
 		break;
+	case ID_FUNC_CALL:
+		return ID_FUNC_CALL;
+		break;
+	case ID_TYPE_DEF:
+		return ID_TYPE_DEF;
+		break;
 
 	default:
 		return 0;
@@ -256,32 +262,35 @@ char* is_token_lit(tTokenPtr token)
 char* is_token_add(tTokenPtr token, char *name, char *name2)
 {
 		char *array = NULL;
-
+		name = "var";
+		name2 = "var2";
+		//printf("bbbbb\n");
+		
 		array = (malloc((char) *name2));
 		strcat(array, name);
 		strcat(array, name2);
 
 		switch (token->id)
 		{
+		printf("bbbbb\n");
 		case ID_IDENTIFIER:
-			token->id = ID_IDENTIFIER;
+			token->id = ID_INT_LIT;
 			token->att.s = array;
-						//printf("bbbbb\n");
 			return token->att.s;
-			break;
+		break;
 
 		case ID_INT_LIT:
+		printf("aaaaaaaabbbbb\n");
 				token->id = ID_INT_LIT;
 				token->att.i = (int) *array;
-				return (char *)(token->att.i);
+				return (char *)(token->att.s);
 			break;
 
 		default:
-			token->id = ID_IDENTIFIER;
+		printf("defaild\n");
+			token->id = ID_INT_LIT;
 			token->att.s = array;
-			//printf("aaaaa\n");
-			return token->att.s;
-
+			return token->att.i;
 			break;
 		}
 

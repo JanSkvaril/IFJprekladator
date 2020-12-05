@@ -1,0 +1,6 @@
+inserted a, type: 0, scope: 177670 
+inserted b, type: 0, scope: 177670 
+Type check alright
+-----------
+-----------
+EXIT 0
