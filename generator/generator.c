@@ -5,6 +5,7 @@ int inFunction = 0;
 int inMain = 0;
 char isMain[] = "main";
 Exp *id_exp = NULL;
+Exp *root;
 
 //literal name
 static int counter;
@@ -43,10 +44,10 @@ char *buffer;
 //   }
 // }
 
-void gen_code(tTokenPtr token, Exp *exp) {
+void gen_code(Exp *exp) {
 
 	DEBUG_PRINT(("---------- start gen ----------\n"));
-	int type = token->id;
+	int type = exp->value->id;
 	char *a;
 
 	switch (type) {
@@ -384,7 +385,7 @@ void semicollon ()
 
 // ukazatel na přirazeni či vytvoření nove proměné
 // rekurzivní volání a generování instrukcí, vyjma vestavených funkci či funkcí s navratem
-void syntax(Exp *exp, Exp *root)
+void syntax(Exp *exp)
 {
 	root = exp;
 
@@ -401,9 +402,9 @@ void syntax(Exp *exp, Exp *root)
 	{
 
 		if (((exp->RPtr->value->id == ID_IDENTIFIER  || exp->RPtr->value->id == ID_INT_LIT  || exp->RPtr->value->id == ID_FLOAT_LIT  || exp->RPtr->value->id == ID_STRING_LIT) && (exp->LPtr->value->id == ID_IDENTIFIER || exp->LPtr->value->id == ID_INT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_STRING_LIT))) {
-			gen_code(exp->value, exp);
+			gen_code(exp);
 			exp = root;
-			syntax(exp, root);
+			syntax(exp);
 		}
 
 		if (exp->RPtr->value->id == ID_ADD || exp->RPtr->value->id == ID_SUB || exp->RPtr->value->id == ID_MULT || exp->RPtr->value->id == ID_DIV) {
@@ -440,14 +441,13 @@ void syntax(Exp *exp, Exp *root)
 			//print_token(exp->value);
 
 			if (((exp->RPtr->value->id == ID_IDENTIFIER || exp->RPtr->value->id == ID_INT_LIT || exp->RPtr->value->id == ID_FLOAT_LIT || exp->RPtr->value->id == ID_STRING_LIT) && (exp->LPtr->value->id == ID_IDENTIFIER || exp->LPtr->value->id == ID_INT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_STRING_LIT))) {
-				gen_code(exp->value, exp);
+				gen_code(exp);
 				exp = id_exp;
-				syntax(exp, root);
+				syntax(exp);
 			}
 			else
 			{
-				//exp = root;
-				syntax(exp, root);
+				syntax(exp);
 			}
 
 		}
@@ -490,14 +490,13 @@ void syntax(Exp *exp, Exp *root)
 			//print_token(exp->value);
 
 			if (((exp->RPtr->value->id == ID_IDENTIFIER || exp->RPtr->value->id == ID_INT_LIT || exp->RPtr->value->id == ID_FLOAT_LIT || exp->RPtr->value->id == ID_STRING_LIT) && (exp->LPtr->value->id == ID_IDENTIFIER || exp->LPtr->value->id == ID_INT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_STRING_LIT))) {
-				gen_code(exp->value, exp);
+				gen_code(exp);
 				exp = id_exp;
-				syntax(exp, root);
+				syntax(exp);
 			}
 			else
 			{
-				//exp = root;
-				syntax(exp, root);
+				syntax(exp);
 			}
 
 		}
@@ -514,36 +513,34 @@ void syntax(Exp *exp, Exp *root)
 	}
 }
 
-void process_func(Exp *exp, Exp *root)
+void process_func(Exp *exp)
 {
 	if (exp != NULL)
 	{
 		if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
-			syntax(exp, root);
-			exp = root;
+			syntax(exp);
 		}
-	process_func(exp->RPtr, exp->RPtr);
-	process_func(exp->Condition, exp->Condition);
-	process_func(exp->LPtr, exp->LPtr);
+	process_func(exp->RPtr);
+	process_func(exp->Condition);
+	process_func(exp->LPtr);
 	}
 }
 
-void generator(Exp *exp, Exp *root)
+void generator(Exp *exp)
 {
-	root = exp;
 	if (exp->value->id == ID_SEMICOLLON){
 		printf("LABEL $%s", exp->LPtr->value->att.s);
-		process_func(exp->RPtr, exp->RPtr);
+		process_func(exp->RPtr);
 		if (exp->LPtr != NULL)
 			exp = exp->LPtr;
-		generator(exp, root);
+		generator(exp);
 
 
 	}
 	else if (exp->value->id == ID_KEY_FUNC)
 	{
 		printf("LABEL $%s\n", exp->LPtr->value->att.s);
-		process_func(exp->RPtr, exp->RPtr);
+		process_func(exp->RPtr);
 	}
 	return;
 }

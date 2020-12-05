@@ -16,8 +16,8 @@
 #include <stdio.h>
 
 
-void gen_code(tTokenPtr, Exp *exp);
-void generator(Exp *exp, Exp *root);
+void gen_code(Exp *exp);
+void generator(Exp *exp);
 
 
 #endif
