@@ -40,10 +40,21 @@ int main()
 	Exp *root = NULL;
 	root = exp;
 
+
 	int spaces_num = 0;
 	print_tree(exp, spaces_num);
-	
+
 	DEBUG_PRINT(("----------Generator start ----------\n"));
+	print_token(exp->value);
+	// DEBUG_PRINT(("----\n"));
+	print_token(exp->LPtr->value);
+	print_token(exp->RPtr->value);
+	DEBUG_PRINT(("---------- if true----------\n"));
+		print_token(exp->Condition->value);
+	print_token(exp->Condition->LPtr->value);
+		print_token(exp->Condition->RPtr->value);
+	//DEBUG_PRINT(("----\n"));
+	//print_token(exp->RPtr->RPtr->value);
 	generator(exp, root);
 	DEBUG_PRINT(("------------Generator exit!---------\n"));
 	return 0;
