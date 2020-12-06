@@ -510,6 +510,14 @@ void syntax(Exp *exp)
 	}
 }
 
+Exp *get_return_node (Exp *exp)
+{
+	while (exp->value->id != ID_KEY_RETURN)
+		exp = exp->LPtr;
+	
+	return exp;
+}
+
 //print instructions for built-in funtions
 void proc_builtin(int builtin_func, Exp *exp)
 {
@@ -557,20 +565,20 @@ int is_builtin(char *func_name)
 //print instructions for every argument, put the value on temp frame
 void print_arg(Exp *exp, int counter)
 {
-	printf("DEFVAR TF@?%d\n", counter);
+	printf("DEFVAR TF@?param%d\n", counter);
 		switch (exp->value->id)
 		{
 			case ID_IDENTIFIER:
-				printf("MOVE TF@?%d LF@%s\n", counter, exp->value->att.s);
+				printf("MOVE TF@?param%d LF@%s\n", counter, exp->value->att.s);
 			break;
 			case ID_INT_LIT:
-				printf("MOVE TF@?%d int@%ld\n", counter, exp->value->att.i);
+				printf("MOVE TF@?param%d int@%ld\n", counter, exp->value->att.i);
 			break;
 			case ID_FLOAT_LIT:
-				printf("MOVE TF@?%d float@%f\n", counter, exp->value->att.d);
+				printf("MOVE TF@?param%d float@%f\n", counter, exp->value->att.d);
 			break;
 			case ID_STRING_LIT:
-				printf("MOVE TF@?%d string@%s\n", counter, exp->value->att.s);
+				printf("MOVE TF@?param%d string@%s\n", counter, exp->value->att.s);
 			break;
 			default:
 			break;
@@ -595,7 +603,7 @@ void proc_func_args(Exp *exp, int counter)
 void print_param(Exp *exp, int counter)
 {
 	printf("DEFVAR LF@%s\n", exp->LPtr->value->att.s);
-	printf("MOVE LF@%s LF@?%d\n",exp->LPtr->value->att.s, counter);
+	printf("MOVE LF@%s LF@?param%d\n",exp->LPtr->value->att.s, counter);
 	return;
 }
 
@@ -612,19 +620,61 @@ void proc_func_params(Exp *exp, int counter)
 		print_param(exp, counter);
 	return;
 }
+void print_def_retval(Exp *exp, int counter)
+{
+	printf("DEFVAR LF@$retval%d\n", counter);
+	printf("MOVE LF@$retval%d LF@%s\n", counter, exp->value->att.s );
+	return;
+}
+//go through ret vals in function definition
+void proc_func_def_retvals(Exp *exp, int counter)
+{
+	if (exp->value->id == ID_COMMA)
+	{
+		print_def_retval(exp->RPtr, counter);
+		counter++;
+		proc_func_def_retvals(exp->LPtr, counter);
+	}
+	else
+		print_def_retval(exp, counter);
+	return;
+}
+
+void print_call_retval(Exp *exp, int counter)
+{
+	printf("MOVE LF@%s LF@$retval%d\n", exp->value->att.s, counter);
+	return;
+}
+
+void proc_func_call_retvals(Exp *exp, int counter)
+{
+	if (exp->value->id == ID_COMMA)
+	{
+		print_call_retval(exp->RPtr, counter);
+		counter++;
+		proc_func_call_retvals(exp->LPtr, counter);
+	}
+	else
+		print_call_retval(exp, counter);
+	return;
+}
 
 //process a function definition
 void proc_func(Exp *exp)
 {
 	if (exp != NULL)
 	{
-		if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
-			syntax(exp);
-			return;
-		}
+		
 		//is function call
-		if (exp->value->id == ID_FUNC_CALL)
+		if (exp->value->id == ID_FUNC_CALL ||
+			(exp->value->id == ID_ASSIGN && exp->LPtr->value->id == ID_FUNC_CALL))
 		{
+			Exp *retvals = NULL;
+			if (exp->value->id == ID_ASSIGN)
+			{
+				retvals = exp->RPtr;
+				exp = exp->LPtr;
+			}
 			int builtin_func;
 			//is built-in
 			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1) 
@@ -633,11 +683,19 @@ void proc_func(Exp *exp)
 			else
 			{
 				printf("CREATEFRAME\n"); //zbytecne kdyz nema parametry
-				int counter = 0;
 				if (exp->RPtr != NULL) //has parameters
-					proc_func_args(exp->RPtr, counter);
+					proc_func_args(exp->RPtr, 0);
 				printf("CALL $%s\n", exp->LPtr->value->att.s);
 			}
+			if (retvals != NULL)
+			{
+				proc_func_call_retvals(retvals, 0);
+			}
+			return;
+		}
+		//Kubova kouzelna funkce
+		else if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
+			syntax(exp);
 			return;
 		}
 		if (exp->value->id == ID_KEY_RETURN)
@@ -657,10 +715,17 @@ void generator(Exp *exp)
 	if (exp->value->id == ID_SEMICOLLON){
 		printf("\nLABEL $%s\n", exp->RPtr->LPtr->value->att.s);
 		printf("PUSHFRAME\n");
-		int counter = 0;
-		if (exp->RPtr->Condition->LPtr != NULL)//has at least one parameter		
-			proc_func_params(exp->RPtr->Condition->LPtr, counter);
+		//parameters
+		if (exp->RPtr->Condition->LPtr != NULL)		
+			proc_func_params(exp->RPtr->Condition->LPtr, 0);
+		//function body
 		proc_func(exp->RPtr);
+		//return values
+		if (exp->RPtr->Condition->RPtr != NULL)
+		{
+			Exp *returnNode = get_return_node(exp->RPtr->RPtr);
+			proc_func_def_retvals(returnNode->LPtr, 0);
+		}
 		if (exp->LPtr != NULL)
 			exp = exp->LPtr;
 		printf("POPFRAME\n");
