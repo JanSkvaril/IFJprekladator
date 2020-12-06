@@ -10,7 +10,7 @@
         if (st != NULL)                                                                    \
         {                                                                                  \
             /*DEBUG_PRINT(("Expression rule found: %d\n", ID_OF_TOKEN));*/                 \
-            new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token, scope->top); \
+            new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token); \
             ReplaceWithExp(st, new_exp, 2);                                                \
             return true;                                                                   \
         }                                                                                  \
@@ -59,7 +59,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
     {
         tToken *init_token = malloc(sizeof(tToken));
         init_token->id = ID_KEY_RETURN;
-        new_exp = makeTree(st->exp, NULL, init_token, scope->top);
+        new_exp = makeTree(st->exp, NULL, init_token);
         ReplaceWithExp(st, new_exp, 1);
         return true;
     }
@@ -69,7 +69,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
     {
         tToken *init_token = malloc(sizeof(tToken));
         init_token->id = ID_KEY_PACKAGE;
-        new_exp = makeTree(st->exp, NULL, init_token, scope->top);
+        new_exp = makeTree(st->exp, NULL, init_token);
         ReplaceWithExp(st, new_exp, 1);
         return true;
     }
@@ -85,7 +85,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
             init_token->id = ID_KEY_RETURN;
             free(curr->token);
             curr->token = NULL;
-            new_exp = makeTree(NULL, NULL, init_token, scope->top);
+            new_exp = makeTree(NULL, NULL, init_token);
             curr->exp = new_exp;
             return true;
         }
@@ -97,7 +97,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
     {
         tToken *init_token = malloc(sizeof(tToken));
         init_token->id = ID_SEMICOLLON;
-        new_exp = makeTree(st->exp, st->prev->exp, init_token, scope->top);
+        new_exp = makeTree(st->exp, st->prev->exp, init_token);
         ReplaceWithExp(st, new_exp, 1);
         return true;
     }
@@ -147,7 +147,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     if (typed == NULL)
                         return false; //TODO: error
                     typed->id = ID_TYPE_DEF;
-                    tsPushExp(stack, makeTree(tsPopExp(stack), leaf, typed, scope->top));
+                    tsPushExp(stack, makeTree(tsPopExp(stack), leaf, typed));
                 }
                 else
                 {
@@ -170,7 +170,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                         tToken *bracket = tsPopToken(stack);
                         tToken *empty = malloc(sizeof(tToken));
                         empty->id = ID_SEMICOLLON;
-                        Exp *emptyExp = makeTree(NULL, NULL, empty, NULL);
+                        Exp *emptyExp = makeTree(NULL, NULL, empty);
                         tsPushExp(stack, emptyExp);
                         tsPushToken(stack, bracket);
                         changed = true;
@@ -241,7 +241,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                                 funcToken->id = ID_FUNC_CALL;
                                 if (funcToken == NULL)
                                     return false; //TODO: error?
-                                tsPushExp(stack, makeTree(funcName, funcArgs, funcToken, scope->top));
+                                tsPushExp(stack, makeTree(funcName, funcArgs, funcToken));
                             }
                         }
                     }
@@ -276,7 +276,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             funcToken->id = ID_FUNC_CALL;
                             if (funcToken == NULL)
                                 return false; //TODO: error?
-                            tsPushExp(stack, makeTree(funcName, NULL, funcToken, scope->top));
+                            tsPushExp(stack, makeTree(funcName, NULL, funcToken));
                         }
                     }
                     changed = true;
@@ -295,7 +295,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     tToken *semicol = tsPopToken(stack);
                     tToken *empty = malloc(sizeof(tToken));
                     empty->id = ID_SEMICOLLON;
-                    Exp *emptyExp = makeTree(NULL, NULL, empty, NULL);
+                    Exp *emptyExp = makeTree(NULL, NULL, empty);
                     tsPushExp(stack, emptyExp);
                     tsPushToken(stack, semicol);
                     changed = true;
@@ -313,7 +313,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     tToken *init_token = malloc(sizeof(tToken));
                     init_token->id = ID_SEMICOLLON;
                     //adds empty exp to bracket so function, if and for rules work corretly
-                    tsPushExp(stack, makeTree(NULL, NULL, init_token, NULL));
+                    tsPushExp(stack, makeTree(NULL, NULL, init_token));
                     tsPushToken(stack, bracket);
                 }
                 //not empty
@@ -393,7 +393,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             tToken *funcT = tsPopToken(stack);
                             tToken *argsRetToken = malloc(sizeof(tToken));
                             argsRetToken->id = ID_SEMICOLLON;
-                            Exp *argsRet = makeTree(args, ret, argsRetToken, scope->top);
+                            Exp *argsRet = makeTree(args, ret, argsRetToken);
 
                             tsPushExp(stack, makeIfTree(name, argsRet, body, funcT));
                             break;
@@ -431,7 +431,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     Exp *body = tsPopExp(stack);
                     Exp *head = tsPopExp(stack);
                     tToken *t = tsPopToken(stack);
-                    Exp *forExp = makeTree(body, head, t, scope->top);
+                    Exp *forExp = makeTree(body, head, t);
                     tsPushExp(stack, forExp);
 
                     changed = true;
@@ -502,8 +502,9 @@ Exp *Parse()
     ssInit(scopeStack);
     DEBUG_PRINT(("Type check started\n"));
     ssAdd(scopeStack);
+    defineFunctions(final_tree, scopeStack);
     CheckTypes(final_tree, scopeStack);
-    DEBUG_PRINT(("Type check alright\n"));
+    printf("Type check alright\n");
     ssDispose(scopeStack);
     free(scopeStack);
     return final_tree;
