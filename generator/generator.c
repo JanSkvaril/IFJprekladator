@@ -34,7 +34,7 @@ char *buffer;
 //     return("int@%ld", (char *)token->att.i);
 //     break;
 //   case ID_FLOAT_LIT:
-//     //return (char *)("float@%.16lf", exp->att.d);
+//     //return (char *)("float@%a", exp->att.d);
 //     break;
 //   case ID_STRING_LIT:
 //     return("string@%s", token->att.s);
@@ -73,7 +73,7 @@ void gen_code(Exp *exp) {
 			printf("ADD LF@%s int@%ld ", exp->value->att.s, exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("ADD LF@%s float@%.16lf ", exp->value->att.s, exp->LPtr->value->att.d);
+			printf("ADD LF@%s float@%a ", exp->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("ADD LF@%s string@%s ", exp->value->att.s, exp->LPtr->value->att.s);
@@ -89,7 +89,7 @@ void gen_code(Exp *exp) {
 			printf("int@%ld\n", exp->RPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("float@%.16lf\n", exp->RPtr->value->att.d);
+			printf("float@%a\n", exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("string@%s\n", exp->RPtr->value->att.s);
@@ -121,7 +121,7 @@ void gen_code(Exp *exp) {
 			printf("SUB LF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("SUB LF@%s float@%.16lf ", exp->value->att.s, exp->RPtr->value->att.d);
+			printf("SUB LF@%s float@%a ", exp->value->att.s, exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("SUB LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
@@ -137,7 +137,7 @@ void gen_code(Exp *exp) {
 			printf("int@%ld\n", exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("float@%.16lf\n", exp->LPtr->value->att.d);
+			printf("float@%a\n", exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("string@%s\n", exp->LPtr->value->att.s);
@@ -167,7 +167,7 @@ void gen_code(Exp *exp) {
 			printf("MUL LF@%s int@%ld ", exp->value->att.s, exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("MUL LF@%s float@%.16lf ", exp->value->att.s, exp->LPtr->value->att.d);
+			printf("MUL LF@%s float@%a ", exp->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("MUL LF@%s string@%s ", exp->value->att.s, exp->LPtr->value->att.s);
@@ -183,7 +183,7 @@ void gen_code(Exp *exp) {
 			printf("int@%ld\n", exp->RPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("float@%.16lf\n", exp->RPtr->value->att.d);
+			printf("float@%a\n", exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("string@%s\n", exp->RPtr->value->att.s);
@@ -216,7 +216,7 @@ void gen_code(Exp *exp) {
 			printf("DIV LF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("DIV LF@%s float@%.16lf ", exp->value->att.s, exp->RPtr->value->att.d);
+			printf("DIV LF@%s float@%a ", exp->value->att.s, exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("DIV LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
@@ -232,7 +232,7 @@ void gen_code(Exp *exp) {
 			printf("int@%ld\n", exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("float@%.16lf\n", exp->LPtr->value->att.d);
+			printf("float@%a\n", exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("string@%s\n", exp->LPtr->value->att.s);
@@ -266,7 +266,7 @@ void gen_code(Exp *exp) {
 			printf("MOVE LF@%s int@%ld\n", exp->RPtr->value->att.s, exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("MOVE LF@%s float@%.16lf\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
+			printf("MOVE LF@%s float@%a\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("MOVE LF@%s string@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
@@ -295,7 +295,7 @@ void gen_code(Exp *exp) {
 			printf("MOVE LF@%s int@%ld\n", exp->RPtr->value->att.s, exp->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("MOVE LF@%s float@%.16lf\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
+			printf("MOVE LF@%s float@%a\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("MOVE LF@%s string@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
@@ -540,6 +540,7 @@ void proc_builtin(int builtin_func, Exp *exp, Exp *retvals)
 			built_float2int(exp, retvals);
 			break;
 		case BUILT_LEN:
+			built_len(exp, retvals);
 			break;
 		case BUILT_SUBSTR:
 			break;
@@ -679,7 +680,7 @@ void proc_func(Exp *exp)
 			int builtin_func;
 			//is built-in
 			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1) 
-				proc_builtin(builtin_func, exp, retvals);
+				proc_builtin(builtin_func, exp->RPtr, retvals);
 			//is user function
 			else
 			{
