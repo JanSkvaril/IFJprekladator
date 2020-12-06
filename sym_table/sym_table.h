@@ -12,15 +12,17 @@ typedef enum
 {
 	INT,
 	FLOAT,
-	STRING
+	STRING,
+	FUNC
 } TYPE;
 
 typedef struct Data_struct
 {
 	TYPE type;
-	int defined;
 	int paramsNumber;
-	char params[];
+	struct T *params;
+	int returnsNumber;
+	struct T *returns;
 } Data;
 
 typedef struct Node
