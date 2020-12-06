@@ -1,5 +1,6 @@
 #include "generator.h"
 #include "../debug.h"
+#include "builtin.h"
 
 int inFunction = 0;
 int inMain = 0;
@@ -519,7 +520,7 @@ Exp *get_return_node (Exp *exp)
 }
 
 //print instructions for built-in funtions
-void proc_builtin(int builtin_func, Exp *exp)
+void proc_builtin(int builtin_func, Exp *exp, Exp *retvals)
 {
 	switch(builtin_func)
 	{
@@ -530,13 +531,13 @@ void proc_builtin(int builtin_func, Exp *exp)
 		case BUILT_INPUTF:
 			break;
 		case BUILT_PRINT:
-			//funguje jen pro jeden parametr v print
-			//TODO
-			printf("WRITE LF@%s\n", exp->RPtr->value->att.s);
+			built_print(exp);
 			break;
 		case BUILT_INT2FLOAT:
+			built_int2float(exp, retvals);
 			break;
 		case BUILT_FLOAT2INT:
+			built_float2int(exp, retvals);
 			break;
 		case BUILT_LEN:
 			break;
@@ -678,7 +679,7 @@ void proc_func(Exp *exp)
 			int builtin_func;
 			//is built-in
 			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1) 
-				proc_builtin(builtin_func, exp);
+				proc_builtin(builtin_func, exp, retvals);
 			//is user function
 			else
 			{
@@ -686,11 +687,12 @@ void proc_func(Exp *exp)
 				if (exp->RPtr != NULL) //has parameters
 					proc_func_args(exp->RPtr, 0);
 				printf("CALL $%s\n", exp->LPtr->value->att.s);
+				if (retvals != NULL)
+				{
+					proc_func_call_retvals(retvals, 0);
+				}
 			}
-			if (retvals != NULL)
-			{
-				proc_func_call_retvals(retvals, 0);
-			}
+			
 			return;
 		}
 		//Kubova kouzelna funkce
