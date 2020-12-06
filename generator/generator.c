@@ -510,6 +510,7 @@ void syntax(Exp *exp)
 	}
 }
 
+//print instructions for built-in funtions
 void proc_builtin(int builtin_func, Exp *exp)
 {
 	switch(builtin_func)
@@ -541,6 +542,7 @@ void proc_builtin(int builtin_func, Exp *exp)
 	return;
 }
 
+//check if function call calls a built-in funtion and return its ID
 int is_builtin(char *func_name)
 {
 	static char *table[10] = {"inputs", "inputi", "inputf", "print", "int2float", "float2int", "len", "substr", "ord", "chr"};
@@ -552,7 +554,7 @@ int is_builtin(char *func_name)
 	return -1;
 }
 
-//printf instructions to define argument variable on temp stack and to move value in the variable
+//print instructions for every argument, put the value on temp frame
 void print_arg(Exp *exp, int counter)
 {
 	printf("DEFVAR TF@?%d\n", counter);
@@ -575,7 +577,7 @@ void print_arg(Exp *exp, int counter)
 		}
 }
 
-//goes through all the function call parameters
+//goes through all the function call arguments
 void proc_func_args(Exp *exp, int counter)
 {
 	if (exp->value->id == ID_COMMA)
@@ -589,6 +591,7 @@ void proc_func_args(Exp *exp, int counter)
 	return;
 }
 
+//print instructions for every parameter
 void print_param(Exp *exp, int counter)
 {
 	printf("DEFVAR LF@%s\n", exp->LPtr->value->att.s);
@@ -596,7 +599,7 @@ void print_param(Exp *exp, int counter)
 	return;
 }
 
-
+//at the start of a funtion definition, get params from temp frame
 void proc_func_params(Exp *exp, int counter)
 {
 	if (exp->value->id == ID_COMMA)
@@ -610,6 +613,7 @@ void proc_func_params(Exp *exp, int counter)
 	return;
 }
 
+//process a function definition
 void proc_func(Exp *exp)
 {
 	if (exp != NULL)
@@ -638,14 +642,18 @@ void proc_func(Exp *exp)
 		}
 		if (exp->value->id == ID_KEY_RETURN)
 			return;
+	//toto asi nemusi prochazet uplne vsechno, ale zatim to funguje
 	proc_func(exp->RPtr);
 	proc_func(exp->Condition);
 	proc_func(exp->LPtr);
 	}
 }
 
+//recursevily called for every ";" node, calls functions to process all function definitions
 void generator(Exp *exp)
 {
+	//other than main
+	//create label, manage frame, add instructions for eventual parameters and return values
 	if (exp->value->id == ID_SEMICOLLON){
 		printf("\nLABEL $%s\n", exp->RPtr->LPtr->value->att.s);
 		printf("PUSHFRAME\n");
@@ -658,11 +666,9 @@ void generator(Exp *exp)
 		printf("POPFRAME\n");
 		printf("RETURN\n");
 		generator(exp);
-
-
 	}
 
-	//main
+	//is main
 	else if (exp->value->id == ID_KEY_FUNC)
 	{
 		printf("\nLABEL $%s\n", exp->LPtr->value->att.s);
