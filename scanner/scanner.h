@@ -61,6 +61,7 @@ typedef enum
 	//parser
 	ID_FUNC_CALL,
 	ID_TYPE_DEF,
+	ID_EMPTY,
 } tID;
 
 //token attribute type
@@ -89,7 +90,7 @@ tTokenRet get_token(tTokenPtr *, tEolFlag);
 //note that if ret value of get_token is not zero, the token data is undefined
 void print_token(tTokenPtr);
 int is_token(tTokenPtr);
-char* is_token_lit(tTokenPtr);
-char* is_token_add(tTokenPtr, char *name, char *name2);
+char *is_token_lit(tTokenPtr);
+char *is_token_add(tTokenPtr, char *name, char *name2);
 
 #endif

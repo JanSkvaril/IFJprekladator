@@ -256,6 +256,9 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             if (IsToken(curr) && curr->token->id == ID_KEY_FUNC)
                             {
                                 isDefinition = true;
+                                tToken *temp = malloc(sizeof(tToken));
+                                temp->id = ID_EMPTY;
+                                tsPushToken(stack, temp);
                                 break;
                             }
                             curr = curr->prev;
@@ -367,8 +370,17 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             }
                             else
                             {
-                                DEBUG_PRINT(("Arguments: "));
-                                args = tsPopExp(stack);
+                                if (IsToken(stack->top))
+                                {
+                                    free(tsPopToken(stack));
+                                    DEBUG_PRINT(("No arguments\n"));
+                                    args = NULL;
+                                }
+                                else
+                                {
+                                    DEBUG_PRINT(("Arguments: "));
+                                    args = tsPopExp(stack);
+                                }
                             }
                             DEBUG_PRINT(("Name: "));
                             Exp *name = tsPopExp(stack);

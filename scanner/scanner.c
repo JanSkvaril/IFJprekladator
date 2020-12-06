@@ -116,12 +116,14 @@ void print_token(tTokenPtr token)
 	case ID_TYPE_DEF:
 		DEBUG_PRINT(("TYPE DEF\n"));
 		break;
+	case ID_EMPTY:
+		DEBUG_PRINT(("EMPTY TOKEN\n"));
+		break;
 	default:
 		DEBUG_PRINT(("lol je to v riti\n"));
 		break;
 	}
 }
-
 
 int is_token(tTokenPtr token)
 {
@@ -237,7 +239,7 @@ int is_token(tTokenPtr token)
 	}
 }
 
-char* is_token_lit(tTokenPtr token)
+char *is_token_lit(tTokenPtr token)
 {
 	switch (token->id)
 	{
@@ -246,7 +248,7 @@ char* is_token_lit(tTokenPtr token)
 		break;
 
 	case ID_INT_LIT:
-			return (char *)(token->att.i);
+		return (char *)(token->att.i);
 
 		break;
 
@@ -257,45 +259,42 @@ char* is_token_lit(tTokenPtr token)
 		printf("lol je to v riti\n");
 		break;
 	}
-
 }
 
-char* is_token_add(tTokenPtr token, char *name, char *name2)
+char *is_token_add(tTokenPtr token, char *name, char *name2)
 {
-		char *array = NULL;
-		name = "var";
-		name2 = "var2";
-		//printf("bbbbb\n");
-		
-		array = (malloc((char) *name2));
-		strcat(array, name);
-		strcat(array, name2);
+	char *array = NULL;
+	name = "var";
+	name2 = "var2";
+	//printf("bbbbb\n");
 
-		switch (token->id)
-		{
+	array = (malloc((char)*name2));
+	strcat(array, name);
+	strcat(array, name2);
+
+	switch (token->id)
+	{
 		printf("bbbbb\n");
-		case ID_IDENTIFIER:
-			token->id = ID_INT_LIT;
-			token->att.s = array;
-			return token->att.s;
+	case ID_IDENTIFIER:
+		token->id = ID_INT_LIT;
+		token->att.s = array;
+		return token->att.s;
 		break;
 
-		case ID_INT_LIT:
+	case ID_INT_LIT:
 		printf("aaaaaaaabbbbb\n");
-				token->id = ID_INT_LIT;
-				token->att.i = (int) *array;
-				return (char *)(token->att.s);
-			break;
+		token->id = ID_INT_LIT;
+		token->att.i = (int)*array;
+		return (char *)(token->att.s);
+		break;
 
-		default:
+	default:
 		printf("defaild\n");
-			token->id = ID_INT_LIT;
-			token->att.s = array;
-			return token->att.i;
-			break;
-		}
-
-
+		token->id = ID_INT_LIT;
+		token->att.s = array;
+		return token->att.i;
+		break;
+	}
 }
 
 int str_alloc(char **str)
