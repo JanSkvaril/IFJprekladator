@@ -1,20 +1,21 @@
 //zdroooooooooooooooooooooooooooooooj!!
 #include "sym_table.h"
 
-unsigned long hash(char *str) {
+unsigned long hash(char *str)
+{
 
-        unsigned long hash = 5381;
-        int c;
-        while ((c = *str++))
-            hash = ((hash << 5) + hash) + c;
-        return hash;
-
+	unsigned long hash = 5381;
+	int c;
+	while ((c = *str++))
+		hash = ((hash << 5) + hash) + c;
+	return hash;
 }
 
 /* 
 ** Funkce provede počáteční inicializaci stromu před jeho prvním použitím.
 **/
-void Init (NodePtr *RootPtr) {
+void Init(NodePtr *RootPtr)
+{
 	*RootPtr = NULL;
 }
 
@@ -26,22 +27,23 @@ void Init (NodePtr *RootPtr) {
 ** hodnotu FALSE a obsah proměnné Content není definován (nic do ní proto
 ** nepřiřazujte).
 **/
-int BSTSearch (NodePtr RootPtr, unsigned long K, Data *Content)	{
-	if(RootPtr == NULL)
+int BSTSearch(NodePtr RootPtr, unsigned long K, Data **Content)
+{
+	if (RootPtr == NULL)
 		return FALSE;
-
+	//printf("key is: %ld", RootPtr->Key);
 	if (RootPtr->Key == K)
 	{
 		*Content = RootPtr->data;
-    	return TRUE;
+		return TRUE;
 	}
 
 	if (RootPtr->Key < K)
-       return BSTSearch(RootPtr->RPtr, K, Content);
+		return BSTSearch(RootPtr->RPtr, K, Content);
 
 	if (RootPtr->Key > K)
-    	return BSTSearch(RootPtr->LPtr, K, Content);
-	
+		return BSTSearch(RootPtr->LPtr, K, Content);
+
 	return FALSE;
 }
 
@@ -52,22 +54,23 @@ int BSTSearch (NodePtr RootPtr, unsigned long K, Data *Content)	{
 ** s klíčem K nahrazen novou hodnotou. Pokud bude do stromu vložen nový
 ** uzel, bude vložen vždy jako list stromu.
 **/
-void BSTInsert (NodePtr* RootPtr, unsigned long K, Data *Content)	{
-	if(*RootPtr == NULL)
+void BSTInsert(NodePtr *RootPtr, unsigned long K, Data *Content)
+{
+	if (*RootPtr == NULL)
 	{
 		NodePtr new = malloc(sizeof(struct Node) + sizeof(Content));
-		if(new==NULL)
+		if (new == NULL)
 			return;
-		new->data = *Content;
+		new->data = Content;
 		new->Key = K;
 		new->RPtr = NULL;
 		new->LPtr = NULL;
 		(*RootPtr) = new;
-	} 
+	}
 	else
 	{
-		if(K == (*RootPtr)->Key)
-			(*RootPtr)->data = *Content;
+		if (K == (*RootPtr)->Key)
+			(*RootPtr)->data = Content;
 		else if (K < (*RootPtr)->Key)
 			BSTInsert(&(*RootPtr)->LPtr, K, Content);
 		else if (K > (*RootPtr)->Key)
@@ -83,7 +86,8 @@ void BSTInsert (NodePtr* RootPtr, unsigned long K, Data *Content)	{
 ** Předpokládá se, že hodnota ukazatele RootPtr nebude NULL (zajistěte to
 ** testováním před volání této funkce).
 **/
-void ReplaceByRightmost (NodePtr PtrReplaced, NodePtr *RootPtr) {
+void ReplaceByRightmost(NodePtr PtrReplaced, NodePtr *RootPtr)
+{
 	if (*RootPtr != NULL)
 	{
 		if ((*RootPtr)->RPtr == NULL)
@@ -108,44 +112,45 @@ void ReplaceByRightmost (NodePtr PtrReplaced, NodePtr *RootPtr) {
 ** Pokud má rušený uzel oba podstromy, pak je rušený uzel nahrazen nejpravějším
 ** uzlem levého podstromu. Pozor! Nejpravější uzel nemusí být listem.
 **/
-void BSTDelete (NodePtr *RootPtr, unsigned long K) 		{
-if((*RootPtr) != NULL) {
-		if((*RootPtr)->Key>K)
+void BSTDelete(NodePtr *RootPtr, unsigned long K)
+{
+	if ((*RootPtr) != NULL)
+	{
+		if ((*RootPtr)->Key > K)
 			BSTDelete(&(*RootPtr)->LPtr, K);
-		else if((*RootPtr)->Key<K)
+		else if ((*RootPtr)->Key < K)
 			BSTDelete(&(*RootPtr)->RPtr, K);
-		else 
+		else
 		{
 			NodePtr old = *RootPtr;
-			
-			if((*RootPtr)->RPtr != NULL && (*RootPtr)->LPtr != NULL) 
+
+			if ((*RootPtr)->RPtr != NULL && (*RootPtr)->LPtr != NULL)
 				ReplaceByRightmost((*RootPtr), &(*RootPtr)->LPtr);
-			else if((*RootPtr)->RPtr == NULL)	
-			{	
-				free(old);					
+			else if ((*RootPtr)->RPtr == NULL)
+			{
+				free(old);
 				*RootPtr = (*RootPtr)->LPtr;
-			} 
-			else if((*RootPtr)->LPtr == NULL)	
-			{						
+			}
+			else if ((*RootPtr)->LPtr == NULL)
+			{
 				free(old);
 				*RootPtr = (*RootPtr)->RPtr;
-			} 
+			}
 			else
 			{
 				free(old);
 				*RootPtr = NULL;
-			}											
-				
+			}
 		}
-		
 	}
 }
 
 /*
 ** Zruší celý binární vyhledávací strom a korektně uvolní paměť.
 **/
-void Dispose (NodePtr *RootPtr) {	
-	if(*RootPtr != NULL)
+void Dispose(NodePtr *RootPtr)
+{
+	if (*RootPtr != NULL)
 	{
 		Dispose(&(*RootPtr)->LPtr);
 		Dispose(&(*RootPtr)->RPtr);
@@ -154,31 +159,33 @@ void Dispose (NodePtr *RootPtr) {
 	}
 }
 
-void Insert(NodePtr* RootPtr, char *k, Data *Content)
+void Insert(NodePtr *RootPtr, char *k, Data *Content)
 {
-	if(k == NULL)
+	if (k == NULL)
 		return;
+
 	unsigned long key = hash(k);
 	BSTInsert(RootPtr, key, Content);
 }
 
-int Search(NodePtr RootPtr, char *k, Data *Content)
+int Search(NodePtr RootPtr, char *k, Data **Content)
 {
-	if(k == NULL)
+	if (k == NULL)
 		return -1;
+	//printf("\n\n\n\n%s\n", k);
 	unsigned long key = hash(k);
 	BSTSearch(RootPtr, key, Content);
 }
 
-void Delete(NodePtr* RootPtr, char *k)
+void Delete(NodePtr *RootPtr, char *k)
 {
-	if(k == NULL)
+	if (k == NULL)
 		return;
 	unsigned long key = hash(k);
 	BSTDelete(RootPtr, key);
 }
 
-/* basic tests
+/*
 
 void main()
 {

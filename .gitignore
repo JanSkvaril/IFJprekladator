@@ -1,3 +1,7 @@
 *.o
 compiler
 .vscode
+deploy
+*.zip
+tests/log
+tests/outputs

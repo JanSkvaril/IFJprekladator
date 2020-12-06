@@ -2,30 +2,31 @@
 # Team 115
 
 CC = gcc
-CFLAGS = -g -Wall -pedantic -Wextra
-LFLAGS = -lm
-OBJ = scanner.o parser.o generator.o sym_table.o main.o
+all: CFLAGS = -g -Wall -pedantic -Wextra
+debug: CFLAGS = -g -Wall -pedantic -Wextra -DDEBUG
 
-compiler: $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ $(LFLAGS)
+LDFLAGS	=-lm
 
-scanner.o: scanner/scanner.c scanner/scanner.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
+SRC_DIRS = scanner parser generator error sym_table
+SRCS = $(shell find $(SRC_DIRS) -name "*.c")
+SRCS += main.c
+OBJS = $(addsuffix .o,$(basename $(SRCS)))
 
-parser.o: parser/parser.c parser/parser.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
+all: compiler
+debug: compiler
+compiler: $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
-generator.o: generator/generator.c generator/generator.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-sym_table.o: sym_table/sym_table.c sym_table/sym_table.h
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-main.o: main.c
-	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
-
-./PHONY: clean test
+.PHONY: clean test deploy zip
 test:
-#todo
+	cd tests;\
+	python2 testsuite.py --compiler ../compiler;\
+	cd ..
+#creates folder deploy, copies all source files and updates includes so that everything works wow
+deploy:
+	./deploy.sh
+zip:
+	zip -r -j xzavad18.zip deploy
 clean:
-	rm -f *.o compiler
+	find -name "*.o" -delete
+	rm -r -f compiler compiler_dbg

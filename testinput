@@ -1,0 +1,6 @@
+package main
+
+func main(a int, b string) {
+    a = 3
+}
+a := 2
