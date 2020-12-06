@@ -47,10 +47,10 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
     /* == GREATER==*/
     solve_and_replace_exp(ID_GREATER_EQ);
     /* =    Others   = */
-    /* == WRITE == */
-    solve_and_replace_exp(ID_ASSIGN);
     /* == COMMA == */
     solve_and_replace_exp(ID_COMMA);
+    /* == WRITE == */
+    solve_and_replace_exp(ID_ASSIGN);
     /* == DEFINE == */
     solve_and_replace_exp(ID_DEFINE);
     /* == RETURN VAL == */
@@ -126,6 +126,12 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
             }
             /* == LITERAL ==*/
             else if (stack->top->token->id == ID_INT_LIT || stack->top->token->id == ID_FLOAT_LIT || stack->top->token->id == ID_STRING_LIT)
+            {
+                tsPushExp(stack, makeLeaf(tsPopToken(stack)));
+                changed = true;
+            }
+            /* == UNDERLINE == */
+            else if (stack->top->token->id == ID_UNDER)
             {
                 tsPushExp(stack, makeLeaf(tsPopToken(stack)));
                 changed = true;
