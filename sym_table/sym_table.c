@@ -35,6 +35,7 @@ int BSTSearch(NodePtr RootPtr, unsigned long K, Data **Content)
 	if (RootPtr->Key == K)
 	{
 		*Content = RootPtr->data;
+		//printf("typ %d paramNum %d\n", RootPtr->data->type, RootPtr->data->paramsNumber);
 		return TRUE;
 	}
 
@@ -163,7 +164,6 @@ void Insert(NodePtr *RootPtr, char *k, Data *Content)
 {
 	if (k == NULL)
 		return;
-
 	unsigned long key = hash(k);
 	BSTInsert(RootPtr, key, Content);
 }
@@ -174,7 +174,9 @@ int Search(NodePtr RootPtr, char *k, Data **Content)
 		return -1;
 	//printf("\n\n\n\n%s\n", k);
 	unsigned long key = hash(k);
-	BSTSearch(RootPtr, key, Content);
+	int result = BSTSearch(RootPtr, key, Content);
+	//printf("TFJDKJFKD %d\n", (*Content)->paramsNumber);
+	return result;
 }
 
 void Delete(NodePtr *RootPtr, char *k)
