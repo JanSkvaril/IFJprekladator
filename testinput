@@ -1,11 +1,14 @@
 package main
 
-func main(a int) {
+func main(a int)(int) {
 	a = 1 * 2 * 3
 	b := 2
   	x := 3
+	return 5
 }
 
-func xmain(){
-	a:=2
+func xmain(g int){
+	a:=2+3
+	b:=5
+	a = main(5)
 }

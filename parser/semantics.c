@@ -73,6 +73,25 @@ void identifierScopeCheck(Scope *scope, tToken *term)
 
 void assignCheck(Scope *scope, Tree *tree, tID action)
 {
+    
+    if(tree->LPtr !=NULL)
+        if(tree->LPtr->value->id == ID_FUNC_CALL)
+        {
+            //printf("%d\n",varNumber(tree->LPtr->LPtr));
+            Scope *tmp = scope;
+            while(tmp->prev != NULL)
+            {
+                tmp = tmp->prev;
+            }
+            Data *dataType = malloc(sizeof(struct Data_struct));
+            Search(tmp->table, tree->LPtr->LPtr->value->att.s, &dataType);
+            //printf("%s, %d, %d\n", tree->LPtr->LPtr->value->att.s,varNumber(tree->LPtr->LPtr),  dataType->returnsNumber);
+            if(varNumber(tree->LPtr->LPtr) != dataType->returnsNumber)
+                parser_free_exit(6);
+            
+            free(dataType);
+        }
+    //else
     if (tree->value->id == ID_IDENTIFIER)
     {
         Data *dataType = malloc(sizeof(struct Data_struct));
@@ -181,13 +200,16 @@ void symTabDefineFunction(Scope *scope, tToken *name, Tree *Value)
 
     data->type = FUNC;
     data->paramsNumber = varNumber(Value->LPtr)/2;
-    //DEBUG_PRINT("%d, ", data->paramsNumber);
+    printf("%d---", data->paramsNumber);
+    //DEBUG_PRINT(("...%d..., ", data->paramsNumber));
     data->params = Value->LPtr;
     data->returnsNumber = varNumber(Value->RPtr);
+    
     data->returns = Value->RPtr;
     
 
     Insert(&scope->table, name->att.s, data);
+    DEBUG_PRINT(("inserted %s, type: %d, scope: %ld, params:%d \n", name->att.s, (int)data->type, scope->table->Key, data->paramsNumber));
 
 
     //DEBUG_PRINT("..%d, %d ..", varNumber(Value->LPtr)/2, varNumber(Value->RPtr));    
@@ -216,16 +238,24 @@ void funcCheck(Scope *scope, Tree *Value)
         tmp = tmp->prev;
     }
     Data *dataType = malloc(sizeof(struct Data_struct));
+    printf("%d, %d\n", Search(tmp->table, Value->LPtr->value->att.s, &dataType), varNumber(Value->RPtr));
+    printf(" %d\n",  dataType->paramsNumber);
+
     if (!Search(tmp->table, Value->LPtr->value->att.s, &dataType))
         parser_free_exit(3);
     else if(Value->RPtr != NULL)
     {
-        //DEBUG_PRINT("%d, %d", dataType->paramsNumber, (varNumber(Value->RPtr)));
+        //DEBUG_PRINT(("%d, %d ",, (varNumber(Value->RPtr))));
         if(dataType->paramsNumber != (varNumber(Value->RPtr)))
+        {
+            printf("..%d, %d", dataType->paramsNumber, varNumber(Value->RPtr));
             parser_free_exit(6);
+        }
+
     }
     else if(dataType->paramsNumber != 0)
         parser_free_exit(6);
+        
 
     //DEBUG_PRINT("%d", dataType->paramsNumber);
         
@@ -283,7 +313,7 @@ void defineFuncParams(Scope *scope, Tree *tree)
 
     //Insert(&scope->table, name->att.s, data);
     //DEBUG_PRINT("inserted %s, type: %d, scope: %ld \n", name->att.s, (int)data->type, scope->table->Key);
-    free(dataType);
+    //free(dataType);
 }
 
 void CheckTypes(Tree *tree, scopeStack *scopeS)
