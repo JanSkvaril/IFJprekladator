@@ -16,14 +16,12 @@ typedef enum
 	BUILT_CHR
 } tBUILT;
 
-void built_inputs(Exp*);
-void built_inputi(Exp*);
-void built_inputf(Exp*);
+void built_inputx(Exp*, char*);
 void built_print(Exp*);
 void built_int2float(Exp*, Exp*);
 void built_float2int(Exp*, Exp*);
-void built_len();
-void built_substr();
-void built_ord();
-void built_chr();
+void built_len(Exp*, Exp*);
+void built_substr(Exp*, Exp*);
+void built_ord(Exp*, Exp*);
+void built_chr(Exp*, Exp*);
 #endif

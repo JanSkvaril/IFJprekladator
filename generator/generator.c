@@ -25,7 +25,6 @@ void print_string_lit (char *str)
 			printf("%c", c);
 		i++;
 	}
-	printf("\n");
 	return;
 }
 
@@ -289,6 +288,7 @@ void gen_code(Exp *exp) {
 		case ID_STRING_LIT:
 			printf("MOVE LF@%s ", exp->RPtr->value->att.s);
 			print_string_lit(exp->LPtr->value->att.s);
+			printf("\n");
 			break;
 		}
 
@@ -319,6 +319,7 @@ void gen_code(Exp *exp) {
 		case ID_STRING_LIT:
 			printf("MOVE LF@%s ", exp->RPtr->value->att.s);
 			print_string_lit(exp->LPtr->value->att.s);
+			printf("\n");
 			break;
 		}
 
@@ -540,33 +541,39 @@ Exp *get_return_node (Exp *exp)
 }
 
 //print instructions for built-in funtions
-void proc_builtin(int builtin_func, Exp *exp, Exp *retvals)
+void proc_builtin(int builtin_func, Exp *params, Exp *retvals)
 {
 	switch(builtin_func)
 	{
 		case BUILT_INPUTS:
+			built_inputx(retvals, "string");
 			break;
 		case BUILT_INPUTI:
+			built_inputx(retvals, "int");
 			break;
 		case BUILT_INPUTF:
+			built_inputx(retvals, "float");
 			break;
 		case BUILT_PRINT:
-			built_print(exp);
+			built_print(params);
 			break;
 		case BUILT_INT2FLOAT:
-			built_int2float(exp, retvals);
+			built_int2float(params, retvals);
 			break;
 		case BUILT_FLOAT2INT:
-			built_float2int(exp, retvals);
+			built_float2int(params, retvals);
 			break;
 		case BUILT_LEN:
-			built_len(exp, retvals);
+			built_len(params, retvals);
 			break;
 		case BUILT_SUBSTR:
+			built_substr(params, retvals);
 			break;
 		case BUILT_ORD:
+			built_ord(params, retvals);
 			break;
 		case BUILT_CHR:
+			built_chr(params, retvals);
 			break;
 	}
 	return;
@@ -602,6 +609,7 @@ void print_arg(Exp *exp, int counter)
 			break;
 			case ID_STRING_LIT:
 				print_string_lit(exp->value->att.s);
+				printf("\n");
 			break;
 			default:
 			break;
@@ -736,7 +744,6 @@ void proc_func(Exp *exp)
 //recursevily called for every ";" node, calls functions to process all function definitions
 void generator(Exp *exp)
 {
-	//char *s = "retezec s lomitkem \\ a\nnovym#radkem";
 	//other than main
 	//create label, manage frame, add instructions for eventual parameters and return values
 	if (exp->value->id == ID_SEMICOLLON){
