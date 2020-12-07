@@ -52,7 +52,11 @@ void checkMembersType(tID value, int error)
 {
     nextMember = value;
     if (member != nextMember && member != ID_SEMICOLLON)
+    {
+        printf("%d, %d \n",member,nextMember);
         parser_free_exit(error);
+    }
+        
 
     member = nextMember;
 }
@@ -220,9 +224,9 @@ void funcCheck(Scope *scope, Tree *Value)
         parser_free_exit(3);
     else if(Value->RPtr != NULL)
     {
-        //DEBUG_PRINT("%d, %d", dataType->paramsNumber, (varNumber(Value->RPtr)));
-        if(dataType->paramsNumber != (varNumber(Value->RPtr)))
-            parser_free_exit(6);
+        //DEBUG_PRINT(("%d, %d", dataType->paramsNumber, (varNumber(Value->RPtr))));
+        //if(dataType->paramsNumber != (varNumber(Value->RPtr)))
+        //    parser_free_exit(6);
     }
     else if(dataType->paramsNumber != 0)
         parser_free_exit(6);
@@ -259,7 +263,7 @@ void defineFuncParam(Scope *scope, Tree *tree)
 
             Insert(&scope->table, tree->LPtr->value->att.s, data);
             DEBUG_PRINT(("inserted %s, type: %d, scope: %ld \n", tree->LPtr->value->att.s, (int)data->type, scope->table->Key));
-            free(dataType);
+            //free(dataType);
         } 
         defineFuncParam(scope,tree->RPtr);
         defineFuncParam(scope,tree->LPtr);

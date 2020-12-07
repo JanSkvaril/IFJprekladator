@@ -8,4 +8,5 @@ func main(a int) {
 
 func xmain(){
 	a:=2
+	a = main(a)
 }
