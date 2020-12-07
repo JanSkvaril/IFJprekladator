@@ -11,4 +11,5 @@ func xmain(g int){
 	a:=2+3
 	b:=5
 	a = main(5,2)
+	a = print()
 }
