@@ -86,10 +86,15 @@ void assignCheck(Scope *scope, Tree *tree, tID action)
             {
                 tmp = tmp->prev;
             }
-            Data *dataType;
-            Search(tmp->table, tree->LPtr->LPtr->value->att.s, &dataType);
-            if (varNumber(tree->RPtr) != dataType->returnsNumber)
-                parser_free_exit(6);
+            if(!isBuiltIn(tree->LPtr->LPtr->value))
+            {
+                Data *dataType;
+                Search(tmp->table, tree->LPtr->LPtr->value->att.s, &dataType);
+                //printf("%s %d ", tree->LPtr->LPtr->value->att.s, isBuiltIn(tree->LPtr->LPtr->value));
+                if (varNumber(tree->RPtr) != dataType->returnsNumber)
+                    parser_free_exit(6);
+                //printf("..%s %d ", tree->LPtr->LPtr->value->att.s, isBuiltIn(tree->LPtr->LPtr->value));
+            }
             return;
         }
     if (tree->value->id == ID_IDENTIFIER)
@@ -224,8 +229,22 @@ void defineFunctions(Tree *tree, scopeStack *scopeS)
     }
 }
 
+int isBuiltIn(tToken *func)
+{
+    char builtInFunc[][10] = {"inputs", "inputi", "inputf", "print", "int2float", "float2int", "len", "substr", "ord", "chr"};
+
+    for(size_t i = 0; i < sizeof(builtInFunc) / sizeof(builtInFunc[0]); i++)
+    {
+        
+         if(!strcmp(func->att.s, builtInFunc[i]))
+            return TRUE;
+    }  
+   return FALSE;
+}
+
 void funcCheck(Scope *scope, Tree *Value)
 {
+
     Scope *tmp = scope;
     while (tmp->prev != NULL)
     {
@@ -233,10 +252,13 @@ void funcCheck(Scope *scope, Tree *Value)
     }
     Data *dataType;
     //printf("%d, %d\n", Search(tmp->table, Value->LPtr->value->att.s, &dataType), varNumber(Value->RPtr));
-    // printf(" %d\n", dataType->type);
+    
 
     if (!Search(tmp->table, Value->LPtr->value->att.s, &dataType))
-        parser_free_exit(3);
+    {
+        if(!isBuiltIn(Value->LPtr->value))
+            parser_free_exit(3);
+    } 
     else if (Value->RPtr != NULL)
     {
         //DEBUG_PRINT(("%d, %d ",, (varNumber(Value->RPtr))));
@@ -249,6 +271,7 @@ void funcCheck(Scope *scope, Tree *Value)
     else if (dataType->paramsNumber != 0)
         parser_free_exit(6);
 
+    //printf(" %d\n", !isBuiltIn(Value->LPtr->value));
     //DEBUG_PRINT("%d", dataType->paramsNumber);
 
     //free(dataType);
