@@ -12,6 +12,19 @@ Exp *root;
 static int counter;
 char *buffer;
 
+static int ifCounterArray[2024];
+static int ifCounter = 0;
+static int ifCounterLength = 0;
+
+static int forCounterArray[2024];
+static int forCounter = 0;
+static int forCounterLength = 0;
+
+static int forCounter;
+char *forBuffer;
+
+
+
 void print_string_lit (char *str)
 {
 	int i = 0;
@@ -536,7 +549,7 @@ Exp *get_return_node (Exp *exp)
 {
 	while (exp->value->id != ID_KEY_RETURN)
 		exp = exp->LPtr;
-	
+
 	return exp;
 }
 
@@ -586,7 +599,7 @@ int is_builtin(char *func_name)
 	for (int i = 0; i < 10; i++)
 	{
 		if (strcmp(func_name, table[i]) == 0)
-			return i;	
+			return i;
 	}
 	return -1;
 }
@@ -697,7 +710,7 @@ void proc_func(Exp *exp)
 {
 	if (exp != NULL)
 	{
-		
+
 		//is function call
 		if (exp->value->id == ID_FUNC_CALL ||
 			(exp->value->id == ID_ASSIGN && exp->LPtr->value->id == ID_FUNC_CALL))
@@ -710,7 +723,7 @@ void proc_func(Exp *exp)
 			}
 			int builtin_func;
 			//is built-in
-			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1) 
+			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1)
 				proc_builtin(builtin_func, exp->RPtr, retvals);
 			//is user function
 			else
@@ -724,7 +737,7 @@ void proc_func(Exp *exp)
 					proc_func_call_retvals(retvals, 0);
 				}
 			}
-			
+
 			return;
 		}
 		//Kubova kouzelna funkce
@@ -741,6 +754,318 @@ void proc_func(Exp *exp)
 	}
 }
 
+
+
+void startIf(Exp *exp)
+{
+	// !!! these comments need to be printed !!!
+	//printf("DEFVAR bool$x\n");
+	//printf("DEFVAR bool$x2\n");
+
+	ifCounterLength++;
+	ifCounter++;
+	ifCounterArray[ifCounterLength] = ifCounter;
+
+	if (exp->Condition->value->id == ID_LESS) {
+		printf("LT ");
+	}
+	else if (exp->Condition->value->id == ID_LESS_EQ) {
+		printf("LT ");
+	}
+	else if (exp->Condition->value->id == ID_GREATER) {
+		printf("GT ");
+	}
+	else if (exp->Condition->value->id == ID_GREATER_EQ) {
+		printf("GT ");
+	}
+	else if (exp->Condition->value->id == ID_EQ) {
+		printf("EQ ");
+	}
+	else if (exp->Condition->value->id == ID_NEQ) {
+		printf("EQ ");
+	}
+
+	int type = exp->Condition->RPtr->value->id;
+	switch (type) {
+	case ID_IDENTIFIER:
+		printf("GF@bool$x LF@%s ", exp->Condition->RPtr->value->att.s);
+		break;
+	case ID_INT_LIT:
+		printf("GF@bool$x int@%ld ", exp->Condition->RPtr->value->att.i);
+		break;
+	case ID_FLOAT_LIT:
+		printf("GF@bool$x float@%.16lf ", exp->Condition->RPtr->value->att.d);
+		break;
+	case ID_STRING_LIT:
+		printf("GF@bool$x string@%s ", exp->Condition->RPtr->value->att.s);
+		break;
+	}
+
+	type = exp->Condition->LPtr->value->id;
+	switch (type) {
+	case ID_IDENTIFIER:
+		printf("LF@%s\n", exp->Condition->LPtr->value->att.s);
+		break;
+	case ID_INT_LIT:
+		printf("int@%ld\n", exp->Condition->LPtr->value->att.i);
+		break;
+	case ID_FLOAT_LIT:
+		printf("float@%.16lf\n", exp->Condition->LPtr->value->att.d);
+		break;
+	case ID_STRING_LIT:
+		printf("string@%s\n", exp->Condition->LPtr->value->att.s);
+		break;
+	}
+
+
+	if (exp->Condition->value->id == ID_LESS_EQ || exp->Condition->value->id == ID_GREATER_EQ) {
+		printf("EQ ");
+
+		type = exp->Condition->RPtr->value->id;
+		switch (type) {
+		case ID_IDENTIFIER:
+			printf("GF@bool$x2 LF@%s ",exp->Condition->RPtr->value->att.s);
+			break;
+		case ID_INT_LIT:
+			printf("GF@bool$x2 int@%ld ",exp->Condition->RPtr->value->att.i);
+			break;
+		case ID_FLOAT_LIT:
+			printf("GF@bool$x2 float@%.16lf ",exp->Condition->RPtr->value->att.d);
+			break;
+		case ID_STRING_LIT:
+			printf("GF@bool$x2 string@%s ",exp->Condition->RPtr->value->att.s);
+			break;
+		}
+
+		type = exp->Condition->LPtr->value->id;
+		switch (type) {
+		case ID_IDENTIFIER:
+			printf("LF@%s\n", exp->Condition->LPtr->value->att.s);
+			break;
+		case ID_INT_LIT:
+			printf("int@%ld\n", exp->Condition->LPtr->value->att.i);
+			break;
+		case ID_FLOAT_LIT:
+			printf("float@%.16lf\n", exp->Condition->LPtr->value->att.d);
+			break;
+		case ID_STRING_LIT:
+			printf("string@%s\n", exp->Condition->LPtr->value->att.s);
+			break;
+		}
+
+		printf("OR GF@bool$x GF@bool$x GF@bool$x2\n");
+	}
+
+
+
+	if (exp->Condition->value->id == ID_NEQ) {
+		printf("NOT GF@bool$x GF@bool$x\n");
+	}
+
+	printf("JUMPIFNEQ else$if$%d GF@bool$x bool@true\n", ifCounterArray[ifCounterLength]);
+
+	DEBUG_PRINT(("------ if vypis -----\n"));
+	// vypis if
+}
+
+void elseIf()
+{
+	printf("JUMP end$if$%d\n", ifCounterArray[ifCounterLength]);
+	printf("LABEL else$if$%d\n", ifCounterArray[ifCounterLength]);
+	DEBUG_PRINT(("--- if else vypis ----\n"));
+	// vypis else if
+
+}
+
+void endIf()
+{
+	printf("LABEL end$if$%d\n", ifCounterArray[ifCounterLength]);
+	//end of if / return to root of function if inIF = 0
+	ifCounterLength--;
+}
+
+
+void startFor(Exp *exp)
+{
+	forCounterLength++;
+	forCounter++;
+	forCounterArray[forCounterLength] = forCounter;
+	int typeFor;
+
+	 //-----------------------------------------
+	//definition - check expression exist, if yes, generate code for exp
+	if (exp->RPtr->RPtr->value->id == ID_SEMICOLLON) {
+		/* nothing */
+	}
+	else if (exp->RPtr->RPtr->value->id == ID_ASSIGN || exp->RPtr->RPtr->value->id == ID_DEFINE) {
+		syntax(exp->RPtr->RPtr);
+
+		forBuffer = malloc(snprintf(0, 0, "%s$%d", exp->RPtr->RPtr->value->att.s,forCounter)+1);
+		sprintf(forBuffer, "%s$%d", exp->RPtr->RPtr->value->att.s, forCounter);
+		char *varFor = forBuffer;
+
+
+		if (!strcmp(exp->RPtr->RPtr->value->att.s, exp->RPtr->LPtr->RPtr->RPtr->value->att.s)) {
+			printf("DEFVAR LF@%s\n", varFor);
+			printf("MOVE LF@%s LF@%s\n", varFor, exp->RPtr->RPtr->value->att.s);
+			exp->RPtr->LPtr->RPtr->RPtr->value->att.s = varFor;
+		}
+
+		if (!strcmp(exp->RPtr->RPtr->value->att.s, exp->RPtr->LPtr->RPtr->LPtr->value->att.s)) {
+			printf("DEFVAR LF@%s\n", varFor);
+			printf("MOVE LF@%s LF@%s\n", varFor, exp->RPtr->RPtr->value->att.s);
+			exp->RPtr->LPtr->RPtr->LPtr->value->att.s = varFor;
+		}
+
+	}
+
+	forBuffer = malloc(snprintf(0, 0, "for$%d", forCounter)+1);
+	sprintf(forBuffer, "for$%d", forCounter);
+
+	printf("DEFVAR LF@%s\n", forBuffer);
+	 //-----------------------------------------
+
+	printf("LABEL start$for$%d\n", forCounterArray[forCounterLength]);
+
+	if (exp->RPtr->LPtr->RPtr->value->id == ID_LESS) {
+		printf("LT ");
+	}
+	else if (exp->RPtr->LPtr->RPtr->value->id == ID_LESS_EQ) {
+		printf("LT ");
+	}
+	else if (exp->RPtr->LPtr->RPtr->value->id == ID_GREATER) {
+		printf("GT ");
+	}
+	else if (exp->RPtr->LPtr->RPtr->value->id == ID_GREATER_EQ) {
+		printf("GT ");
+	}
+	else if (exp->RPtr->LPtr->RPtr->value->id == ID_EQ) {
+		printf("EQ ");
+	}
+	else if (exp->RPtr->LPtr->RPtr->value->id == ID_NEQ) {
+		printf("EQ ");
+	}
+
+	typeFor = exp->RPtr->LPtr->RPtr->RPtr->value->id;
+	switch (typeFor) {
+	case ID_IDENTIFIER:
+		printf("GF@bool$x LF@%s ",exp->RPtr->LPtr->RPtr->RPtr->value->att.s);
+		break;
+	case ID_INT_LIT:
+		printf("GF@bool$x int@%ld ",exp->RPtr->LPtr->RPtr->RPtr->value->att.i);
+		break;
+	case ID_FLOAT_LIT:
+		printf("GF@bool$x float@%.16lf ",exp->RPtr->LPtr->RPtr->RPtr->value->att.d);
+		break;
+	case ID_STRING_LIT:
+		printf("GF@bool$x string@%s ",exp->RPtr->LPtr->RPtr->RPtr->value->att.s);
+		break;
+	}
+
+	typeFor = exp->RPtr->LPtr->RPtr->LPtr->value->id;
+	switch (typeFor) {
+	case ID_IDENTIFIER:
+		printf("LF@%s\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.s);
+		break;
+	case ID_INT_LIT:
+		printf("int@%ld\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.i);
+		break;
+	case ID_FLOAT_LIT:
+		printf("float@%.16lf\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.d);
+		break;
+	case ID_STRING_LIT:
+		printf("string@%s\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.s);
+		break;
+	}
+
+
+	if (exp->RPtr->LPtr->RPtr->value->id == ID_LESS_EQ || exp->RPtr->LPtr->RPtr->value->id == ID_GREATER_EQ) {
+		printf("EQ ");
+
+		typeFor = exp->RPtr->LPtr->RPtr->RPtr->value->id;
+		switch (typeFor) {
+		case ID_IDENTIFIER:
+			printf("GF@bool$x2 LF@%s ",exp->RPtr->LPtr->RPtr->RPtr->value->att.s);
+			break;
+		case ID_INT_LIT:
+			printf("GF@bool$x2 int@%ld ",exp->RPtr->LPtr->RPtr->RPtr->value->att.i);
+			break;
+		case ID_FLOAT_LIT:
+			printf("GF@bool$x2 float@%.16lf ",exp->RPtr->LPtr->RPtr->RPtr->value->att.d);
+			break;
+		case ID_STRING_LIT:
+			printf("GF@bool$x2 string@%s ",exp->RPtr->LPtr->RPtr->RPtr->value->att.s);
+			break;
+		}
+
+		typeFor = exp->RPtr->LPtr->RPtr->LPtr->value->id;
+		switch (typeFor) {
+		case ID_IDENTIFIER:
+			printf("LF@%s\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.s);
+			break;
+		case ID_INT_LIT:
+			printf("int@%ld\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.i);
+			break;
+		case ID_FLOAT_LIT:
+			printf("float@%.16lf\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.d);
+			break;
+		case ID_STRING_LIT:
+			printf("string@%s\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.s);
+			break;
+		}
+
+		printf("OR GF@bool$x GF@bool$x GF@bool$x2\n");
+	}
+
+	if (exp->RPtr->LPtr->RPtr->value->id == ID_NEQ) {
+		printf("NOT GF@bool$x GF@bool$x\n");
+	}
+
+	printf("JUMPIFNEQ end$for$%d GF@bool$x bool@true\n", forCounterArray[forCounterLength]);
+	DEBUG_PRINT(("------ for body -----\n"));
+}
+
+void endFor(Exp *exp)
+{
+
+ //-----------------------------------------
+	//command of assign - iteration changed - check expression exist, if yes, generate code for exp
+	if (exp->RPtr->LPtr->LPtr->value->id == ID_SEMICOLLON) {
+		/* nothing */
+	}
+	else if (exp->RPtr->LPtr->LPtr->value->id == ID_ASSIGN || exp->RPtr->LPtr->LPtr->value->id == ID_DEFINE) {
+		syntax(exp->RPtr->LPtr->LPtr);
+
+		forBuffer = malloc(snprintf(0, 0, "%s$%d", exp->RPtr->LPtr->LPtr->value->att.s,forCounter)+1);
+		sprintf(forBuffer, "%s$%d", exp->RPtr->LPtr->LPtr->value->att.s, forCounter);
+		char *varFor = forBuffer;
+
+
+		if (!strcmp(exp->RPtr->LPtr->LPtr->value->att.s, exp->RPtr->LPtr->RPtr->RPtr->value->att.s)) {
+
+			printf("MOVE LF@%s LF@%s\n", varFor, exp->RPtr->LPtr->value->att.s);
+			exp->RPtr->LPtr->RPtr->RPtr->value->att.s = varFor;
+		}
+
+		if (!strcmp(exp->RPtr->LPtr->LPtr->value->att.s, exp->RPtr->LPtr->RPtr->LPtr->value->att.s)) {
+
+			printf("MOVE LF@%s LF@%s\n", varFor, exp->RPtr->LPtr->value->att.s);
+			exp->RPtr->LPtr->RPtr->LPtr->value->att.s = varFor;
+		}
+
+
+	}
+	//------------------------------------
+
+	printf("JUMP start$for$%d\n", forCounterArray[forCounterLength]);
+	printf("LABEL end$for$%d\n", forCounterArray[forCounterLength]);
+	forCounterLength--;
+	DEBUG_PRINT(("------ end for -----\n"));
+}
+
+
+
+
 //recursevily called for every ";" node, calls functions to process all function definitions
 void generator(Exp *exp)
 {
@@ -750,7 +1075,7 @@ void generator(Exp *exp)
 		printf("\nLABEL $%s\n", exp->RPtr->LPtr->value->att.s);
 		printf("PUSHFRAME\n");
 		//parameters
-		if (exp->RPtr->Condition->LPtr != NULL)		
+		if (exp->RPtr->Condition->LPtr != NULL)
 			proc_func_params(exp->RPtr->Condition->LPtr, 0);
 		//function body
 		proc_func(exp->RPtr);
