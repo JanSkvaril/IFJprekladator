@@ -84,14 +84,10 @@ void assignCheck(Scope *scope, Tree *tree, tID action)
             }
             Data *dataType;
             Search(tmp->table, tree->LPtr->LPtr->value->att.s, &dataType);
-            //printf("%s, %d, %d\n", tree->LPtr->LPtr->value->att.s,varNumber(tree->LPtr->LPtr),  dataType->returnsNumber);
-            if (varNumber(tree->LPtr->LPtr) != dataType->returnsNumber)
+            if (varNumber(tree->RPtr) != dataType->returnsNumber)
                 parser_free_exit(6);
-
-            //free(dataType);
             return;
         }
-    //else
     if (tree->value->id == ID_IDENTIFIER)
     {
         Data *dataType;
