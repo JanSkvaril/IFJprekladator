@@ -12,6 +12,24 @@ Exp *root;
 static int counter;
 char *buffer;
 
+void print_string_lit (char *str)
+{
+	int i = 0;
+	char c;
+	printf("string@");
+	while ((c = str[i]) != '\0')
+	{
+		if ((c >= 0 && c <= 32) || c == 35 || c == 92)
+			printf("\\0%d", c);
+		else
+			printf("%c", c);
+		i++;
+	}
+	printf("\n");
+	return;
+}
+
+
 // char* literalType(tTokenPtr token, Exp *exp)
 // {
 //   char *a;
@@ -269,7 +287,8 @@ void gen_code(Exp *exp) {
 			printf("MOVE LF@%s float@%a\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("MOVE LF@%s string@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
+			printf("MOVE LF@%s ", exp->RPtr->value->att.s);
+			print_string_lit(exp->LPtr->value->att.s);
 			break;
 		}
 
@@ -298,7 +317,8 @@ void gen_code(Exp *exp) {
 			printf("MOVE LF@%s float@%a\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("MOVE LF@%s string@%s\n", exp->RPtr->value->att.s, exp->LPtr->value->att.s);
+			printf("MOVE LF@%s ", exp->RPtr->value->att.s);
+			print_string_lit(exp->LPtr->value->att.s);
 			break;
 		}
 
@@ -568,19 +588,20 @@ int is_builtin(char *func_name)
 void print_arg(Exp *exp, int counter)
 {
 	printf("DEFVAR TF@?param%d\n", counter);
+	printf("MOVE TF@?param%d ", counter);
 		switch (exp->value->id)
 		{
 			case ID_IDENTIFIER:
-				printf("MOVE TF@?param%d LF@%s\n", counter, exp->value->att.s);
+				printf("LF@%s\n", exp->value->att.s);
 			break;
 			case ID_INT_LIT:
-				printf("MOVE TF@?param%d int@%ld\n", counter, exp->value->att.i);
+				printf("int@%ld\n",exp->value->att.i);
 			break;
 			case ID_FLOAT_LIT:
-				printf("MOVE TF@?param%d float@%f\n", counter, exp->value->att.d);
+				printf("float@%f\n", exp->value->att.d);
 			break;
 			case ID_STRING_LIT:
-				printf("MOVE TF@?param%d string@%s\n", counter, exp->value->att.s);
+				print_string_lit(exp->value->att.s);
 			break;
 			default:
 			break;
@@ -661,6 +682,8 @@ void proc_func_call_retvals(Exp *exp, int counter)
 	return;
 }
 
+
+
 //process a function definition
 void proc_func(Exp *exp)
 {
@@ -713,6 +736,7 @@ void proc_func(Exp *exp)
 //recursevily called for every ";" node, calls functions to process all function definitions
 void generator(Exp *exp)
 {
+	//char *s = "retezec s lomitkem \\ a\nnovym#radkem";
 	//other than main
 	//create label, manage frame, add instructions for eventual parameters and return values
 	if (exp->value->id == ID_SEMICOLLON){

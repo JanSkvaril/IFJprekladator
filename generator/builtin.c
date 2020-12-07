@@ -1,7 +1,26 @@
 #include "builtin.h"
+#include "generator.h"
 
-//funguje jen pro jeden parametr v print
-//TODO
+void built_inputs(Exp *retvals)
+{
+	printf("READ LF@%s string", retvals->RPtr->value->att.s);
+	//printf("TYPE ")
+	return;
+}
+
+void built_inputi(Exp *retvals)
+{
+	printf("READ LF@%s int", retvals->RPtr->value->att.s);
+	return;
+}
+
+void built_inputf(Exp *retvals)
+{
+	printf("READ LF@%s float", retvals->RPtr->value->att.s);
+	return;
+}
+
+
 void built_print(Exp *exp)
 {
 	if (exp->value->id == ID_COMMA)
@@ -10,7 +29,26 @@ void built_print(Exp *exp)
 		built_print(exp->LPtr);
 	}
 	else
-		printf("WRITE LF@%s\n", exp->value->att.s);
+	{
+		printf("WRITE ");
+		switch (exp->value->id)
+		{
+			case ID_IDENTIFIER:
+				printf("LF@%s\n", exp->value->att.s);
+			break;
+			case ID_INT_LIT:
+				printf("int@%ld\n", exp->value->att.i);
+			break;
+			case ID_FLOAT_LIT:
+				printf("LF@%f\n", exp->value->att.d);
+			break;
+			case ID_STRING_LIT:
+				print_string_lit(exp->value->att.s);
+			break;
+			default:
+			break;
+		}
+	}
 	return;
 }
 

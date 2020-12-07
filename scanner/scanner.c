@@ -780,6 +780,8 @@ tTokenRet get_token(tTokenPtr *token, tEolFlag eol)
 				ungetc(c, stdin);
 				state = START_S;
 			}
+			else if (c == EOF)
+				return RET_EOF;
 			break;
 		case BLOCK_COMMENT_S:
 			if (c == '*')

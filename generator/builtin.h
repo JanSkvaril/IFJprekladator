@@ -16,9 +16,9 @@ typedef enum
 	BUILT_CHR
 } tBUILT;
 
-void built_inputs();
-void built_inputi();
-void built_inputf();
+void built_inputs(Exp*);
+void built_inputi(Exp*);
+void built_inputf(Exp*);
 void built_print(Exp*);
 void built_int2float(Exp*, Exp*);
 void built_float2int(Exp*, Exp*);
