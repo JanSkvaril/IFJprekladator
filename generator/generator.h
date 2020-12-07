@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
+void print_string_lit(char*);
 
 void gen_code(Exp *exp);
 void generator(Exp *exp);
