@@ -1,4 +1,3 @@
-//zdroooooooooooooooooooooooooooooooj!!
 #ifndef SYM_H_
 #define SYM_H_
 
@@ -27,13 +26,11 @@ typedef struct Data_struct
 
 typedef struct Node
 {
-	unsigned long Key; /* klíč */
-	Data *data;		   /* užitečný obsah uzlu */
-	struct Node *LPtr; /* levý podstrom */
-	struct Node *RPtr; /* pravý podstrom */
+	unsigned long Key;
+	Data *data;
+	struct Node *LPtr;
+	struct Node *RPtr;
 } * NodePtr;
-
-/* prototypy funkcí */
 
 void Init(NodePtr *);
 int Search(NodePtr, char *, Data **);
