@@ -236,38 +236,76 @@ void gen_code(Exp *exp) {
 		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
 		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
+		if (exp->RPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT
+			|| exp->RPtr->value->id == ID_IDENTIFIER || exp->LPtr->value->id == ID_IDENTIFIER
+			|| exp->RPtr->value->id == ID_STRING_LIT || exp->LPtr->value->id == ID_STRING_LIT) {
+			type = exp->RPtr->value->id;
+			switch (type) {
+			case ID_IDENTIFIER:
+				printf("TYPE LF@%s LF@%s\n", exp->value->att.s, exp->RPtr->value->att.s);
+				printf("DIV LF@%s LF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("DIV LF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("DIV LF@%s float@%a ", exp->value->att.s, exp->RPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("DIV LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+				break;
+			}
 
-		type = exp->RPtr->value->id;
-		switch (type) {
-		case ID_IDENTIFIER:
-			printf("DIV LF@%s LF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
-			break;
-		case ID_INT_LIT:
-			printf("DIV LF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
-			break;
-		case ID_FLOAT_LIT:
-			printf("DIV LF@%s float@%a ", exp->value->att.s, exp->RPtr->value->att.d);
-			break;
-		case ID_STRING_LIT:
-			printf("DIV LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
-			break;
+			type = exp->LPtr->value->id;
+			switch (type) {
+			case ID_IDENTIFIER:
+				printf("LF@%s\n", exp->LPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("int@%ld\n", exp->LPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("float@%a\n", exp->LPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("string@%s\n", exp->LPtr->value->att.s);
+				break;
+			}
+		}
+		else if (exp->RPtr->value->id == ID_INT_LIT || exp->LPtr->value->id == ID_INT_LIT) {
+			type = exp->RPtr->value->id;
+			switch (type) {
+			case ID_IDENTIFIER:
+				printf("IDIV LF@%s LF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("IDIV LF@%s int@%ld ", exp->value->att.s, exp->RPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("IDIV LF@%s float@%a ", exp->value->att.s, exp->RPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("IDIV LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+				break;
+			}
+
+			type = exp->LPtr->value->id;
+			switch (type) {
+			case ID_IDENTIFIER:
+				printf("LF@%s\n", exp->LPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("int@%ld\n", exp->LPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("float@%a\n", exp->LPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("string@%s\n", exp->LPtr->value->att.s);
+				break;
+			}
 		}
 
-		type = exp->LPtr->value->id;
-		switch (type) {
-		case ID_IDENTIFIER:
-			printf("LF@%s\n", exp->LPtr->value->att.s);
-			break;
-		case ID_INT_LIT:
-			printf("int@%ld\n", exp->LPtr->value->att.i);
-			break;
-		case ID_FLOAT_LIT:
-			printf("float@%a\n", exp->LPtr->value->att.d);
-			break;
-		case ID_STRING_LIT:
-			printf("string@%s\n", exp->LPtr->value->att.s);
-			break;
-		}
 
 		//printf("DIV GF@%s GF@%s GF@%s\n", a, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
 		//printf("DIV\n");
@@ -282,7 +320,16 @@ void gen_code(Exp *exp) {
 		switch (type) {
 		case ID_IDENTIFIER:
 			exp->value->att.s = exp->RPtr->value->att.s;
-			printf("DEFVAR LF@%s\n", exp->RPtr->value->att.s);
+
+			if (ifCounterArray[ifCounterLength] > 0) {
+				printf("DEFVAR LF@%s$%d\n", exp->RPtr->value->att.s, ifCounterArray[ifCounterLength]);
+			}
+			else
+			{
+				printf("DEFVAR LF@%s\n", exp->RPtr->value->att.s);
+			}
+
+
 			break;
 		}
 
@@ -558,36 +605,36 @@ void proc_builtin(int builtin_func, Exp *params, Exp *retvals)
 {
 	switch(builtin_func)
 	{
-		case BUILT_INPUTS:
-			built_inputx(retvals, "string");
-			break;
-		case BUILT_INPUTI:
-			built_inputx(retvals, "int");
-			break;
-		case BUILT_INPUTF:
-			built_inputx(retvals, "float");
-			break;
-		case BUILT_PRINT:
-			built_print(params);
-			break;
-		case BUILT_INT2FLOAT:
-			built_int2float(params, retvals);
-			break;
-		case BUILT_FLOAT2INT:
-			built_float2int(params, retvals);
-			break;
-		case BUILT_LEN:
-			built_len(params, retvals);
-			break;
-		case BUILT_SUBSTR:
-			built_substr(params, retvals);
-			break;
-		case BUILT_ORD:
-			built_ord(params, retvals);
-			break;
-		case BUILT_CHR:
-			built_chr(params, retvals);
-			break;
+	case BUILT_INPUTS:
+		built_inputx(retvals, "string");
+		break;
+	case BUILT_INPUTI:
+		built_inputx(retvals, "int");
+		break;
+	case BUILT_INPUTF:
+		built_inputx(retvals, "float");
+		break;
+	case BUILT_PRINT:
+		built_print(params);
+		break;
+	case BUILT_INT2FLOAT:
+		built_int2float(params, retvals);
+		break;
+	case BUILT_FLOAT2INT:
+		built_float2int(params, retvals);
+		break;
+	case BUILT_LEN:
+		built_len(params, retvals);
+		break;
+	case BUILT_SUBSTR:
+		built_substr(params, retvals);
+		break;
+	case BUILT_ORD:
+		built_ord(params, retvals);
+		break;
+	case BUILT_CHR:
+		built_chr(params, retvals);
+		break;
 	}
 	return;
 }
@@ -609,24 +656,24 @@ void print_arg(Exp *exp, int counter)
 {
 	printf("DEFVAR TF@?param%d\n", counter);
 	printf("MOVE TF@?param%d ", counter);
-		switch (exp->value->id)
-		{
-			case ID_IDENTIFIER:
-				printf("LF@%s\n", exp->value->att.s);
-			break;
-			case ID_INT_LIT:
-				printf("int@%ld\n",exp->value->att.i);
-			break;
-			case ID_FLOAT_LIT:
-				printf("float@%f\n", exp->value->att.d);
-			break;
-			case ID_STRING_LIT:
-				print_string_lit(exp->value->att.s);
-				printf("\n");
-			break;
-			default:
-			break;
-		}
+	switch (exp->value->id)
+	{
+	case ID_IDENTIFIER:
+		printf("LF@%s\n", exp->value->att.s);
+		break;
+	case ID_INT_LIT:
+		printf("int@%ld\n",exp->value->att.i);
+		break;
+	case ID_FLOAT_LIT:
+		printf("float@%f\n", exp->value->att.d);
+		break;
+	case ID_STRING_LIT:
+		print_string_lit(exp->value->att.s);
+		printf("\n");
+		break;
+	default:
+		break;
+	}
 }
 
 //goes through all the function call arguments
@@ -703,64 +750,9 @@ void proc_func_call_retvals(Exp *exp, int counter)
 	return;
 }
 
-
-
-//process a function definition
-void proc_func(Exp *exp)
-{
-	if (exp != NULL)
-	{
-
-		//is function call
-		if (exp->value->id == ID_FUNC_CALL ||
-			(exp->value->id == ID_ASSIGN && exp->LPtr->value->id == ID_FUNC_CALL))
-		{
-			Exp *retvals = NULL;
-			if (exp->value->id == ID_ASSIGN)
-			{
-				retvals = exp->RPtr;
-				exp = exp->LPtr;
-			}
-			int builtin_func;
-			//is built-in
-			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1)
-				proc_builtin(builtin_func, exp->RPtr, retvals);
-			//is user function
-			else
-			{
-				printf("CREATEFRAME\n"); //zbytecne kdyz nema parametry
-				if (exp->RPtr != NULL) //has parameters
-					proc_func_args(exp->RPtr, 0);
-				printf("CALL $%s\n", exp->LPtr->value->att.s);
-				if (retvals != NULL)
-				{
-					proc_func_call_retvals(retvals, 0);
-				}
-			}
-
-			return;
-		}
-		//Kubova kouzelna funkce
-		else if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
-			syntax(exp);
-			return;
-		}
-		if (exp->value->id == ID_KEY_RETURN)
-			return;
-	//toto asi nemusi prochazet uplne vsechno, ale zatim to funguje
-	proc_func(exp->RPtr);
-	proc_func(exp->Condition);
-	proc_func(exp->LPtr);
-	}
-}
-
-
-
 void startIf(Exp *exp)
 {
 	// !!! these comments need to be printed !!!
-	//printf("DEFVAR bool$x\n");
-	//printf("DEFVAR bool$x2\n");
 
 	ifCounterLength++;
 	ifCounter++;
@@ -857,7 +849,6 @@ void startIf(Exp *exp)
 	}
 
 
-
 	if (exp->Condition->value->id == ID_NEQ) {
 		printf("NOT GF@bool$x GF@bool$x\n");
 	}
@@ -884,7 +875,6 @@ void endIf()
 	ifCounterLength--;
 }
 
-
 void startFor(Exp *exp)
 {
 	forCounterLength++;
@@ -892,7 +882,7 @@ void startFor(Exp *exp)
 	forCounterArray[forCounterLength] = forCounter;
 	int typeFor;
 
-	 //-----------------------------------------
+	//-----------------------------------------
 	//definition - check expression exist, if yes, generate code for exp
 	if (exp->RPtr->RPtr->value->id == ID_SEMICOLLON) {
 		/* nothing */
@@ -923,7 +913,7 @@ void startFor(Exp *exp)
 	sprintf(forBuffer, "for$%d", forCounter);
 
 	printf("DEFVAR LF@%s\n", forBuffer);
-	 //-----------------------------------------
+	//-----------------------------------------
 
 	printf("LABEL start$for$%d\n", forCounterArray[forCounterLength]);
 
@@ -1028,7 +1018,7 @@ void startFor(Exp *exp)
 void endFor(Exp *exp)
 {
 
- //-----------------------------------------
+	//-----------------------------------------
 	//command of assign - iteration changed - check expression exist, if yes, generate code for exp
 	if (exp->RPtr->LPtr->LPtr->value->id == ID_SEMICOLLON) {
 		/* nothing */
@@ -1063,15 +1053,83 @@ void endFor(Exp *exp)
 	DEBUG_PRINT(("------ end for -----\n"));
 }
 
+//process a function definition
+void proc_func(Exp *exp)
+{
+	if (exp != NULL)
+	{
 
+		//is function call
+		if (exp->value->id == ID_FUNC_CALL ||
+		    (exp->value->id == ID_ASSIGN && exp->LPtr->value->id == ID_FUNC_CALL))
+		{
+			Exp *retvals = NULL;
+			if (exp->value->id == ID_ASSIGN)
+			{
+				retvals = exp->RPtr;
+				exp = exp->LPtr;
+			}
+			int builtin_func;
+			//is built-in
+			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1)
+				proc_builtin(builtin_func, exp->RPtr, retvals);
+			//is user function
+			else
+			{
+				printf("CREATEFRAME\n"); //zbytecne kdyz nema parametry
+				if (exp->RPtr != NULL) //has parameters
+					proc_func_args(exp->RPtr, 0);
+				printf("CALL $%s\n", exp->LPtr->value->att.s);
+				if (retvals != NULL)
+				{
+					proc_func_call_retvals(retvals, 0);
+				}
+			}
 
+			return;
+		}
+		//Kubova kouzelna funkce
+		if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
+			syntax(exp);
+			return;
+		}
+		if (exp->value->id == ID_KEY_IF) {
+			startIf(exp);
+			if (exp->LPtr->value != NULL) {
+				proc_func(exp->LPtr);
+			}
+			elseIf();
+			if (exp->RPtr->value != NULL) {
+				proc_func(exp->RPtr);
+			}
+			endIf();
+			return;
+		}
+
+		// if (exp->value->id == ID_KEY_FOR) {
+		// 	startFor(exp);
+		// 	if (exp->LPtr->value != NULL) {
+		// 		proc_func(exp->LPtr);
+		// 	}
+		// 	endFor(exp);
+		// 	return;
+		// }
+
+		if (exp->value->id == ID_KEY_RETURN)
+			return;
+		//toto asi nemusi prochazet uplne vsechno, ale zatim to funguje
+		proc_func(exp->RPtr);
+		proc_func(exp->Condition);
+		proc_func(exp->LPtr);
+	}
+}
 
 //recursevily called for every ";" node, calls functions to process all function definitions
 void generator(Exp *exp)
 {
 	//other than main
 	//create label, manage frame, add instructions for eventual parameters and return values
-	if (exp->value->id == ID_SEMICOLLON){
+	if (exp->value->id == ID_SEMICOLLON) {
 		printf("\nLABEL $%s\n", exp->RPtr->LPtr->value->att.s);
 		printf("PUSHFRAME\n");
 		//parameters

@@ -55,6 +55,8 @@ int main()
 	//DEBUG_PRINT(("----\n"));
 	//print_token(exp->RPtr->RPtr->value);
 	printf(".IFJcode20\n");
+	printf("DEFVAR GF@bool$x2\n");
+	printf("DEFVAR GF@bool$x\n");
 	printf("JUMP $main\n");
 	generator(exp->LPtr);
 	DEBUG_PRINT(("------------Generator exit!---------\n"));

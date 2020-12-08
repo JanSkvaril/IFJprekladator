@@ -16,7 +16,11 @@
 #include <stdio.h>
 
 void print_string_lit(char*);
-
+void startIf(Exp *exp);
+void elseIf();
+void endIf();
+void startFor(Exp *exp);
+void endFor(Exp *exp);
 void gen_code(Exp *exp);
 void generator(Exp *exp);
 
