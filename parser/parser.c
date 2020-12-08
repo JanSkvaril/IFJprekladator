@@ -504,6 +504,7 @@ Exp *Parse()
     ssAdd(scopeStack);
     defineFunctions(final_tree, scopeStack);
     CheckTypes(final_tree, scopeStack);
+    checkMain(scopeStack->top);
     DEBUG_PRINT(("Type check alright\n"));
     ssDispose(scopeStack);
     free(scopeStack);

@@ -75,7 +75,6 @@ void checkMembersType(tID value, int error)
     nextMember = value;
     if (member != nextMember && member != ID_SEMICOLLON)
     {
-        printf("%d, %d \n",member,nextMember);
         parser_free_exit(error);
     }
         
@@ -342,6 +341,13 @@ void defineFuncParams(Scope *scope, Tree *tree)
     Search(tmp->table, tree->LPtr->value->att.s, &dataType);
 
     defineFuncParam(scope, dataType->params);
+}
+
+void checkMain(Scope *scope)
+{
+    Data *dataType;
+    if(!Search(scope->table, "main", &dataType))
+        parser_free_exit(7);
 }
 
 void CheckTypes(Tree *tree, scopeStack *scopeS)

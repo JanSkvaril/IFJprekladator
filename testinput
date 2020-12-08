@@ -1,14 +1,14 @@
 package main
 
-func main(a int, kk string)(string, string) {
+func amain(a int, kk string)(string, string) {
 	a = 1 * 2 * 3
 	b := 2
-  	a,b = 3,""
+  	a,b = 3,2
 }
 
 func xmain(g int){
 	a:=2+3
 	b:=""
-	b,_ = main(2,"")
+	b,_ = amain(2,"")
 	//a = print()
 }

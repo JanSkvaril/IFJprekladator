@@ -22,6 +22,7 @@ Tree *makeLeaf(tToken *);
 Tree *makeTree(Tree *, Tree *, tToken *);
 Tree *makeIfTree(Tree *tru, Tree *cond, Tree *fals, tToken *token);
 Tree *AddToIfTree(Tree *, Tree *);
+void checkMain(Scope *);
 void disposeTree(Tree *);
 void CheckTypes(Tree *, scopeStack *);
 void defineFunctions(Tree *, scopeStack *);
