@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../scanner/scanner.h"
 #include "scope.h"
 #include "../sym_table/sym_table.h"

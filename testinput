@@ -1,6 +1,6 @@
 package main
 
-func main(a int, kk int)(int) {
+func main(a int, kk string)(string, string) {
 	a = 1 * 2 * 3
 	b := 2
   	x := 3
@@ -9,7 +9,7 @@ func main(a int, kk int)(int) {
 
 func xmain(g int){
 	a:=2+3
-	b:=5
-	a = main(5,2)
-	a = print()
+	b:=""
+	b,_ = main(2,"")
+	//a = print()
 }

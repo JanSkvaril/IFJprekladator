@@ -17,6 +17,29 @@ tToken *getValue(Tree *tree)
     return tree->value;
 }
 
+int isBuiltIn(tToken *func)
+{
+    char builtInFunc[][10] = {"inputs", "inputi", "inputf", "print", "int2float", "float2int", "len", "substr", "ord", "chr"};
+
+    for(size_t i = 0; i < sizeof(builtInFunc) / sizeof(builtInFunc[0]); i++)
+    {
+        
+         if(!strcmp(func->att.s, builtInFunc[i]))
+            return TRUE;
+    }  
+   return FALSE;
+}
+
+int varNumber(Tree *tree)
+{
+    if (tree == NULL)
+        return 0;
+    if (tree->RPtr == NULL && tree->LPtr == NULL)
+        return 1;
+    else
+        return varNumber(tree->RPtr) + varNumber(tree->LPtr);
+}
+
 void symTabDefine(Scope *scope, tToken *name, Tree *Value)
 {
     Data *dataType;
@@ -70,13 +93,35 @@ void identifierScopeCheck(Scope *scope, tToken *term)
         checkMembersType(dataType->type + 1, 4);
 }
 
+void checkReturnTypes(Scope *scope, Tree* root1, Tree* root2){
+	if(root1->LPtr==NULL && root2->LPtr==NULL && root1->RPtr==NULL && root2->RPtr==NULL)  
+    {
+        if(root1->value->id == ID_UNDER)
+            return;
+
+        Data *dataType;
+        if(!Search(scope->table, root1->value->att.s, &dataType))
+            parser_free_exit(3);
+
+        if(dataType->type+1 != root2->value->id-3)
+            parser_free_exit(6);
+        
+        return;
+    }
+		
+	if(root1->LPtr==NULL || root2->LPtr==NULL || root1->RPtr==NULL || root2->RPtr==NULL)
+        parser_free_exit(6);
+
+	checkReturnTypes(scope, root1->LPtr,root2->LPtr);
+    checkReturnTypes(scope, root1->RPtr,root2->RPtr); 
+}
+
 void assignCheck(Scope *scope, Tree *tree, tID action)
 {
 
     if (tree->LPtr != NULL)
         if (tree->LPtr->value->id == ID_FUNC_CALL)
         {
-            //printf("%d\n",varNumber(tree->LPtr->LPtr));
             Scope *tmp = scope;
             while (tmp->prev != NULL)
             {
@@ -86,10 +131,10 @@ void assignCheck(Scope *scope, Tree *tree, tID action)
             {
                 Data *dataType;
                 Search(tmp->table, tree->LPtr->LPtr->value->att.s, &dataType);
-                //printf("%s %d ", tree->LPtr->LPtr->value->att.s, isBuiltIn(tree->LPtr->LPtr->value));
                 if (varNumber(tree->RPtr) != dataType->returnsNumber)
                     parser_free_exit(6);
-                //printf("..%s %d ", tree->LPtr->LPtr->value->att.s, isBuiltIn(tree->LPtr->LPtr->value));
+                
+                checkReturnTypes(scope, tree->RPtr,dataType->returns);
             }
             return;
         }
@@ -176,20 +221,9 @@ int checkRelationIds(tID id)
     return FALSE;
 }
 
-int varNumber(Tree *tree)
-{
-    if (tree == NULL)
-        return 0;
-    if (tree->RPtr == NULL && tree->LPtr == NULL)
-        return 1;
-    else
-        return varNumber(tree->RPtr) + varNumber(tree->LPtr);
-}
-
 void symTabDefineFunction(Scope *scope, tToken *name, Tree *Value)
 {
     Data *dataType;
-    //DEBUG_PRINT("%d ", Value->value->id);
     if (Search(scope->table, name->att.s, &dataType))
         parser_free_exit(3);
 
@@ -199,8 +233,6 @@ void symTabDefineFunction(Scope *scope, tToken *name, Tree *Value)
 
     data->type = FUNC;
     data->paramsNumber = varNumber(Value->LPtr) / 2;
-    //printf("%d---", data->paramsNumber);
-    //DEBUG_PRINT(("...%d..., ", data->paramsNumber));
     data->params = Value->LPtr;
     data->returnsNumber = varNumber(Value->RPtr);
 
@@ -208,8 +240,6 @@ void symTabDefineFunction(Scope *scope, tToken *name, Tree *Value)
 
     Insert(&scope->table, name->att.s, data);
     DEBUG_PRINT(("inserted %s, type: %d, scope: %ld, params:%d \n", name->att.s, (int)data->type, scope->table->Key, data->paramsNumber));
-
-    //DEBUG_PRINT("..%d, %d ..", varNumber(Value->LPtr)/2, varNumber(Value->RPtr));
 }
 
 void defineFunctions(Tree *tree, scopeStack *scopeS)
@@ -225,31 +255,31 @@ void defineFunctions(Tree *tree, scopeStack *scopeS)
     }
 }
 
-int isBuiltIn(tToken *func)
+void checkParamTypes(Scope *scope, Tree *root1, Tree *root2)
 {
-    char builtInFunc[][10] = {"inputs", "inputi", "inputf", "print", "int2float", "float2int", "len", "substr", "ord", "chr"};
-
-    for(size_t i = 0; i < sizeof(builtInFunc) / sizeof(builtInFunc[0]); i++)
+	if(root1->value->id == ID_TYPE_DEF && root2->LPtr==NULL && root2->RPtr==NULL)
     {
-        
-         if(!strcmp(func->att.s, builtInFunc[i]))
-            return TRUE;
-    }  
-   return FALSE;
+        printf("%d, %d \n", root1->RPtr->value->id-3, root2->value->id);
+        if(root1->RPtr->value->id-3 != root2->value->id)
+            parser_free_exit(6);
+		return;
+    }
+
+	if(root1->value->id == ID_TYPE_DEF || root2->LPtr==NULL || root2->RPtr==NULL)
+        parser_free_exit(6);
+
+	checkParamTypes(scope, root1->LPtr, root2->LPtr);
+    checkParamTypes(scope, root1->RPtr,root2->RPtr); 
 }
 
 void funcCheck(Scope *scope, Tree *Value)
 {
-
     Scope *tmp = scope;
     while (tmp->prev != NULL)
     {
         tmp = tmp->prev;
     }
     Data *dataType;
-    //printf("%d, %d\n", Search(tmp->table, Value->LPtr->value->att.s, &dataType), varNumber(Value->RPtr));
-    
-
     if (!Search(tmp->table, Value->LPtr->value->att.s, &dataType))
     {
         if(!isBuiltIn(Value->LPtr->value))
@@ -257,20 +287,12 @@ void funcCheck(Scope *scope, Tree *Value)
     } 
     else if (Value->RPtr != NULL)
     {
-        //DEBUG_PRINT(("%d, %d ",, (varNumber(Value->RPtr))));
         if (dataType->paramsNumber != (varNumber(Value->RPtr)))
-        {
-            //printf("..%d, %d", dataType->paramsNumber, varNumber(Value->RPtr));
             parser_free_exit(6);
-        }
+        checkParamTypes(scope, dataType->params, Value->RPtr);
     }
     else if (dataType->paramsNumber != 0)
         parser_free_exit(6);
-
-    //printf(" %d\n", !isBuiltIn(Value->LPtr->value));
-    //DEBUG_PRINT("%d", dataType->paramsNumber);
-
-    //free(dataType);
 }
 
 void defineFuncParam(Scope *scope, Tree *tree)
@@ -278,10 +300,8 @@ void defineFuncParam(Scope *scope, Tree *tree)
 
     if (tree != NULL)
     {
-        //DEBUG_PRINT("XX\n");
         if (tree->value->id == ID_TYPE_DEF)
         {
-            //DEBUG_PRINT("XX\n");
             Data *dataType;
             if (Search(scope->table, tree->LPtr->value->att.s, &dataType))
                 parser_free_exit(3);
@@ -316,17 +336,10 @@ void defineFuncParams(Scope *scope, Tree *tree)
     Search(tmp->table, tree->LPtr->value->att.s, &dataType);
 
     defineFuncParam(scope, dataType->params);
-
-    //data->type =
-
-    //Insert(&scope->table, name->att.s, data);
-    //DEBUG_PRINT("inserted %s, type: %d, scope: %ld \n", name->att.s, (int)data->type, scope->table->Key);
-    //free(dataType);
 }
 
 void CheckTypes(Tree *tree, scopeStack *scopeS)
 {
-    //tutaj pisaj
     if (tree != NULL)
     {
         if (tree->value->id == ID_DIV && tree->LPtr->value->att.i == 0)
