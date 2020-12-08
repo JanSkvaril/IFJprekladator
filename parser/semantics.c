@@ -259,7 +259,6 @@ void checkParamTypes(Scope *scope, Tree *root1, Tree *root2)
 {
 	if(root1->value->id == ID_TYPE_DEF && root2->LPtr==NULL && root2->RPtr==NULL)
     {
-        printf("%d, %d \n", root1->RPtr->value->id-3, root2->value->id);
         if(root1->RPtr->value->id-3 != root2->value->id)
             parser_free_exit(6);
 		return;
