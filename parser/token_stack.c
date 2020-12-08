@@ -11,6 +11,7 @@ void tsPushToken(TokenStack *stack, tToken *token)
 {
     if (token == NULL)
     {
+        tsDispose(stack);
         parser_free_exit(SYN_ERR);
     }
     sToken *new_token = malloc(sizeof(sToken));
@@ -28,6 +29,7 @@ void tsPushExp(TokenStack *stack, Exp *exp)
 {
     if (exp == NULL)
     {
+        tsDispose(stack);
         parser_free_exit(SYN_ERR);
     }
     sToken *new_token = malloc(sizeof(sToken));
@@ -45,10 +47,12 @@ tToken *tsPopToken(TokenStack *stack)
 {
     if (stack->top == NULL)
     {
+        tsDispose(stack);
         parser_free_exit(SYN_ERR);
     }
     if (stack->top->token == NULL)
     {
+        tsDispose(stack);
         parser_free_exit(SYN_ERR);
     }
     tToken *token = stack->top->token;
@@ -64,10 +68,12 @@ Exp *tsPopExp(TokenStack *stack)
 {
     if (stack->top == NULL)
     {
+        tsDispose(stack);
         parser_free_exit(SYN_ERR);
     }
     if (stack->top->exp == NULL)
     {
+        tsDispose(stack);
         parser_free_exit(SYN_ERR);
     }
     Exp *token = stack->top->exp;
@@ -92,6 +98,14 @@ void tsDispose(TokenStack *stack)
     {
         sToken *deleted = stack->top;
         stack->top = deleted->prev;
+        if (deleted->token != NULL)
+        {
+            free(deleted->token);
+        }
+        if (deleted->exp != NULL)
+        {
+            disposeTree(deleted->exp);
+        }
         free(deleted);
     }
 }
@@ -189,7 +203,9 @@ void ReplaceWithExp(sToken *token, Exp *exp, int delete)
         }
     }
     else
+    {
         parser_free_exit(SYN_ERR);
+    }
 }
 
 void AddSemicolom(TokenStack *stack)

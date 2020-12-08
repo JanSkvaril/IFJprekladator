@@ -3,23 +3,23 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define solve_and_replace_exp(ID_OF_TOKEN)                                                 \
-    do                                                                                     \
-    {                                                                                      \
-        st = searchForRule(stack, ID_OF_TOKEN, endToken);                                  \
-        if (st != NULL)                                                                    \
-        {                                                                                  \
-            /*DEBUG_PRINT(("Expression rule found: %d\n", ID_OF_TOKEN));*/                 \
+#define solve_and_replace_exp(ID_OF_TOKEN)                                     \
+    do                                                                         \
+    {                                                                          \
+        st = searchForRule(stack, ID_OF_TOKEN, endToken);                      \
+        if (st != NULL)                                                        \
+        {                                                                      \
+            /*DEBUG_PRINT(("Expression rule found: %d\n", ID_OF_TOKEN));*/     \
             new_exp = makeTree(st->exp, st->prev->prev->exp, st->prev->token); \
-            ReplaceWithExp(st, new_exp, 2);                                                \
-            return true;                                                                   \
-        }                                                                                  \
+            ReplaceWithExp(st, new_exp, 2);                                    \
+            return true;                                                       \
+        }                                                                      \
     } while (false)
 
 #define replace_return
 
 /* Returns true if anything changed */
-bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
+bool ResolveExpresionRules(TokenStack *stack, id_t endToken)
 {
     bool changed = false;
     sToken *st;
@@ -109,7 +109,7 @@ bool ResolveExpresionRules(TokenStack *stack, id_t endToken, scopeStack *scope)
     return changed;
 }
 
-bool ResolveRules(TokenStack *stack, scopeStack *scope)
+bool ResolveRules(TokenStack *stack)
 {
     bool changed = false;
     bool scopeChanged = false;
@@ -160,7 +160,6 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
             {
                 if (scopeChanged == false)
                 {
-                    ssAdd(scope);
                     scopeChanged = true;
                 }
                 if (stack->top->prev != NULL)
@@ -185,7 +184,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             bool changed = true;
                             while (changed)
                             {
-                                changed = ResolveExpresionRules(stack, ID_KEY_IF, scope);
+                                changed = ResolveExpresionRules(stack, ID_KEY_IF);
                             }
                             break;
                         }
@@ -195,7 +194,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                             bool changed = true;
                             while (changed)
                             {
-                                changed = ResolveExpresionRules(stack, ID_KEY_FOR, scope);
+                                changed = ResolveExpresionRules(stack, ID_KEY_FOR);
                             }
                             break;
                         }
@@ -284,7 +283,7 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                 else
                 {
 
-                    changed = ResolveExpresionRules(stack, ID_ROUND_1, scope);
+                    changed = ResolveExpresionRules(stack, ID_ROUND_1);
                 }
             }
             /* == Semicollon: ; == */
@@ -317,15 +316,17 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                     tsPushToken(stack, bracket);
                 }
                 //not empty
-                changed = ResolveExpresionRules(stack, ID_CURLY_1, scope);
+                changed = ResolveExpresionRules(stack, ID_CURLY_1);
                 if (changed == false)
                 {
                     if (stack->top == NULL || stack->top->prev == NULL || stack->top->prev->prev == NULL)
                     {
+                        tsDispose(stack);
                         parser_free_exit(SYN_ERR);
                     }
                     else if ((IsToken(stack->top->prev) == false && IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_CURLY_1) == false)
                     {
+                        tsDispose(stack);
                         parser_free_exit(SYN_ERR);
                     }
                     DEBUG_PRINT(("} - replacing\n"));
@@ -401,9 +402,6 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
                         expCounter++;
                         curr = curr->prev;
                     }
-
-                    /* Remove scope */
-                    ssPop(scope);
                 }
             }
         }
@@ -444,12 +442,6 @@ bool ResolveRules(TokenStack *stack, scopeStack *scope)
 
 Exp *Parse()
 {
-    /* == Create scope == */
-    scopeStack *scopeS = malloc(sizeof(scopeStack));
-    if (scopeS == NULL)
-        return NULL; //TODO: rework
-    ssInit(scopeS);
-    ssAdd(scopeS);
 
     /* == Create stack == */
     TokenStack *stack = malloc(sizeof(TokenStack));
@@ -471,12 +463,12 @@ Exp *Parse()
         if (status == RET_OK)
         {
             tsPushToken(stack, token);
-            ResolveRules(stack, scopeS);
+            ResolveRules(stack);
         }
     } while (status == RET_OK);
     //add ending brackert
     tsPushToken(stack, oBracker2);
-    ResolveRules(stack, scopeS);
+    ResolveRules(stack);
 
     DEBUG_PRINT(("    == Parsing finished ==\n"));
     /* == Cleanup and return tree == */
@@ -484,6 +476,7 @@ Exp *Parse()
     if (stack->top == NULL || IsToken(stack->top))
     {
         DEBUG_PRINT(("!! Error durring parsing !! \n"));
+        tsDispose(stack);
         parser_free_exit(SYN_ERR);
     }
     Exp *final_tree = tsPopExp(stack); //EXP
@@ -494,7 +487,6 @@ Exp *Parse()
         DEBUG_PRINT(("Succesfuly reduced to one Exp\n"));
     }
     tsDispose(stack);
-    ssDispose(scopeS);
 
     scopeStack *scopeStack = malloc(sizeof(scopeStack));
     if (scopeStack == NULL)

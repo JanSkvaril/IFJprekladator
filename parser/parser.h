@@ -11,5 +11,5 @@
 Exp *Parse();
 
 /* Checks and resolves rules in stack, returns true, if there are no more rules to chechk */
-bool ResolveRules(TokenStack *, scopeStack *);
+bool ResolveRules(TokenStack *);
 #endif
