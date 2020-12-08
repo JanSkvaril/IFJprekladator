@@ -3,8 +3,7 @@ package main
 func main(a int, kk string)(string, string) {
 	a = 1 * 2 * 3
 	b := 2
-  	x := 3
-	return 5
+  	a,b = 3,""
 }
 
 func xmain(g int){

@@ -164,9 +164,12 @@ void assignCheck(Scope *scope, Tree *tree, tID action)
         return;
 
     assignCheck(scope, tree->LPtr, action);
-    right++;
-    assignCheck(scope, tree->RPtr, action);
-    right--;
+    if(!(right==0 && tree->RPtr->value == ID_COMMA))
+    {
+        right++;
+        assignCheck(scope, tree->RPtr, action);
+        right--;
+    }
 }
 
 Tree *makeLeaf(tToken *term)
