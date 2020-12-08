@@ -8,12 +8,14 @@
 
 #include "../scanner/scanner.h"
 #include "../sym_table/sym_table.h"
+#include "builtin.h"
 
 
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 
 void print_string_lit(char*);
 void startIf(Exp *exp);

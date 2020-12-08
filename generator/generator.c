@@ -1,15 +1,5 @@
 #include "generator.h"
 #include "../debug.h"
-#include "builtin.h"
-
-typedef enum{
-	CALLER_ARGS,
-	CALLER_RETVALS,
-	CALLEE_PARAMS,
-	CALLEE_RETVALS
-}tPARAM_RETVALS;
-
-
 
 int inFunction = 0;
 int inMain = 0;
@@ -34,6 +24,16 @@ static int forCounterLength = 0;
 static int forCounter;
 char *forBuffer;
 
+
+static int counter;
+
+typedef enum{
+	CALLER_ARGS,
+	CALLER_RETVALS,
+	CALLEE_PARAMS,
+	CALLEE_RETVALS
+}tPARAM_RETVALS;
+
 void print_string_lit (char *str)
 {
 	int i = 0;
@@ -47,6 +47,37 @@ void print_string_lit (char *str)
 			printf("%c", c);
 		i++;
 	}
+	return;
+}
+
+int built_flags[10] = {0};
+
+void built_flags_seen(tBUILT type)
+{
+	built_flags[type] = 1;
+	return;
+}
+
+void built_flags_print()
+{
+	if (built_flags[0])
+		built_inputx('s', "string");
+	if (built_flags[1])
+		built_inputx('i', "int");
+	if (built_flags[2])
+		built_inputx('f', "float");
+	if (built_flags[4])
+		built_int2float();
+	if (built_flags[5])
+		built_float2int();
+	if (built_flags[6])
+		built_len();
+	if (built_flags[7])
+		built_substr();
+	if (built_flags[8])
+		built_ord();
+	if (built_flags[9])
+		built_chr();
 	return;
 }
 
@@ -465,41 +496,42 @@ Exp *get_return_node (Exp *exp)
 }
 
 //print instructions for built-in funtions
-void proc_builtin(int builtin_func, Exp *params, Exp *retvals)
+void call_builtin(tBUILT type)
 {
-	switch(builtin_func)
+	printf("CALL ");
+	switch(type)
 	{
 	case BUILT_INPUTS:
-		built_inputx(retvals, "string");
+		printf("$built_inputs\n");
 		break;
 	case BUILT_INPUTI:
-		built_inputx(retvals, "int");
+		printf("$built_inputi\n");
 		break;
 	case BUILT_INPUTF:
-		built_inputx(retvals, "float");
-		break;
-	case BUILT_PRINT:
-		built_print(params);
+		printf("$built_inputf\n");
 		break;
 	case BUILT_INT2FLOAT:
-		built_int2float(params, retvals);
+		printf("$built_int2float\n");
 		break;
 	case BUILT_FLOAT2INT:
-		built_float2int(params, retvals);
+		printf("$built_float2int\n");
 		break;
 	case BUILT_LEN:
-		built_len(params, retvals);
+		printf("$built_len\n");
 		break;
 	case BUILT_SUBSTR:
-		built_substr(params, retvals);
+		printf("$built_substr\n");
 		break;
 	case BUILT_ORD:
-		built_ord(params, retvals);
+		printf("$built_ord\n");
 		break;
 	case BUILT_CHR:
-		built_chr(params, retvals);
+		printf("$built_chr\n");
 		break;
+	default:
+	break;
 	}
+	built_flags_seen(type);
 	return;
 }
 
@@ -529,7 +561,7 @@ void print_arg(Exp *exp, int counter)
 		printf("int@%ld\n",exp->value->att.i);
 		break;
 	case ID_FLOAT_LIT:
-		printf("float@%f\n", exp->value->att.d);
+		printf("float@%a\n", exp->value->att.d);
 		break;
 	case ID_STRING_LIT:
 		print_string_lit(exp->value->att.s);
@@ -550,15 +582,33 @@ void print_param(Exp *exp, int counter)
 
 void print_def_retval(Exp *exp, int counter)
 {
-	printf("DEFVAR LF@$retval%d\n", counter);
-	printf("MOVE LF@$retval%d LF@%s\n", counter, exp->value->att.s );
+	printf("DEFVAR LF@?retval%d\n", counter);
+	printf("MOVE LF@?retval%d ", counter);
+	switch (exp->value->id)
+	{
+	case ID_IDENTIFIER:
+		printf("LF@%s\n", exp->value->att.s);
+		break;
+	case ID_INT_LIT:
+		printf("int@%ld\n",exp->value->att.i);
+		break;
+	case ID_FLOAT_LIT:
+		printf("float@%a\n", exp->value->att.d);
+		break;
+	case ID_STRING_LIT:
+		print_string_lit(exp->value->att.s);
+		printf("\n");
+		break;
+	default:
+		break;
+	}
 	return;
 }
 
 void print_call_retval(Exp *exp, int counter)
 {
 	if (exp->value->id != ID_UNDER)
-		printf("MOVE LF@%s LF@$retval%d\n", exp->value->att.s, counter);
+		printf("MOVE LF@%s TF@?retval%d\n", exp->value->att.s, counter);
 	return;
 }
 
@@ -922,21 +972,26 @@ void proc_func(Exp *exp)
 				retvals = exp->RPtr;
 				exp = exp->LPtr;
 			}
+			
+			//is user function
+			printf("CREATEFRAME\n"); //zbytecne kdyz nema parametry
+			if (exp->RPtr != NULL) //has parameters
+				proc_params_retvals(exp->RPtr, 0, CALLER_ARGS);
+			
 			int builtin_func;
 			//is built-in
 			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1)
-				proc_builtin(builtin_func, exp->RPtr, retvals);
-			//is user function
-			else
 			{
-				printf("CREATEFRAME\n"); //zbytecne kdyz nema parametry
-				if (exp->RPtr != NULL) //has parameters
-					proc_params_retvals(exp->RPtr, 0, CALLER_ARGS);
+				if (builtin_func == BUILT_PRINT)
+					built_print(exp->RPtr);
+				else
+					call_builtin(builtin_func);
+			}
+			else
 				printf("CALL $%s\n", exp->LPtr->value->att.s);
-				if (retvals != NULL)
-				{
-					proc_params_retvals(retvals, 0, CALLER_RETVALS);
-				}
+			if (retvals != NULL)
+			{
+				proc_params_retvals(retvals, 0, CALLER_RETVALS);
 			}
 
 			return;
@@ -1013,6 +1068,9 @@ void generator(Exp *exp)
 		printf("PUSHFRAME\n");
 		proc_func(exp->RPtr);
 		printf("POPFRAME\n");
+		printf("JUMP $end_program\n");
+		built_flags_print();
+		printf("\nLABEL $end_program\n");
 	}
 	return;
 }

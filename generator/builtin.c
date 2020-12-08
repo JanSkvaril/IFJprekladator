@@ -2,35 +2,26 @@
 #include "builtin.h"
 #include "generator.h"
 
-#define REP2(X) X,X
-#define REP3(X) X,X,X
-
-static int built_counter = 0;
-
-void built_inputx(Exp *retvals, char *type)
+void built_inputx(char c, char *type)
 {
-	tTokenPtr retval0 = retvals->RPtr->value;
-	tTokenPtr retval1 = retvals->LPtr->value;
-
-	print_token(retval1);
-	if(retval1->id != ID_UNDER)
-		printf("MOVE LF@%s int@1\n", retval1->att.s);
-
-	printf("READ LF@%s %s\n", retval0->att.s, type);
-	printf("JUMPIFEQ *end%d LF@%s nil@nil\n", built_counter, retval0->att.s);
-	
-	if(retval1->id != ID_UNDER)
-		printf("MOVE LF@%s int@0\n", retval1->att.s);
-
-	printf("LABEL *end%d\n", built_counter);
-
-	built_counter++;
+	printf("\nLABEL $built_input%c\n", c);
+	printf("PUSHFRAME\n");
+	printf("DEFVAR LF@?retval0\n");
+	printf("DEFVAR LF@?retval1\n");
+	printf("MOVE LF@?retval1 int@1\n");
+	printf("READ LF@?retval0 %s\n", type);
+	printf("JUMPIFEQ *end_inputs LF@?retval0 nil@nil\n");
+	printf("MOVE LF@?retval1 int@0\n");
+	printf("LABEL *end_input%c\n", c);
+	printf("POPFRAME\n");
+	printf("RETURN\n");
 	return;
 }
 
 
 void built_print(Exp *params)
 {
+	
 	if (params == NULL)
 		return;
 	else if (params->value->id == ID_COMMA)
@@ -63,198 +54,153 @@ void built_print(Exp *params)
 	return;
 }
 
-void built_int2float(Exp *params, Exp *retvals)
-{
-	printf("INT2FLOAT LF@%s ", retvals->value->att.s);
-	if (params->value->id == ID_IDENTIFIER)
-		printf("LF@%s\n", params->value->att.s);
-	else
-		printf("int@%ld\n", params->value->att.i);
-
+void built_int2float()
+{	
+	printf("\nLABEL $built_int2float\n");
+	printf("PUSHFRAME\n");
+	printf("DEFVAR LF@?retval0\n");
+	printf("INT2FLOAT LF@?retval0 LF@?param0\n");
+	printf("POPFRAME\n");
+	printf("RETURN\n");
 	return;
 }
 
-void built_float2int(Exp *params, Exp *retvals)
+void built_float2int()
 {
-	printf("FLOAT2INT LF@%s ", retvals->value->att.s);
-	if (params->value->id == ID_IDENTIFIER)
-		printf("LF@%s\n", params->value->att.s);
-	else
-		printf("float@%a\n", params->value->att.d);
+	printf("\nLABEL $built_float2int\n");
+	printf("PUSHFRAME\n");
+	printf("DEFVAR LF@?retval0\n");
+	printf("FLOAT2INT LF@?retval0 LF@?param0\n");
+	printf("POPFRAME\n");
+	printf("RETURN\n");
+	return;
+}
+
+
+void built_len()
+{
+	printf("\nLABEL $built_len\n");
+	printf("PUSHFRAME\n");
+	printf("DEFVAR LF@?retval0\n");
+	printf("STRLEN LF@?retval0 LF@?param0\n");
+	printf("POPFRAME\n");
+	printf("RETURN\n");
+	return;
+}
+
+void built_substr()
+{
+	printf("\nLABEL $built_substr\n");
+	printf("PUSHFRAME\n");
+	printf("DEFVAR LF@?retval0\n");
+	printf("DEFVAR LF@?retval1\n");
+	printf("DEFVAR LF@*tmp_substr\n");
+	printf("DEFVAR LF@*sum_substr\n");
+
+
+	printf("MOVE LF@?retval0 nil@nil\n");
+	printf("MOVE LF@?retval1 int@1\n");
+
+
+
+	printf("LT LF@*tmp_substr LF@?param1 int@0\n");
+	printf("JUMPIFEQ *end_substr LF@*tmp_substr bool@true\n");
+
+	printf("LT LF@*tmp_substr LF@?param2 int@0\n");
+	printf("JUMPIFEQ *end_substr LF@*tmp_substr bool@true\n");
 	
-	return;
-}
+	printf("STRLEN LF@*tmp_substr LF@?param0\n");
+	printf("ADD LF@*sum_substr LF@?param1 LF@?param2\n");
+	printf("LT LF@*tmp_substr LF@*tmp_substr LF@*sum_substr\n");
+	printf("JUMPIFEQ *end_substr LF@*tmp_substr bool@true\n");
 
-void built_len(Exp *params, Exp *retvals)
-{
-	printf("STRLEN LF@%s ", retvals->value->att.s);
-	if (params->value->id == ID_IDENTIFIER)
-		printf("LF@%s\n", params->value->att.s);
-	else
-		printf("string@%s\n", params->value->att.s);
-
-	return;
-}
-
-void built_substr(Exp *params, Exp *retvals)
-{
-	tTokenPtr retval0 = retvals->RPtr->value;
-	tTokenPtr retval1 = retvals->LPtr->value;
-	tTokenPtr param0 = params->RPtr->value;
-	tTokenPtr param1 = params->LPtr->RPtr->value;
-	tTokenPtr param2 = params->LPtr->LPtr->value;
-
-	if(retval1->id != ID_UNDER)
-		printf("MOVE LF@%s int@1\n", retval1->att.s);
-
-	printf("DEFVAR LF@*str$%d\n", built_counter);
-	printf("MOVE LF@*str$%d ", built_counter);
-	if (param0->id == ID_IDENTIFIER)
-		printf("LF@%s\n", param0->att.s);
-	else
-	{
-		print_string_lit(param0->att.s);
-		printf("\n");
-	}
-
-	printf("DEFVAR LF@*iter$%d\n", built_counter);
-	printf("MOVE LF@*iter$%d ", built_counter);
-	if (param1->id == ID_IDENTIFIER)
-		printf("LF@%s\n", param1->att.s);
-	else
-		printf("int@%ld\n", param1->att.i);
-
-	printf("DEFVAR LF@*len$%d\n", built_counter);
-	printf("MOVE LF@*len$%d ", built_counter);
-	if (param2->id == ID_IDENTIFIER)
-		printf("LF@%s\n", param2->att.s);
-	else
-		printf("int@%ld\n", param2->att.i);
-
-	//arg check
-	printf("DEFVAR LF@*tmp$%d\n", built_counter);
-	printf("DEFVAR LF@*sum$%d\n", built_counter);
-	printf("STRLEN LF@*tmp$%d LF@*str$%d\n", REP2(built_counter));
-	printf("ADD LF@*sum$%d LF@*len$%d LF@*iter$%d\n", REP3(built_counter));
-	printf("LT LF@*tmp$%d LF@*tmp$%d LF@*sum$%d\n", REP3(built_counter));
-	printf("JUMPIFEQ *end%d LF@*tmp$%d bool@true\n", REP2(built_counter));
-
-	if(retval1->id != ID_UNDER)
-		printf("MOVE LF@%s int@0\n", retval1->att.s);
+	printf("MOVE LF@?retval1 int@0\n");
 
 	//calculation
-	printf("DEFVAR LF@*x%d\n", built_counter);
-	printf("DEFVAR LF@*y%d\n", built_counter);
-	printf("GETCHAR LF@*x%d LF@*str$%d LF@*iter$%d\n", REP3(built_counter));
+	printf("DEFVAR LF@*x_substr\n");
+	printf("DEFVAR LF@*y_substr\n");
+	printf("GETCHAR LF@*x_substr LF@?param0 LF@?param1\n");
 
-	printf("SUB LF@*len$%d LF@*len$%d int@1\n", REP2(built_counter));
-	printf("JUMPIFEQ *once%d LF@*len$%d int@0\n", REP2(built_counter));
-	printf("LABEL *loop%d\n", built_counter);
-	printf("ADD LF@*iter$%d LF@*iter$%d int@1\n", REP2(built_counter));
-	printf("GETCHAR LF@*y%d LF@*str$%d LF@*iter$%d\n", REP3(built_counter));
-	printf("CONCAT LF@*x%d LF@*x%d LF@*y%d\n", REP3(built_counter));
-	printf("SUB LF@*len$%d LF@*len$%d int@1\n", REP2(built_counter));
-	printf("JUMPIFNEQ *loop%d LF@*len$%d int@0\n", REP2(built_counter));
+	printf("SUB LF@?param2 LF@?param2 int@1\n");
+	printf("JUMPIFEQ *once_substr LF@?param2 int@0\n");
+	printf("LABEL *loop_substr\n");
+	printf("ADD LF@?param1 LF@?param1 int@1\n");
+	printf("GETCHAR LF@*y_substr LF@?param0 LF@?param1\n");
+	printf("CONCAT LF@*x_substr LF@*x_substr LF@*y_substr\n");
+	printf("SUB LF@?param2  LF@?param2  int@1\n");
+	printf("JUMPIFNEQ *loop_substr LF@?param2  int@0\n");
 
-	printf("LABEL *once%d\n", built_counter);
-	printf("MOVE LF@%s LF@*x%d\n", retval0->att.s, built_counter);
+	printf("LABEL *once_substr\n");
+	printf("MOVE LF@?retval0 LF@*x_substr\n");
 
-	printf("LABEL *end%d\n", built_counter);
+	printf("LABEL *end_substr\n");
 
-	built_counter++;
+	printf("POPFRAME\n");
+	printf("RETURN\n");
+
 	return;
 }
 
 
 
-void built_ord(Exp *params, Exp *retvals)
+void built_ord()
 {
-	tTokenPtr retval0 = retvals->RPtr->value;
-	tTokenPtr retval1 = retvals->LPtr->value;
-	tTokenPtr param0 = params->RPtr->value;
-	tTokenPtr param1 = params->LPtr->value;
+	printf("\nLABEL $built_ord\n");
+	printf("PUSHFRAME\n");
+	printf("DEFVAR LF@?retval0\n");
+	printf("DEFVAR LF@?retval1\n");
+	printf("DEFVAR LF@*tmp_ord\n");
 
-	if(retval1->id != ID_UNDER)
-		printf("MOVE LF@%s int@1\n", retval1->att.s);
+	printf("MOVE LF@?retval0 nil@nil\n");
+	printf("MOVE LF@?retval1 int@1\n");
+
+	printf("LT LF@*tmp_ord LF@?param1 int@0\n");
+	printf("JUMPIFEQ *end_ord LF@*tmp_ord bool@true\n");
+
+	printf("DEFVAR LF@*len_ord\n");
+	printf("STRLEN LF@*len_ord LF@?param0\n");
 	
-	printf("DEFVAR LF@*len%d\n", built_counter);
-	printf("STRLEN LF@*len%d ", built_counter);
-	if (param0->id == ID_IDENTIFIER)
-		printf("LF@%s\n", param0->att.s);
-	else
-	{
-		print_string_lit(param0->att.s);
-		printf("\n");
-	}
+	printf("GT LF@*tmp_ord LF@*len_ord LF@?param1\n");
+	printf("JUMPIFNEQ *end_ord LF@*tmp_ord bool@true\n");
+	printf("MOVE LF@?retval1 int@0\n");
 
-	printf("DEFVAR LF@*tmp%d\n", built_counter);
-	printf("GT LF@*tmp%d LF@*len%d ", built_counter, built_counter);
-	if (param1->id == ID_IDENTIFIER)
-		printf("LF@%s\n", param1->att.s);
-	else
-		printf("int@%ld\n", param1->att.i);
+	printf("STRI2INT LF@?retval0 LF@?param0 LF@?param1\n");
 
-	printf("JUMPIFNEQ *end%d LF@*tmp%d bool@true\n", built_counter, built_counter);
-	
-	if(retval1->id != ID_UNDER)
-		printf("MOVE LF@%s int@0\n", retval1->att.s);
-
-	if(retval0->id != ID_UNDER)
-	{
-		printf("STRI2INT LF@%s ", retval0->att.s);
-		if (param0->id == ID_IDENTIFIER)
-			printf("LF@%s ", param0->att.s);
-		else
-		{
-			print_string_lit(param0->att.s);
-			printf(" ");
-		}
-		if (param1->id == ID_IDENTIFIER)
-			printf("LF@%s\n", param1->att.s);
-		else
-			printf("int@%ld\n", param1->att.i);
-	}
-
-	printf("LABEL *end%d\n", built_counter);
-	built_counter++;
+	printf("LABEL *end_ord\n");
+	printf("POPFRAME\n");
+	printf("RETURN\n");
 	return;
 }
 
 
 
-void built_chr(Exp *params, Exp *retvals)
+void built_chr()
 {
-	tTokenPtr retval0 = retvals->RPtr->value;
-	tTokenPtr retval1 = retvals->LPtr->value;
-	tAttPtr param = params->value->att;
+	printf("\nLABEL $built_chr\n");
+	printf("PUSHFRAME\n");
+	printf("DEFVAR LF@?retval0\n");
+	printf("DEFVAR LF@?retval1\n");
 
-	if(retval1->id != ID_UNDER)
-		printf("MOVE LF@%s int@1\n", retval1->att.s);
+	printf("DEFVAR LF@*tmp_chr\n");
 
-	printf("DEFVAR LF@*tmp%d\n", built_counter);
 
-	printf("GT LF@*tmp%d ", built_counter);
-	if (params->value->id == ID_IDENTIFIER)
-		printf("LF@%s int@255\n", param.s);
-	else
-		printf("int@%ld int@255\n", param.i);
+	printf("MOVE LF@?retval0 nil@nil\n");
+	printf("MOVE LF@?retval1 int@1\n");
 
-	printf("JUMPIFEQ *end%d LF@*tmp%d bool@true\n", built_counter, built_counter);
+	printf("LT LF@*tmp_chr LF@?param0 int@0\n");
+	printf("JUMPIFEQ *end_chr LF@*tmp_chr bool@true\n");
+
+	printf("GT LF@*tmp_chr LF@?param0 int@255\n");
+	printf("JUMPIFEQ *end_chr LF@*tmp_chr bool@true\n");
+
+	printf("MOVE LF@?retval1 int@0\n");
+	printf("INT2CHAR LF@?retval0 LF@?param0\n");
+
+	printf("LABEL *end_chr\n");
+	printf("POPFRAME\n");
+	printf("RETURN\n");
+
 	
-	if(retval1->id != ID_UNDER)
-		printf("MOVE LF@%s int@0\n", retval1->att.s);
 
-	if(retval0->id != ID_UNDER)
-	{
-		printf("INT2CHAR LF@%s ", retval0->att.s);
-
-		if (params->value->id == ID_IDENTIFIER)
-			printf("LF@%s\n", param.s);
-		else
-			printf("int@%ld\n", param.i);
-	}
-	printf("LABEL *end%d\n", built_counter);
-
-	built_counter++;
 	return;
-}	
+}
