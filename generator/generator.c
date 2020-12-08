@@ -2,6 +2,15 @@
 #include "../debug.h"
 #include "builtin.h"
 
+typedef enum{
+	CALLER_ARGS,
+	CALLER_RETVALS,
+	CALLEE_PARAMS,
+	CALLEE_RETVALS
+}tPARAM_RETVALS;
+
+
+
 int inFunction = 0;
 int inMain = 0;
 char isMain[] = "main";
@@ -531,20 +540,6 @@ void print_arg(Exp *exp, int counter)
 	}
 }
 
-//goes through all the function call arguments
-void proc_func_args(Exp *exp, int counter)
-{
-	if (exp->value->id == ID_COMMA)
-	{
-		print_arg(exp->RPtr, counter);
-		counter++;
-		proc_func_args(exp->LPtr, counter);
-	}
-	else
-		print_arg(exp, counter);
-	return;
-}
-
 //print instructions for every parameter
 void print_param(Exp *exp, int counter)
 {
@@ -553,55 +548,63 @@ void print_param(Exp *exp, int counter)
 	return;
 }
 
-//at the start of a funtion definition, get params from temp frame
-void proc_func_params(Exp *exp, int counter)
-{
-	if (exp->value->id == ID_COMMA)
-	{
-		print_param(exp->RPtr, counter);
-		counter++;
-		proc_func_params(exp->LPtr, counter);
-	}
-	else
-		print_param(exp, counter);
-	return;
-}
 void print_def_retval(Exp *exp, int counter)
 {
 	printf("DEFVAR LF@$retval%d\n", counter);
 	printf("MOVE LF@$retval%d LF@%s\n", counter, exp->value->att.s );
 	return;
 }
-//go through ret vals in function definition
-void proc_func_def_retvals(Exp *exp, int counter)
-{
-	if (exp->value->id == ID_COMMA)
-	{
-		print_def_retval(exp->RPtr, counter);
-		counter++;
-		proc_func_def_retvals(exp->LPtr, counter);
-	}
-	else
-		print_def_retval(exp, counter);
-	return;
-}
 
 void print_call_retval(Exp *exp, int counter)
 {
-	printf("MOVE LF@%s LF@$retval%d\n", exp->value->att.s, counter);
+	if (exp->value->id != ID_UNDER)
+		printf("MOVE LF@%s LF@$retval%d\n", exp->value->att.s, counter);
 	return;
 }
 
-void proc_func_call_retvals(Exp *exp, int counter)
+
+
+void proc_params_retvals(Exp *exp, int counter, tPARAM_RETVALS type)
 {
 	if (exp->value->id == ID_COMMA)
 	{
-		print_call_retval(exp->RPtr, counter);
+		switch (type)
+		{
+			case CALLER_ARGS:
+				print_arg(exp->RPtr, counter);
+			break;
+			case CALLER_RETVALS:
+				print_call_retval(exp->RPtr, counter);
+			break;
+			case CALLEE_PARAMS:
+				print_param(exp->RPtr, counter);
+			break;
+			case CALLEE_RETVALS:
+				print_def_retval(exp->RPtr, counter);
+			break;
+		
+		}
 		counter++;
-		proc_func_call_retvals(exp->LPtr, counter);
+		proc_params_retvals(exp->LPtr, counter, type);
 	}
 	else
-		print_call_retval(exp, counter);
+	{
+		switch (type)
+		{
+			case CALLER_ARGS:
+				print_arg(exp, counter);
+			break;
+			case CALLER_RETVALS:
+				print_call_retval(exp, counter);
+			break;
+			case CALLEE_PARAMS:
+				print_param(exp, counter);
+			break;
+			case CALLEE_RETVALS:
+				print_def_retval(exp, counter);
+			break;
+		}
+	}
 	return;
 }
 
@@ -928,11 +931,11 @@ void proc_func(Exp *exp)
 			{
 				printf("CREATEFRAME\n"); //zbytecne kdyz nema parametry
 				if (exp->RPtr != NULL) //has parameters
-					proc_func_args(exp->RPtr, 0);
+					proc_params_retvals(exp->RPtr, 0, CALLER_ARGS);
 				printf("CALL $%s\n", exp->LPtr->value->att.s);
 				if (retvals != NULL)
 				{
-					proc_func_call_retvals(retvals, 0);
+					proc_params_retvals(retvals, 0, CALLER_RETVALS);
 				}
 			}
 
@@ -986,14 +989,14 @@ void generator(Exp *exp)
 		printf("PUSHFRAME\n");
 		//parameters
 		if (exp->RPtr->Condition->LPtr != NULL)
-			proc_func_params(exp->RPtr->Condition->LPtr, 0);
+			proc_params_retvals(exp->RPtr->Condition->LPtr, 0, CALLEE_PARAMS);
 		//function body
 		proc_func(exp->RPtr);
 		//return values
 		if (exp->RPtr->Condition->RPtr != NULL)
 		{
 			Exp *returnNode = get_return_node(exp->RPtr->RPtr);
-			proc_func_def_retvals(returnNode->LPtr, 0);
+			proc_params_retvals(returnNode->LPtr, 0, CALLEE_RETVALS);
 		}
 		if (exp->LPtr != NULL)
 			exp = exp->LPtr;
