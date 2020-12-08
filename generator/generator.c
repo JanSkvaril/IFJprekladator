@@ -8,22 +8,22 @@ char isMain[] = "main";
 Exp *id_exp = NULL;
 Exp *root;
 
-//literal name
+//literal counter
 static int counter;
 char *buffer;
 
+// if counter
 static int ifCounterArray[2024];
 static int ifCounter = 0;
 static int ifCounterLength = 0;
 
+// for counter
 static int forCounterArray[2024];
 static int forCounter = 0;
 static int forCounterLength = 0;
 
 static int forCounter;
 char *forBuffer;
-
-
 
 void print_string_lit (char *str)
 {
@@ -41,44 +41,10 @@ void print_string_lit (char *str)
 	return;
 }
 
-
-// char* literalType(tTokenPtr token, Exp *exp)
-// {
-//   char *a;
-//   int type = token->id;
-//   char str[128];
-//
-//   //exp = exp->value
-//   //int type = exp->id;
-//   //print_token(exp->id);
-// DEBUG_PRINT(("---------- here here ----------\n"));
-// //print_token(type);
-// //printf("%d\n", token->att.i);
-// //print_token(exp->id);
-//   switch (type) {
-//   case ID_IDENTIFIER:
-//
-//     return snprintf((char *)token->att.s, 128, (char *)"LF@%s");
-//     break;
-//   case ID_INT_LIT:
-//     return("int@%ld", (char *)token->att.i);
-//     break;
-//   case ID_FLOAT_LIT:
-//     //return (char *)("float@%a", exp->att.d);
-//     break;
-//   case ID_STRING_LIT:
-//     return("string@%s", token->att.s);
-//     break;
-//
-//   default:
-//   	break;
-//   }
-// }
-
+//  print arithmetic operation, defining and assigning variables
 void gen_code(Exp *exp) {
 
 	int type = exp->value->id;
-	char *a;
 
 	switch (type) {
 	case ID_ADD:
@@ -90,9 +56,7 @@ void gen_code(Exp *exp) {
 		sprintf(buffer, "var$%d", counter);
 		exp->value->att.s = buffer;
 
-		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
 		printf("DEFVAR LF@%s\n", exp->value->att.s);
-
 
 		type = exp->LPtr->value->id;
 		switch (type) {
@@ -125,9 +89,6 @@ void gen_code(Exp *exp) {
 			printf("string@%s\n", exp->RPtr->value->att.s);
 			break;
 		}
-
-		//printf("ADD GF@%s GF@%s GF@%s\n", a, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		//printf("ADD\n");
 		break;
 
 	case ID_SUB:
@@ -138,9 +99,8 @@ void gen_code(Exp *exp) {
 
 		exp->value->id = ID_IDENTIFIER;
 		exp->value->att.s = buffer;
-		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
+		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
 		type = exp->RPtr->value->id;
 		switch (type) {
@@ -173,20 +133,17 @@ void gen_code(Exp *exp) {
 			printf("string@%s\n", exp->LPtr->value->att.s);
 			break;
 		}
-
-		//printf("SUB GF@%s GF@%s GF@%s\n", a, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		//printf("SUB\n");
 		break;
 
 	case ID_MULT:
+
 		counter++;
 		buffer = malloc(snprintf(0, 0, "var$%d", counter)+1);
 		sprintf(buffer, "var$%d", counter);
 		exp->value->id = ID_IDENTIFIER;
 		exp->value->att.s = buffer;
-		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
+		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
 		type = exp->LPtr->value->id;
 		switch (type) {
@@ -220,20 +177,16 @@ void gen_code(Exp *exp) {
 			break;
 		}
 
-
-		//printf("MUL GF@%s %s %s\n", exp->value->att.s, literalType(exp->LPtr->value, exp), literalType(exp->RPtr->value, exp));
-
-		//printf("MULT\n");
-		//exit(0);
 		break;
 
 	case ID_DIV:
+
 		counter++;
 		buffer = malloc(snprintf(0, 0, "var$%d", counter)+1);
 		sprintf(buffer, "var$%d", counter);
 		exp->value->id = ID_IDENTIFIER;
 		exp->value->att.s = buffer;
-		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
+
 		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
 		if (exp->RPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT
@@ -306,14 +259,10 @@ void gen_code(Exp *exp) {
 			}
 		}
 
-
-		//printf("DIV GF@%s GF@%s GF@%s\n", a, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		//printf("DIV\n");
 		break;
 
 	case ID_DEFINE:
 
-		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
 		exp->value->id = ID_IDENTIFIER;
 
 		type = exp->RPtr->value->id;
@@ -329,10 +278,8 @@ void gen_code(Exp *exp) {
 				printf("DEFVAR LF@%s\n", exp->RPtr->value->att.s);
 			}
 
-
 			break;
 		}
-
 
 		type = exp->LPtr->value->id;
 		switch (type) {
@@ -352,15 +299,9 @@ void gen_code(Exp *exp) {
 			break;
 		}
 
-		//printf("MOVE GF@%s GF@%s\n", a, exp->LPtr->value->att.s);
-		//printf("WRITE %s\n", a);
-		//printf("MOVE\n");
 		break;
 
 	case ID_ASSIGN:
-		//a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		//printf("DEFVAR GF@%s\n", a);
-		//printf("MOVE GF@%s GF@%s\n", a, exp->LPtr->value->att.s);
 
 		exp->value->id = ID_IDENTIFIER;
 		exp->value->att.s = exp->RPtr->value->att.s;
@@ -383,72 +324,6 @@ void gen_code(Exp *exp) {
 			break;
 		}
 
-
-		//printf("WRITE %s\n", a);
-		//printf("MOVE\n");
-		break;
-
-	case ID_INT_LIT:
-		a = is_token_add(exp->value, exp->LPtr->value->att.s, exp->RPtr->value->att.s);
-		printf("DEFVAR LF@%s\n", a);
-
-		printf("MOVE LF@%s LF@%s\n", a, exp->LPtr->value->att.s);
-
-		printf("WRITE %s\n", a);
-		//printf("MOVE\n");
-		break;
-
-	case ID_KEY_IF:
-
-		//todo
-
-		printf("JUMPIFEQ else%s LF@b LF@b\n", is_token_lit(exp->value));
-
-		printf("JUMP if&end%s\n", is_token_lit(exp->RPtr->value));
-		printf("LABEL else%s\n", is_token_lit(exp->RPtr->value));
-
-		printf("LABEL if&end%s\n", is_token_lit(exp->value));
-
-		//printf("MOVE\n");
-		break;
-
-	case ID_KEY_FOR:
-
-		//todo
-
-		//printf("MOVE\n");
-		break;
-
-	case ID_KEY_FUNC:
-		printf("LABEL %s\n", is_token_lit(exp->value));
-		printf("CREATEFRAME\n");
-		//todo
-
-		printf("POPFRAME\n");
-		printf("RETURN\n");
-
-		//printf("MOVE\n");
-		break;
-
-	case ID_EQ:
-		//todo
-		printf("EQ %s %s %s\n", is_token_lit(exp->value), is_token_lit(exp->RPtr->value), is_token_lit(exp->LPtr->value));
-
-		//printf("MOVE\n");
-		break;
-
-	case ID_LESS:
-		//todo
-		printf("LT %s %s %s\n", is_token_lit(exp->value), is_token_lit(exp->RPtr->value), is_token_lit(exp->LPtr->value));
-
-		//printf("MOVE\n");
-		break;
-
-	case ID_GREATER:
-		//todo
-		printf("GT %s %s %s\n", is_token_lit(exp->value), is_token_lit(exp->RPtr->value), is_token_lit(exp->LPtr->value));
-
-		//printf("MOVE\n");
 		break;
 
 	default:
@@ -457,26 +332,16 @@ void gen_code(Exp *exp) {
 
 }
 
-
-void semicollon ()
-{
-
-}
-
-// ukazatel na přirazeni či vytvoření nove proměné
-// rekurzivní volání a generování instrukcí, vyjma vestavených funkci či funkcí s navratem
+// process expression from abstract syntax tree (move from bottom to top),
+// recursive function call together with 'gen_code' function
 void syntax(Exp *exp)
 {
 	root = exp;
 
-
 	if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN)
 	{
-
 		id_exp = exp;
-
 	}
-
 
 	if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN || exp->value->id == ID_ADD || exp->value->id == ID_SUB || exp->value->id == ID_MULT || exp->value->id == ID_DIV)
 	{
@@ -518,7 +383,6 @@ void syntax(Exp *exp)
 					break;
 				}
 			}
-			//print_token(exp->value);
 
 			if (((exp->RPtr->value->id == ID_IDENTIFIER || exp->RPtr->value->id == ID_INT_LIT || exp->RPtr->value->id == ID_FLOAT_LIT || exp->RPtr->value->id == ID_STRING_LIT) && (exp->LPtr->value->id == ID_IDENTIFIER || exp->LPtr->value->id == ID_INT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_STRING_LIT))) {
 				gen_code(exp);
@@ -531,9 +395,6 @@ void syntax(Exp *exp)
 			}
 
 		}
-
-
-
 
 		if (exp->LPtr->value->id == ID_ADD || exp->LPtr->value->id == ID_SUB || exp->LPtr->value->id == ID_MULT || exp->LPtr->value->id == ID_DIV) {
 
@@ -550,7 +411,6 @@ void syntax(Exp *exp)
 					break;
 				}
 			}
-			//printf("Cyc lengthllll: %d\n", cyc);
 			exp = root;
 
 			//tree - move
@@ -567,7 +427,6 @@ void syntax(Exp *exp)
 					break;
 				}
 			}
-			//print_token(exp->value);
 
 			if (((exp->RPtr->value->id == ID_IDENTIFIER || exp->RPtr->value->id == ID_INT_LIT || exp->RPtr->value->id == ID_FLOAT_LIT || exp->RPtr->value->id == ID_STRING_LIT) && (exp->LPtr->value->id == ID_IDENTIFIER || exp->LPtr->value->id == ID_INT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_STRING_LIT))) {
 				gen_code(exp);
@@ -581,14 +440,10 @@ void syntax(Exp *exp)
 
 		}
 
-
-
-
 	}
 	else
 	{
 		//DEBUG_PRINT(("EXIT 0\n"));
-		//exit(0);
 	}
 }
 
@@ -750,10 +605,9 @@ void proc_func_call_retvals(Exp *exp, int counter)
 	return;
 }
 
+//  Condition IF - process Condition and print IF header
 void startIf(Exp *exp)
 {
-	// !!! these comments need to be printed !!!
-
 	ifCounterLength++;
 	ifCounter++;
 	ifCounterArray[ifCounterLength] = ifCounter;
@@ -809,7 +663,6 @@ void startIf(Exp *exp)
 		break;
 	}
 
-
 	if (exp->Condition->value->id == ID_LESS_EQ || exp->Condition->value->id == ID_GREATER_EQ) {
 		printf("EQ ");
 
@@ -848,30 +701,30 @@ void startIf(Exp *exp)
 		printf("OR GF@bool$x GF@bool$x GF@bool$x2\n");
 	}
 
-
 	if (exp->Condition->value->id == ID_NEQ) {
 		printf("NOT GF@bool$x GF@bool$x\n");
 	}
 
 	printf("JUMPIFNEQ else$if$%d GF@bool$x bool@true\n", ifCounterArray[ifCounterLength]);
 
-	DEBUG_PRINT(("------ if vypis -----\n"));
-	// vypis if
+	DEBUG_PRINT(("------ if body -----\n"));
+	// print if body
 }
 
+// print else
 void elseIf()
 {
 	printf("JUMP end$if$%d\n", ifCounterArray[ifCounterLength]);
 	printf("LABEL else$if$%d\n", ifCounterArray[ifCounterLength]);
-	DEBUG_PRINT(("--- if else vypis ----\n"));
-	// vypis else if
+	DEBUG_PRINT(("--- else body ----\n"));
+	// print else body
 
 }
 
+// print end if
 void endIf()
 {
 	printf("LABEL end$if$%d\n", ifCounterArray[ifCounterLength]);
-	//end of if / return to root of function if inIF = 0
 	ifCounterLength--;
 }
 
@@ -1017,7 +870,6 @@ void startFor(Exp *exp)
 
 void endFor(Exp *exp)
 {
-
 	//-----------------------------------------
 	//command of assign - iteration changed - check expression exist, if yes, generate code for exp
 	if (exp->RPtr->LPtr->LPtr->value->id == ID_SEMICOLLON) {
@@ -1043,9 +895,7 @@ void endFor(Exp *exp)
 			exp->RPtr->LPtr->RPtr->LPtr->value->att.s = varFor;
 		}
 
-
 	}
-	//------------------------------------
 
 	printf("JUMP start$for$%d\n", forCounterArray[forCounterLength]);
 	printf("LABEL end$for$%d\n", forCounterArray[forCounterLength]);
@@ -1088,11 +938,13 @@ void proc_func(Exp *exp)
 
 			return;
 		}
-		//Kubova kouzelna funkce
+		//  is expression (DEFINE or ASSIGN)
 		if (exp->value->id == ID_DEFINE || exp->value->id == ID_ASSIGN) {
 			syntax(exp);
 			return;
 		}
+
+		// is if
 		if (exp->value->id == ID_KEY_IF) {
 			startIf(exp);
 			if (exp->LPtr->value != NULL) {
@@ -1105,7 +957,7 @@ void proc_func(Exp *exp)
 			endIf();
 			return;
 		}
-
+		// // is for
 		// if (exp->value->id == ID_KEY_FOR) {
 		// 	startFor(exp);
 		// 	if (exp->LPtr->value != NULL) {
