@@ -275,9 +275,9 @@ void checkParamTypes(Scope *scope, Tree *root1, Tree *root2)
         if(root2->value->id == ID_IDENTIFIER)
         {
             Data *dataType;
-            Search(scope->table, root2->value->att.s, &dataType);
-            if(root1->RPtr->value->id-3 != dataType->type+1)
-                parser_free_exit(6);
+            if(Search(scope->table, root2->value->att.s, &dataType))
+                if(root1->RPtr->value->id-3 != dataType->type+1)
+                    parser_free_exit(6);
         }
         else if(root1->RPtr->value->id-3 != root2->value->id)
             parser_free_exit(6);
