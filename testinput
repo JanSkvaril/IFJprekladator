@@ -1,14 +1,18 @@
+//
 package main
 
-func amain(a int, kk string)(string, string) {
-	a = 1 * 2 * 3
-	b := 2
-  	a,b = 3,2
+func PrintSuccess(cond int, a int, b int) {
+	if (cond==0) {
+		print("0")
+	} else {
+		print("1")
+	}
 }
 
-func xmain(g int){
-	a:=2+3
-	b:=""
-	b,_ = amain(2,"")
-	//a = print()
+func main () {
+	i := 0
+	f := 0.0
+	s := "hello world !?"
+
+	PrintSuccess(i, i, i)
 }

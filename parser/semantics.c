@@ -105,7 +105,7 @@ void checkReturnTypes(Scope *scope, Tree* root1, Tree* root2){
         Data *dataType;
         if(!Search(scope->table, root1->value->att.s, &dataType))
             parser_free_exit(3);
-
+        
         if(dataType->type+1 != root2->value->id-3)
             parser_free_exit(6);
         
@@ -163,12 +163,9 @@ void assignCheck(Scope *scope, Tree *tree, tID action)
         return;
 
     assignCheck(scope, tree->LPtr, action);
-    if(!(right==0 && tree->RPtr->value == ID_COMMA))
-    {
-        right++;
-        assignCheck(scope, tree->RPtr, action);
-        right--;
-    }
+    right++;
+    assignCheck(scope, tree->RPtr, action);
+    right--;
 }
 
 Tree *makeLeaf(tToken *term)
@@ -263,9 +260,11 @@ void defineFunctions(Tree *tree, scopeStack *scopeS)
 
 void checkParamTypes(Scope *scope, Tree *root1, Tree *root2)
 {
+    //printf("aa");
 	if(root1->value->id == ID_TYPE_DEF && root2->LPtr==NULL && root2->RPtr==NULL)
     {
-        if(root1->RPtr->value->id-3 != root2->value->id)
+        //printf("%d, %d\n",root1->RPtr->value->id-4, root2->value->id);
+        if(root1->RPtr->value->id-4 != root2->value->id)
             parser_free_exit(6);
 		return;
     }
@@ -274,7 +273,7 @@ void checkParamTypes(Scope *scope, Tree *root1, Tree *root2)
         parser_free_exit(6);
 
 	checkParamTypes(scope, root1->LPtr, root2->LPtr);
-    checkParamTypes(scope, root1->RPtr,root2->RPtr); 
+    checkParamTypes(scope, root1->RPtr, root2->RPtr); 
 }
 
 void funcCheck(Scope *scope, Tree *Value)
@@ -412,6 +411,7 @@ void disposeTree(Tree *tree)
     if (tree != NULL)
     {
         disposeTree(tree->LPtr);
+        disposeTree(tree->Condition);
         disposeTree(tree->RPtr);
         free(tree);
         tree = NULL;
