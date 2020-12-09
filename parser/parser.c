@@ -299,7 +299,12 @@ bool ResolveRules(TokenStack *stack)
             /* == Semicollon: ; == */
             else if (stack->top->token->id == ID_SEMICOLLON)
             {
-                if (IsToken(stack->top->prev) && (stack->top->prev->token->id == ID_KEY_FOR || stack->top->prev->token->id == ID_SEMICOLLON))
+                if (IsToken(stack->top->prev) && (stack->top->prev->token->id == ID_SEMICOLLON))
+                {
+                    tsDispose(stack);
+                    parser_free_exit(2);
+                }
+                if (IsToken(stack->top->prev) && (stack->top->prev->token->id == ID_KEY_FOR))
                 {
                     tToken *semicol = tsPopToken(stack);
                     tToken *empty = malloc(sizeof(tToken));
@@ -309,7 +314,8 @@ bool ResolveRules(TokenStack *stack)
                     tsPushToken(stack, semicol);
                     changed = true;
                 }
-                //tsPopToken(stack);
+
+                                //tsPopToken(stack);
             }
             /* == Right Curly bracket: } ==*/
             else if (stack->top->token->id == ID_CURLY_2)
