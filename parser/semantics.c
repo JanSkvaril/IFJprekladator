@@ -270,11 +270,16 @@ void defineFunctions(Tree *tree, scopeStack *scopeS)
 
 void checkParamTypes(Scope *scope, Tree *root1, Tree *root2)
 {
-    //printf("aa");
 	if(root1->value->id == ID_TYPE_DEF && root2->LPtr==NULL && root2->RPtr==NULL)
     {
-        //printf("%d, %d\n",root1->RPtr->value->id-4, root2->value->id);
-        if(root1->RPtr->value->id-4 != root2->value->id)
+        if(root2->value->id == ID_IDENTIFIER)
+        {
+            Data *dataType;
+            Search(scope->table, root2->value->att.s, &dataType);
+            if(root1->RPtr->value->id-3 != dataType->type+1)
+                parser_free_exit(6);
+        }
+        else if(root1->RPtr->value->id-3 != root2->value->id)
             parser_free_exit(6);
 		return;
     }
