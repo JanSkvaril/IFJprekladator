@@ -220,9 +220,9 @@ bool ResolveRules(TokenStack *stack)
                 /* == Single Exp in bracket: (Exp) */
                 if (IsToken(stack->top->prev->prev) && stack->top->prev->prev->token->id == ID_ROUND_1)
                 {
-                    tsPopToken(stack);          //)
+                   free(tsPopToken(stack));          //)
                     Exp *exp = tsPopExp(stack); //exp
-                    tsPopToken(stack);          //(
+                    free(tsPopToken(stack));          //(
                     tsPushExp(stack, exp);
                     changed = true;
                     /* == FUNC CALL == */
@@ -258,8 +258,8 @@ bool ResolveRules(TokenStack *stack)
                 /* Empty brackets */
                 else if (IsToken(stack->top->prev) && stack->top->prev->token->id == ID_ROUND_1)
                 {
-                    tsPopToken(stack);
-                    tsPopToken(stack);
+                    free(tsPopToken(stack));
+                    free(tsPopToken(stack));
                     //function call with empty brackets
                     if (IsToken(stack->top) == false && getValue(stack->top->exp)->id == ID_IDENTIFIER)
                     {
@@ -347,9 +347,9 @@ bool ResolveRules(TokenStack *stack)
                     }
                     DEBUG_PRINT(("} - replacing\n"));
                     //should like this {EXP}
-                    tsPopToken(stack);          //}
+                    free(tsPopToken(stack));          //}
                     Exp *exp = tsPopExp(stack); //exp
-                    tsPopToken(stack);          //{
+                    free(tsPopToken(stack));          //{
                     tsPushExp(stack, exp);
                     changed = true;
 
