@@ -10,7 +10,7 @@ void built_inputx(char c, char *type)
 	printf("DEFVAR LF@?retval1\n");
 	printf("MOVE LF@?retval1 int@1\n");
 	printf("READ LF@?retval0 %s\n", type);
-	printf("JUMPIFEQ *end_inputs LF@?retval0 nil@nil\n");
+	printf("JUMPIFEQ *end_input%c LF@?retval0 nil@nil\n", c);
 	printf("MOVE LF@?retval1 int@0\n");
 	printf("LABEL *end_input%c\n", c);
 	printf("POPFRAME\n");
@@ -21,7 +21,7 @@ void built_inputx(char c, char *type)
 
 void built_print(Exp *params)
 {
-	
+
 	if (params == NULL)
 		return;
 	else if (params->value->id == ID_COMMA)
@@ -55,7 +55,7 @@ void built_print(Exp *params)
 }
 
 void built_int2float()
-{	
+{
 	printf("\nLABEL $built_int2float\n");
 	printf("PUSHFRAME\n");
 	printf("DEFVAR LF@?retval0\n");
@@ -108,7 +108,7 @@ void built_substr()
 
 	printf("LT LF@*tmp_substr LF@?param2 int@0\n");
 	printf("JUMPIFEQ *end_substr LF@*tmp_substr bool@true\n");
-	
+
 	printf("STRLEN LF@*tmp_substr LF@?param0\n");
 	printf("ADD LF@*sum_substr LF@?param1 LF@?param2\n");
 	printf("LT LF@*tmp_substr LF@*tmp_substr LF@*sum_substr\n");
@@ -159,7 +159,7 @@ void built_ord()
 
 	printf("DEFVAR LF@*len_ord\n");
 	printf("STRLEN LF@*len_ord LF@?param0\n");
-	
+
 	printf("GT LF@*tmp_ord LF@*len_ord LF@?param1\n");
 	printf("JUMPIFNEQ *end_ord LF@*tmp_ord bool@true\n");
 	printf("MOVE LF@?retval1 int@0\n");
@@ -200,7 +200,7 @@ void built_chr()
 	printf("POPFRAME\n");
 	printf("RETURN\n");
 
-	
+
 
 	return;
 }

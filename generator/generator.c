@@ -24,10 +24,20 @@ static int forCounterLength = 0;
 static int forCounter;
 char *forBuffer;
 
+// int type
+bool intIdiv = false;
+static int ifIdivCounter = 0;
+static char *ifIdivArray[2024];
+bool intTypeFound = false;
+
+static int ifStringCounter = 0;
+static char *ifStringArray[2024];
+bool stringTypeFound = false;
+
 
 static int counter;
 
-typedef enum{
+typedef enum {
 	CALLER_ARGS,
 	CALLER_RETVALS,
 	CALLEE_PARAMS,
@@ -101,7 +111,24 @@ void gen_code(Exp *exp) {
 		type = exp->LPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("ADD LF@%s LF@%s ", exp->value->att.s, exp->LPtr->value->att.s);
+			for (int i=0; i<ifStringCounter; i++)
+			{
+				char *b = ifStringArray[i];
+				if (!strcmp(b, exp->RPtr->value->att.s)) {
+					stringTypeFound = true;
+				}
+				if (!strcmp(b, exp->LPtr->value->att.s)) {
+					stringTypeFound = true;
+				}
+			}
+			if (stringTypeFound) {
+				printf("CONCAT LF@%s LF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+				printf("LF@%s\n", exp->LPtr->value->att.s);
+			}
+			else
+			{
+				printf("ADD LF@%s LF@%s ", exp->value->att.s, exp->LPtr->value->att.s);
+			}
 			break;
 		case ID_INT_LIT:
 			printf("ADD LF@%s int@%ld ", exp->value->att.s, exp->LPtr->value->att.i);
@@ -110,14 +137,18 @@ void gen_code(Exp *exp) {
 			printf("ADD LF@%s float@%a ", exp->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("ADD LF@%s string@%s ", exp->value->att.s, exp->LPtr->value->att.s);
+			printf("CONCAT LF@%s ", exp->value->att.s);
+			print_string_lit(exp->LPtr->value->att.s);
+			printf(" ");
 			break;
 		}
 
 		type = exp->RPtr->value->id;
 		switch (type) {
 		case ID_IDENTIFIER:
-			printf("LF@%s\n", exp->RPtr->value->att.s);
+			if (!stringTypeFound) {
+				printf("LF@%s\n", exp->RPtr->value->att.s);
+			}
 			break;
 		case ID_INT_LIT:
 			printf("int@%ld\n", exp->RPtr->value->att.i);
@@ -126,9 +157,14 @@ void gen_code(Exp *exp) {
 			printf("float@%a\n", exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("string@%s\n", exp->RPtr->value->att.s);
+			if (!stringTypeFound) {
+				print_string_lit(exp->RPtr->value->att.s);
+				printf("\n");
+			}
 			break;
 		}
+
+		stringTypeFound = false;
 		break;
 
 	case ID_SUB:
@@ -154,7 +190,9 @@ void gen_code(Exp *exp) {
 			printf("SUB LF@%s float@%a ", exp->value->att.s, exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("SUB LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+			printf("SUB LF@%s ", exp->value->att.s);
+			print_string_lit(exp->RPtr->value->att.s);
+			printf(" ");
 			break;
 		}
 
@@ -170,7 +208,8 @@ void gen_code(Exp *exp) {
 			printf("float@%a\n", exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("string@%s\n", exp->LPtr->value->att.s);
+			print_string_lit(exp->LPtr->value->att.s);
+			printf("\n");
 			break;
 		}
 		break;
@@ -197,7 +236,9 @@ void gen_code(Exp *exp) {
 			printf("MUL LF@%s float@%a ", exp->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("MUL LF@%s string@%s ", exp->value->att.s, exp->LPtr->value->att.s);
+			printf("MUL LF@%s ", exp->value->att.s);
+			print_string_lit(exp->LPtr->value->att.s);
+			printf(" ");
 			break;
 		}
 
@@ -213,7 +254,8 @@ void gen_code(Exp *exp) {
 			printf("float@%a\n", exp->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
-			printf("string@%s\n", exp->RPtr->value->att.s);
+			print_string_lit(exp->RPtr->value->att.s);
+			printf("\n");
 			break;
 		}
 
@@ -227,15 +269,26 @@ void gen_code(Exp *exp) {
 		exp->value->id = ID_IDENTIFIER;
 		exp->value->att.s = buffer;
 
+		for (int i=1; i<ifIdivCounter; i++)
+		{
+			char *a = ifIdivArray[i];
+			if (!strcmp(a, exp->RPtr->value->att.s)) {
+				intTypeFound = true;
+			}
+			if (!strcmp(a, exp->LPtr->value->att.s)) {
+				intTypeFound = true;
+			}
+		}
+
 		printf("DEFVAR LF@%s\n", exp->value->att.s);
 
-		if (exp->RPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT
-			|| exp->RPtr->value->id == ID_IDENTIFIER || exp->LPtr->value->id == ID_IDENTIFIER
-			|| exp->RPtr->value->id == ID_STRING_LIT || exp->LPtr->value->id == ID_STRING_LIT) {
+		if ((exp->RPtr->value->id == ID_FLOAT_LIT || exp->LPtr->value->id == ID_FLOAT_LIT
+		     || (exp->RPtr->value->id == ID_IDENTIFIER && exp->LPtr->value->id == ID_IDENTIFIER)
+		     || exp->RPtr->value->id == ID_STRING_LIT || exp->LPtr->value->id == ID_STRING_LIT) && !intTypeFound) {
 			type = exp->RPtr->value->id;
 			switch (type) {
 			case ID_IDENTIFIER:
-				printf("TYPE LF@%s LF@%s\n", exp->value->att.s, exp->RPtr->value->att.s);
+				//printf("TYPE LF@%s LF@%s\n", exp->value->att.s, exp->RPtr->value->att.s);
 				printf("DIV LF@%s LF@%s ", exp->value->att.s, exp->RPtr->value->att.s);
 				break;
 			case ID_INT_LIT:
@@ -245,7 +298,9 @@ void gen_code(Exp *exp) {
 				printf("DIV LF@%s float@%a ", exp->value->att.s, exp->RPtr->value->att.d);
 				break;
 			case ID_STRING_LIT:
-				printf("DIV LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+				printf("DIV LF@%s ", exp->value->att.s);
+				print_string_lit(exp->RPtr->value->att.s);
+				printf(" ");
 				break;
 			}
 
@@ -261,11 +316,12 @@ void gen_code(Exp *exp) {
 				printf("float@%a\n", exp->LPtr->value->att.d);
 				break;
 			case ID_STRING_LIT:
-				printf("string@%s\n", exp->LPtr->value->att.s);
+				print_string_lit(exp->LPtr->value->att.s);
+				printf("\n");
 				break;
 			}
 		}
-		else if (exp->RPtr->value->id == ID_INT_LIT || exp->LPtr->value->id == ID_INT_LIT) {
+		else if (exp->RPtr->value->id == ID_INT_LIT || exp->LPtr->value->id == ID_INT_LIT || intIdiv) {
 			type = exp->RPtr->value->id;
 			switch (type) {
 			case ID_IDENTIFIER:
@@ -278,7 +334,9 @@ void gen_code(Exp *exp) {
 				printf("IDIV LF@%s float@%a ", exp->value->att.s, exp->RPtr->value->att.d);
 				break;
 			case ID_STRING_LIT:
-				printf("IDIV LF@%s string@%s ", exp->value->att.s, exp->RPtr->value->att.s);
+				printf("IDIV LF@%s ", exp->value->att.s);
+				print_string_lit(exp->RPtr->value->att.s);
+				printf(" ");
 				break;
 			}
 
@@ -294,10 +352,13 @@ void gen_code(Exp *exp) {
 				printf("float@%a\n", exp->LPtr->value->att.d);
 				break;
 			case ID_STRING_LIT:
-				printf("string@%s\n", exp->LPtr->value->att.s);
+				print_string_lit(exp->LPtr->value->att.s);
+				printf("\n");
 				break;
 			}
 		}
+		intIdiv = false;
+		intTypeFound = false;
 
 		break;
 
@@ -328,11 +389,16 @@ void gen_code(Exp *exp) {
 			break;
 		case ID_INT_LIT:
 			printf("MOVE LF@%s int@%ld\n", exp->RPtr->value->att.s, exp->LPtr->value->att.i);
+			ifIdivArray[ifIdivCounter] = (exp->RPtr->value->att.s);
+			ifIdivCounter++;
+			intIdiv = true;
 			break;
 		case ID_FLOAT_LIT:
 			printf("MOVE LF@%s float@%a\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
+			ifStringArray[ifStringCounter] = (exp->RPtr->value->att.s);
+			ifStringCounter++;
 			printf("MOVE LF@%s ", exp->RPtr->value->att.s);
 			print_string_lit(exp->LPtr->value->att.s);
 			printf("\n");
@@ -353,6 +419,11 @@ void gen_code(Exp *exp) {
 			break;
 		case ID_INT_LIT:
 			printf("MOVE LF@%s int@%ld\n", exp->RPtr->value->att.s, exp->LPtr->value->att.i);
+			ifIdivArray[ifIdivCounter] = (exp->RPtr->value->att.s);
+			ifIdivCounter++;
+			ifStringArray[ifStringCounter] = (exp->RPtr->value->att.s);
+			ifStringCounter++;
+			intIdiv = true;
 			break;
 		case ID_FLOAT_LIT:
 			printf("MOVE LF@%s float@%a\n", exp->RPtr->value->att.s, exp->LPtr->value->att.d);
@@ -529,7 +600,7 @@ void call_builtin(tBUILT type)
 		printf("$built_chr\n");
 		break;
 	default:
-	break;
+		break;
 	}
 	built_flags_seen(type);
 	return;
@@ -612,27 +683,25 @@ void print_call_retval(Exp *exp, int counter)
 	return;
 }
 
-
-
 void proc_params_retvals(Exp *exp, int counter, tPARAM_RETVALS type)
 {
 	if (exp->value->id == ID_COMMA)
 	{
 		switch (type)
 		{
-			case CALLER_ARGS:
-				print_arg(exp->RPtr, counter);
+		case CALLER_ARGS:
+			print_arg(exp->RPtr, counter);
 			break;
-			case CALLER_RETVALS:
-				print_call_retval(exp->RPtr, counter);
+		case CALLER_RETVALS:
+			print_call_retval(exp->RPtr, counter);
 			break;
-			case CALLEE_PARAMS:
-				print_param(exp->RPtr, counter);
+		case CALLEE_PARAMS:
+			print_param(exp->RPtr, counter);
 			break;
-			case CALLEE_RETVALS:
-				print_def_retval(exp->RPtr, counter);
+		case CALLEE_RETVALS:
+			print_def_retval(exp->RPtr, counter);
 			break;
-		
+
 		}
 		counter++;
 		proc_params_retvals(exp->LPtr, counter, type);
@@ -641,17 +710,17 @@ void proc_params_retvals(Exp *exp, int counter, tPARAM_RETVALS type)
 	{
 		switch (type)
 		{
-			case CALLER_ARGS:
-				print_arg(exp, counter);
+		case CALLER_ARGS:
+			print_arg(exp, counter);
 			break;
-			case CALLER_RETVALS:
-				print_call_retval(exp, counter);
+		case CALLER_RETVALS:
+			print_call_retval(exp, counter);
 			break;
-			case CALLEE_PARAMS:
-				print_param(exp, counter);
+		case CALLEE_PARAMS:
+			print_param(exp, counter);
 			break;
-			case CALLEE_RETVALS:
-				print_def_retval(exp, counter);
+		case CALLEE_RETVALS:
+			print_def_retval(exp, counter);
 			break;
 		}
 	}
@@ -693,7 +762,7 @@ void startIf(Exp *exp)
 		printf("GF@bool$x int@%ld ", exp->Condition->RPtr->value->att.i);
 		break;
 	case ID_FLOAT_LIT:
-		printf("GF@bool$x float@%.16lf ", exp->Condition->RPtr->value->att.d);
+		printf("GF@bool$x float@%a ", exp->Condition->RPtr->value->att.d);
 		break;
 	case ID_STRING_LIT:
 		printf("GF@bool$x string@%s ", exp->Condition->RPtr->value->att.s);
@@ -709,7 +778,7 @@ void startIf(Exp *exp)
 		printf("int@%ld\n", exp->Condition->LPtr->value->att.i);
 		break;
 	case ID_FLOAT_LIT:
-		printf("float@%.16lf\n", exp->Condition->LPtr->value->att.d);
+		printf("float@%a\n", exp->Condition->LPtr->value->att.d);
 		break;
 	case ID_STRING_LIT:
 		printf("string@%s\n", exp->Condition->LPtr->value->att.s);
@@ -728,7 +797,7 @@ void startIf(Exp *exp)
 			printf("GF@bool$x2 int@%ld ",exp->Condition->RPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("GF@bool$x2 float@%.16lf ",exp->Condition->RPtr->value->att.d);
+			printf("GF@bool$x2 float@%a ",exp->Condition->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("GF@bool$x2 string@%s ",exp->Condition->RPtr->value->att.s);
@@ -744,7 +813,7 @@ void startIf(Exp *exp)
 			printf("int@%ld\n", exp->Condition->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("float@%.16lf\n", exp->Condition->LPtr->value->att.d);
+			printf("float@%a\n", exp->Condition->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("string@%s\n", exp->Condition->LPtr->value->att.s);
@@ -781,6 +850,7 @@ void endIf()
 	ifCounterLength--;
 }
 
+// print FOR loop header
 void startFor(Exp *exp)
 {
 	forCounterLength++;
@@ -788,39 +858,15 @@ void startFor(Exp *exp)
 	forCounterArray[forCounterLength] = forCounter;
 	int typeFor;
 
-	//-----------------------------------------
 	//definition - check expression exist, if yes, generate code for exp
 	if (exp->RPtr->RPtr->value->id == ID_SEMICOLLON) {
 		/* nothing */
 	}
 	else if (exp->RPtr->RPtr->value->id == ID_ASSIGN || exp->RPtr->RPtr->value->id == ID_DEFINE) {
 		syntax(exp->RPtr->RPtr);
-
-		forBuffer = malloc(snprintf(0, 0, "%s$%d", exp->RPtr->RPtr->value->att.s,forCounter)+1);
-		sprintf(forBuffer, "%s$%d", exp->RPtr->RPtr->value->att.s, forCounter);
-		char *varFor = forBuffer;
-
-
-		if (!strcmp(exp->RPtr->RPtr->value->att.s, exp->RPtr->LPtr->RPtr->RPtr->value->att.s)) {
-			printf("DEFVAR LF@%s\n", varFor);
-			printf("MOVE LF@%s LF@%s\n", varFor, exp->RPtr->RPtr->value->att.s);
-			exp->RPtr->LPtr->RPtr->RPtr->value->att.s = varFor;
-		}
-
-		if (!strcmp(exp->RPtr->RPtr->value->att.s, exp->RPtr->LPtr->RPtr->LPtr->value->att.s)) {
-			printf("DEFVAR LF@%s\n", varFor);
-			printf("MOVE LF@%s LF@%s\n", varFor, exp->RPtr->RPtr->value->att.s);
-			exp->RPtr->LPtr->RPtr->LPtr->value->att.s = varFor;
-		}
-
 	}
 
-	forBuffer = malloc(snprintf(0, 0, "for$%d", forCounter)+1);
-	sprintf(forBuffer, "for$%d", forCounter);
-
-	printf("DEFVAR LF@%s\n", forBuffer);
-	//-----------------------------------------
-
+	// FOR expression process
 	printf("LABEL start$for$%d\n", forCounterArray[forCounterLength]);
 
 	if (exp->RPtr->LPtr->RPtr->value->id == ID_LESS) {
@@ -851,7 +897,7 @@ void startFor(Exp *exp)
 		printf("GF@bool$x int@%ld ",exp->RPtr->LPtr->RPtr->RPtr->value->att.i);
 		break;
 	case ID_FLOAT_LIT:
-		printf("GF@bool$x float@%.16lf ",exp->RPtr->LPtr->RPtr->RPtr->value->att.d);
+		printf("GF@bool$x float@%a ",exp->RPtr->LPtr->RPtr->RPtr->value->att.d);
 		break;
 	case ID_STRING_LIT:
 		printf("GF@bool$x string@%s ",exp->RPtr->LPtr->RPtr->RPtr->value->att.s);
@@ -867,7 +913,7 @@ void startFor(Exp *exp)
 		printf("int@%ld\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.i);
 		break;
 	case ID_FLOAT_LIT:
-		printf("float@%.16lf\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.d);
+		printf("float@%a\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.d);
 		break;
 	case ID_STRING_LIT:
 		printf("string@%s\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.s);
@@ -887,7 +933,7 @@ void startFor(Exp *exp)
 			printf("GF@bool$x2 int@%ld ",exp->RPtr->LPtr->RPtr->RPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("GF@bool$x2 float@%.16lf ",exp->RPtr->LPtr->RPtr->RPtr->value->att.d);
+			printf("GF@bool$x2 float@%a ",exp->RPtr->LPtr->RPtr->RPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("GF@bool$x2 string@%s ",exp->RPtr->LPtr->RPtr->RPtr->value->att.s);
@@ -903,7 +949,7 @@ void startFor(Exp *exp)
 			printf("int@%ld\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.i);
 			break;
 		case ID_FLOAT_LIT:
-			printf("float@%.16lf\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.d);
+			printf("float@%a\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.d);
 			break;
 		case ID_STRING_LIT:
 			printf("string@%s\n", exp->RPtr->LPtr->RPtr->LPtr->value->att.s);
@@ -921,35 +967,222 @@ void startFor(Exp *exp)
 	DEBUG_PRINT(("------ for body -----\n"));
 }
 
+// print end of FOR loop
 void endFor(Exp *exp)
 {
-	//-----------------------------------------
+	int typeForEnd;
+
 	//command of assign - iteration changed - check expression exist, if yes, generate code for exp
 	if (exp->RPtr->LPtr->LPtr->value->id == ID_SEMICOLLON) {
 		/* nothing */
 	}
-	else if (exp->RPtr->LPtr->LPtr->value->id == ID_ASSIGN || exp->RPtr->LPtr->LPtr->value->id == ID_DEFINE) {
-		syntax(exp->RPtr->LPtr->LPtr);
-
-		forBuffer = malloc(snprintf(0, 0, "%s$%d", exp->RPtr->LPtr->LPtr->value->att.s,forCounter)+1);
-		sprintf(forBuffer, "%s$%d", exp->RPtr->LPtr->LPtr->value->att.s, forCounter);
-		char *varFor = forBuffer;
+	else if (exp->RPtr->LPtr->LPtr->value->id == ID_ASSIGN
+	         || exp->RPtr->LPtr->LPtr->value->id == ID_DEFINE) {
 
 
-		if (!strcmp(exp->RPtr->LPtr->LPtr->value->att.s, exp->RPtr->LPtr->RPtr->RPtr->value->att.s)) {
+		if (exp->RPtr->LPtr->LPtr->LPtr->value->id == ID_ADD) {
+			typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id;
+			switch (typeForEnd) {
+			case ID_IDENTIFIER:
+				printf("ADD LF@%s LF@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("ADD LF@%s int@%ld ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("ADD LF@%s float@%a ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("ADD LF@%s string@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+				break;
+			}
 
-			printf("MOVE LF@%s LF@%s\n", varFor, exp->RPtr->LPtr->value->att.s);
-			exp->RPtr->LPtr->RPtr->RPtr->value->att.s = varFor;
+			typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id;
+			switch (typeForEnd) {
+			case ID_IDENTIFIER:
+				printf("LF@%s\n", exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("int@%ld\n", exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("float@%a\n", exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("string@%s\n", exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+				break;
+			}
+
+
 		}
+		else if (exp->RPtr->LPtr->LPtr->LPtr->value->id == ID_SUB) {
+			typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id;
+			switch (typeForEnd) {
+			case ID_IDENTIFIER:
+				printf("SUB LF@%s LF@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("SUB LF@%s int@%ld ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("SUB LF@%s float@%a ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("SUB LF@%s string@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+				break;
+			}
 
-		if (!strcmp(exp->RPtr->LPtr->LPtr->value->att.s, exp->RPtr->LPtr->RPtr->LPtr->value->att.s)) {
+			typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id;
+			switch (typeForEnd) {
+			case ID_IDENTIFIER:
+				printf("LF@%s\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("int@%ld\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("float@%a\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("string@%s\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+				break;
+			}
 
-			printf("MOVE LF@%s LF@%s\n", varFor, exp->RPtr->LPtr->value->att.s);
-			exp->RPtr->LPtr->RPtr->LPtr->value->att.s = varFor;
 		}
+		else if (exp->RPtr->LPtr->LPtr->LPtr->value->id == ID_DIV) {
 
+			if (exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id == ID_FLOAT_LIT
+			    || exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id == ID_FLOAT_LIT
+			    || exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id == ID_IDENTIFIER
+			    || exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id == ID_IDENTIFIER
+			    || exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id == ID_STRING_LIT
+			    || exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id == ID_STRING_LIT) {
+
+				typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id;
+				switch (typeForEnd) {
+				case ID_IDENTIFIER:
+					printf("DIV LF@%s LF@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+					       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+					break;
+				case ID_INT_LIT:
+					printf("DIV LF@%s int@%ld ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+					       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.i);
+					break;
+				case ID_FLOAT_LIT:
+					printf("DIV LF@%s float@%a ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+					       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.d);
+					break;
+				case ID_STRING_LIT:
+					printf("DIV LF@%s string@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+					       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+					break;
+				}
+
+				typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id;
+				switch (typeForEnd) {
+				case ID_IDENTIFIER:
+					printf("LF@%s\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+					break;
+				case ID_INT_LIT:
+					printf("int@%ld\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.i);
+					break;
+				case ID_FLOAT_LIT:
+					printf("float@%a\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.d);
+					break;
+				case ID_STRING_LIT:
+					printf("string@%s\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+					break;
+				}
+			}
+			else if (exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id == ID_INT_LIT
+			         || exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id == ID_INT_LIT) {
+
+
+				typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id;
+				switch (typeForEnd) {
+				case ID_IDENTIFIER:
+					printf("IDIV LF@%s LF@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+					       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+					break;
+				case ID_INT_LIT:
+					printf("IDIV LF@%s int@%ld ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+					       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.i);
+					break;
+				case ID_FLOAT_LIT:
+					printf("IDIV LF@%s float@%a ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+					       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.d);
+					break;
+				case ID_STRING_LIT:
+					printf("IDIV LF@%s string@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+					       exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+					break;
+				}
+
+				typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id;
+				switch (typeForEnd) {
+				case ID_IDENTIFIER:
+					printf("LF@%s\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+					break;
+				case ID_INT_LIT:
+					printf("int@%ld\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.i);
+					break;
+				case ID_FLOAT_LIT:
+					printf("float@%a\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.d);
+					break;
+				case ID_STRING_LIT:
+					printf("string@%s\n", exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+					break;
+				}
+			}
+		}
+		else if (exp->RPtr->LPtr->LPtr->LPtr->value->id == ID_MULT) {
+
+			typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->id;
+			switch (typeForEnd) {
+			case ID_IDENTIFIER:
+				printf("MUL LF@%s LF@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("MUL LF@%s int@%ld ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("MUL LF@%s float@%a ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("MUL LF@%s string@%s ", exp->RPtr->LPtr->LPtr->RPtr->value->att.s,
+				       exp->RPtr->LPtr->LPtr->LPtr->LPtr->value->att.s);
+				break;
+			}
+
+			typeForEnd = exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->id;
+			switch (typeForEnd) {
+			case ID_IDENTIFIER:
+				printf("LF@%s\n", exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+				break;
+			case ID_INT_LIT:
+				printf("int@%ld\n", exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.i);
+				break;
+			case ID_FLOAT_LIT:
+				printf("float@%a\n", exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.d);
+				break;
+			case ID_STRING_LIT:
+				printf("string@%s\n", exp->RPtr->LPtr->LPtr->LPtr->RPtr->value->att.s);
+				break;
+			}
+		}
 	}
-
+	//------------------------------------
 	printf("JUMP start$for$%d\n", forCounterArray[forCounterLength]);
 	printf("LABEL end$for$%d\n", forCounterArray[forCounterLength]);
 	forCounterLength--;
@@ -972,12 +1205,12 @@ void proc_func(Exp *exp)
 				retvals = exp->RPtr;
 				exp = exp->LPtr;
 			}
-			
+
 			//is user function
 			printf("CREATEFRAME\n"); //zbytecne kdyz nema parametry
 			if (exp->RPtr != NULL) //has parameters
 				proc_params_retvals(exp->RPtr, 0, CALLER_ARGS);
-			
+
 			int builtin_func;
 			//is built-in
 			if ((builtin_func = is_builtin(exp->LPtr->value->att.s)) != -1)
@@ -1015,15 +1248,15 @@ void proc_func(Exp *exp)
 			endIf();
 			return;
 		}
-		// // is for
-		// if (exp->value->id == ID_KEY_FOR) {
-		// 	startFor(exp);
-		// 	if (exp->LPtr->value != NULL) {
-		// 		proc_func(exp->LPtr);
-		// 	}
-		// 	endFor(exp);
-		// 	return;
-		// }
+		// is for
+		if (exp->value->id == ID_KEY_FOR) {
+			startFor(exp);
+			if (exp->LPtr->value != NULL) {
+				proc_func(exp->LPtr);
+			}
+			endFor(exp);
+			return;
+		}
 
 		if (exp->value->id == ID_KEY_RETURN)
 			return;

@@ -34,8 +34,6 @@ void print_tree(Exp *exp, int spaces_num)
 
 int main()
 {
-	//Parse();
-	//Exp *Exp = Parse();
 	Exp *exp = Parse();
 
 	#ifdef DEBUG
@@ -44,16 +42,6 @@ int main()
 	#endif
 
 	DEBUG_PRINT(("----------Generator start ----------\n"));
-	// print_token(exp->value);
-	// // DEBUG_PRINT(("----\n"));
-	// print_token(exp->LPtr->value);
-	// print_token(exp->RPtr->value);
-	// DEBUG_PRINT(("---------- if true----------\n"));
-	// 	print_token(exp->Condition->value);
-	// print_token(exp->Condition->LPtr->value);
-	// 	print_token(exp->Condition->RPtr->value);
-	//DEBUG_PRINT(("----\n"));
-	//print_token(exp->RPtr->RPtr->value);
 	printf(".IFJcode20\n");
 	printf("DEFVAR GF@bool$x2\n");
 	printf("DEFVAR GF@bool$x\n");
