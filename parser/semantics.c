@@ -1,3 +1,13 @@
+/**
+* NÁZEV PROJEKTU:   Implementace překladače imperativního jazyka IFJ20
+* ČÍSLO TÝMU:       115
+* VARIANTA:         1.
+*
+* Michal Zavadil    login: xzavad18
+* Jakub Novotný     login: xnovot2a
+* Jan Škvařil       login: xskvar09
+* Erik Báča         login: xbacae00
+*/
 #include "semantics.h"
 #include "../debug.h"
 #include "../error/error.h"
@@ -23,10 +33,10 @@ int isBuiltIn(tToken *func)
 
     for(size_t i = 0; i < sizeof(builtInFunc) / sizeof(builtInFunc[0]); i++)
     {
-        
+
          if(!strcmp(func->att.s, builtInFunc[i]))
             return TRUE;
-    }  
+    }
    return FALSE;
 }
 
@@ -77,7 +87,7 @@ void checkMembersType(tID value, int error)
     {
         parser_free_exit(error);
     }
-        
+
 
     member = nextMember;
 }
@@ -97,7 +107,7 @@ void identifierScopeCheck(Scope *scope, tToken *term)
 }
 
 void checkReturnTypes(Scope *scope, Tree* root1, Tree* root2){
-	if(root1->LPtr==NULL && root2->LPtr==NULL && root1->RPtr==NULL && root2->RPtr==NULL)  
+	if(root1->LPtr==NULL && root2->LPtr==NULL && root1->RPtr==NULL && root2->RPtr==NULL)
     {
         if(root1->value->id == ID_UNDER)
             return;
@@ -105,18 +115,18 @@ void checkReturnTypes(Scope *scope, Tree* root1, Tree* root2){
         Data *dataType;
         if(!Search(scope->table, root1->value->att.s, &dataType))
             parser_free_exit(3);
-        
+
         if(dataType->type+1 != root2->value->id-3)
             parser_free_exit(6);
-        
+
         return;
     }
-		
+
 	if(root1->LPtr==NULL || root2->LPtr==NULL || root1->RPtr==NULL || root2->RPtr==NULL)
         parser_free_exit(6);
 
 	checkReturnTypes(scope, root1->LPtr,root2->LPtr);
-    checkReturnTypes(scope, root1->RPtr,root2->RPtr); 
+    checkReturnTypes(scope, root1->RPtr,root2->RPtr);
 }
 
 void assignCheck(Scope *scope, Tree *tree, tID action)
@@ -136,7 +146,7 @@ void assignCheck(Scope *scope, Tree *tree, tID action)
                 Search(tmp->table, tree->LPtr->LPtr->value->att.s, &dataType);
                 if (varNumber(tree->RPtr) != dataType->returnsNumber)
                     parser_free_exit(6);
-                
+
                 checkReturnTypes(scope, tree->RPtr,dataType->returns);
             }
             return;
@@ -273,7 +283,7 @@ void checkParamTypes(Scope *scope, Tree *root1, Tree *root2)
         parser_free_exit(6);
 
 	checkParamTypes(scope, root1->LPtr, root2->LPtr);
-    checkParamTypes(scope, root1->RPtr, root2->RPtr); 
+    checkParamTypes(scope, root1->RPtr, root2->RPtr);
 }
 
 void funcCheck(Scope *scope, Tree *Value)
@@ -288,7 +298,7 @@ void funcCheck(Scope *scope, Tree *Value)
     {
         if(!isBuiltIn(Value->LPtr->value))
             parser_free_exit(3);
-    } 
+    }
     else if (Value->RPtr != NULL)
     {
         if (dataType->paramsNumber != (varNumber(Value->RPtr)))

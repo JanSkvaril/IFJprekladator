@@ -1,5 +1,15 @@
 #ifndef ERROR_H_
 #define ERROR_H_
+/**
+* NÁZEV PROJEKTU:   Implementace překladače imperativního jazyka IFJ20
+* ČÍSLO TÝMU:       115
+* VARIANTA:         1.
+*
+* Michal Zavadil    login: xzavad18
+* Jakub Novotný     login: xnovot2a
+* Jan Škvařil       login: xskvar09
+* Erik Báča         login: xbacae00
+*/
 
 #include "../scanner/scanner.h"
 typedef enum
